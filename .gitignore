@@ -1,0 +1,12 @@
+.vs/
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Tt]est/
+
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.user
+*.userprefs
