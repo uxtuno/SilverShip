@@ -7,23 +7,31 @@ public class Player : MyMonoBehaviour
 {
 	[SerializeField]
 	private float speed = 1.0f; // 移動速度
+	private float highSpeed = 5.0f; // 移動速度(ダッシュ時)
 	private CharacterController characterController = null;
 
 	private float jumpVY = 0.0f;
-	private float jumpPower = 5.0f;
+	private float jumpPower = 7.0f;
 	private Vector3 moveVec = Vector3.zero;
 
 	private Transform cameraTransform = null;   // プレイヤーカメラのトランスフォーム
 	private float rotateSpeed = 1.5f;   // 視点回転の速度
 	private float facingUpLimit = 60.0f; // 視点移動の上方向制限
 	private float facingDownLimit = 70.0f;  // 視点移動の下方向制限
-	//private Vector3 defaultCameraDirection = Vector3.zero;	 // 開始時の視点方向
+											//private Vector3 defaultCameraDirection = Vector3.zero;	 // 開始時の視点方向
+
+	private Animator animator;
+	private int speedId;
+	private int isJumpId;
 
 	protected override void Awake()
 	{
 		base.Awake();
 		characterController = GetComponent<CharacterController>();
 		characterController.detectCollisions = false;
+		animator = GetComponentInChildren<Animator>(); // アニメーションをコントロールするためのAnimatorを子から取得
+		speedId = Animator.StringToHash("Speed"); // ハッシュIDを取得しておく
+		isJumpId = Animator.StringToHash("IsJump"); // ハッシュIDを取得しておく
 	}
 
 	void Start()
@@ -85,9 +93,27 @@ public class Player : MyMonoBehaviour
 		float dy = Input.GetAxisRaw("Vertical");
 
 		moveVec = Vector3.zero; // 今回の移動量計算用
+		Vector3 localMoveVector = Vector3.zero;
 		if (dy != 0.0f || dx != 0.0f)
 		{
-			moveVec = transform.rotation * new Vector3(dx, 0.0f, dy).normalized;
+			Vector3 rotateAngle = Vector3.zero;
+			rotateAngle.y = Mathf.Atan2(dx, dy) * Mathf.Rad2Deg;
+			transform.eulerAngles = rotateAngle;
+
+			if (Input.GetKey(KeyCode.LeftShift))
+			{
+				localMoveVector = transform.forward * highSpeed;
+				animator.SetFloat(speedId, highSpeed);
+			}
+			else
+			{
+				localMoveVector = transform.forward * speed;
+				animator.SetFloat(speedId, speed);
+			}
+		}
+		else
+		{
+			animator.SetFloat(speedId, 0.0f); // 待機アニメーション
 		}
 
 		if (!characterController.isGrounded)
@@ -97,10 +123,12 @@ public class Player : MyMonoBehaviour
 		}
 		else // 地面についている
 		{
+			animator.SetBool(isJumpId, false);
 			// ジャンプさせる
 			if (Input.GetButtonDown("Jump"))
 			{
 				jumpVY = jumpPower;
+				animator.SetBool(isJumpId, true);
 			}
 			else
 			{
@@ -112,7 +140,8 @@ public class Player : MyMonoBehaviour
 
 		if (moveVec != Vector3.zero)
 		{
-			characterController.Move(moveVec * speed * Time.deltaTime);
+			localMoveVector.y = jumpVY;
+			characterController.Move(localMoveVector * Time.deltaTime);
 		}
 	}
 }
