@@ -6,11 +6,11 @@ using System.Collections.Generic;
 public class Player : MyMonoBehaviour
 {
 	[SerializeField]
-	private float speed = 3.0f; // 移動速度
+	private float speed = 1.0f; // 移動速度
 	private CharacterController characterController = null;
 
 	private float jumpVY = 0.0f;
-	private float jumpPower = 2f;
+	private float jumpPower = 5.0f;
 	private Vector3 moveVec = Vector3.zero;
 
 	private Transform cameraTransform = null;   // プレイヤーカメラのトランスフォーム
