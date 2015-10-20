@@ -64,6 +64,8 @@ public class Player : MyMonoBehaviour
 
 			// プレイヤーを進行方向に向ける処理
 			//direction = cameraTransform.rotation * direction.normalized;
+			direction = cameraTransform.rotation * direction.normalized;
+			//direction = direction.normalized;
 			rotateAngles.y = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg; // xz平面の進行方向から、Y軸回転角を得る
 			transform.eulerAngles = rotateAngles;
 
