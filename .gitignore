@@ -3,7 +3,9 @@
 [Tt]emp/
 [Oo]bj/
 [Tt]est/
+SilverShip/
 
+*.exe
 *.csproj
 *.unityproj
 *.sln

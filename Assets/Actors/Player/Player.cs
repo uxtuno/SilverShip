@@ -5,6 +5,15 @@ using System.Collections.Generic;
 
 public class Player : MyMonoBehaviour
 {
+	//　移動モード
+	private enum moveType
+	{
+		Type1, // カメラの方向に合わせる
+		Type2, // カメラの方向に合わせず移動
+	}
+	[SerializeField]
+	private moveType debugMoveType = moveType.Type1;
+
 	[SerializeField]
 	private float speed = 1.0f; // 移動速度
 	private float highSpeed = 5.0f; // 移動速度(ダッシュ時)
@@ -37,17 +46,14 @@ public class Player : MyMonoBehaviour
 		cameraTransform = Camera.main.transform;
 	}
 
-	protected override void Update()
+	protected override void LateUpdate()
 	{
-		Cursor.lockState = CursorLockMode.Locked;
+		//Cursor.lockState = CursorLockMode.Locked;
 
 		Move(); // プレイヤーの移動など
 
 		float mouseX = Input.GetAxis("Mouse X");
 		float mouseY = Input.GetAxis("Mouse Y");
-
-		//CameraMove(-mouseY, mouseX); // カメラの操作
-
 	}
 
 	void Move()
@@ -64,8 +70,19 @@ public class Player : MyMonoBehaviour
 
 			// プレイヤーを進行方向に向ける処理
 			//direction = cameraTransform.rotation * direction.normalized;
-			direction = cameraTransform.rotation * direction.normalized;
-			//direction = direction.normalized;
+
+			switch (debugMoveType)
+			{
+				case moveType.Type1: // カメラ方向を考慮した移動
+					direction = cameraTransform.rotation * direction.normalized;
+					direction = Vector3.RotateTowards(transform.forward, direction, 0.2f, 0.0f);
+					break;
+
+				case moveType.Type2: //　カメラ方向関係ない移動
+					direction = direction.normalized;
+					break;
+			}
+
 			rotateAngles.y = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg; // xz平面の進行方向から、Y軸回転角を得る
 			transform.eulerAngles = rotateAngles;
 
@@ -101,11 +118,14 @@ public class Player : MyMonoBehaviour
 			else
 			{
 				animator.SetBool(isJumpId, false);
-				jumpVY = Physics.gravity.y;
+				jumpVY = 0.0f;
 			}
 		}
 
 		moveVector.y = jumpVY;
-		characterController.Move(moveVector * Time.deltaTime);
+		if(moveVector != Vector3.zero)
+		{
+			characterController.Move(moveVector * Time.deltaTime);
+		}
 	}
 }
