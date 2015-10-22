@@ -58,7 +58,6 @@ GameObject:
   - 4: {fileID: 451632}
   - 143: {fileID: 14376398}
   - 114: {fileID: 11471312}
-  - 54: {fileID: 5458184}
   - 136: {fileID: 13680718}
   m_Layer: 0
   m_Name: Player
@@ -341,21 +340,6 @@ GameObject:
   - 114: {fileID: 11491086}
   m_Layer: 0
   m_Name: Character1_Spine2
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!1 &111178
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
-  m_Component:
-  - 4: {fileID: 401860}
-  m_Layer: 0
-  m_Name: LookPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2756,18 +2740,6 @@ Transform:
   - {fileID: 439006}
   m_Father: {fileID: 406410}
   m_RootOrder: 3
---- !u!4 &401860
-Transform:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 111178}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.24000001, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 451632}
-  m_RootOrder: 2
 --- !u!4 &402084
 Transform:
   m_ObjectHideFlags: 1
@@ -3866,7 +3838,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 153270}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: .800000012, z: 0}
+  m_LocalPosition: {x: 0, y: 1.16999996, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 492808}
@@ -4060,7 +4032,6 @@ Transform:
   m_Children:
   - {fileID: 492808}
   - {fileID: 422968}
-  - {fileID: 401860}
   m_Father: {fileID: 0}
   m_RootOrder: 0
 --- !u!4 &452662
@@ -5083,21 +5054,6 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 124442}
   m_Mesh: {fileID: 4300004, guid: 8f0565f23a2b58541a475bd3c1393052, type: 3}
---- !u!54 &5458184
-Rigidbody:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 101344}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: .0500000007
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 112
-  m_CollisionDetection: 1
 --- !u!95 &9574774
 Animator:
   serializedVersion: 3
@@ -5197,7 +5153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6514ba86f976d724ab63844a6015b2aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dynamicRatio: .200000003
+  dynamicRatio: .25
   stiffnessForce: 0
   stiffnessCurve:
     serializedVersion: 2
@@ -5880,9 +5836,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isWindActive: 1
-  threshold: .5
-  interval: 5
-  windPower: 1
+  threshold: .200000003
+  interval: 1
+  windPower: 2
   gravity: .980000019
 --- !u!114 &11451736
 MonoBehaviour:
@@ -6027,6 +5983,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffcc1de64d0226f4fa2288de76e04138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  debugMoveType: 0
   speed: 2
 --- !u!114 &11471680
 MonoBehaviour:
