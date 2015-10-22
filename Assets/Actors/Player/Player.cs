@@ -23,9 +23,6 @@ public class Player : MyMonoBehaviour
 	private float jumpPower = 7.0f;
 
 	private Transform cameraTransform = null;   // プレイヤーカメラのトランスフォーム
-	private float rotateSpeed = 1.5f;   // 視点回転の速度
-	private float facingUpLimit = 60.0f; // 視点移動の上方向制限
-	private float facingDownLimit = 70.0f;  // 視点移動の下方向制限
 
 	private Animator animator;
 	private int speedId;

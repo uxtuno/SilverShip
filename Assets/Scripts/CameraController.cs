@@ -3,15 +3,12 @@ using System.Collections;
 
 public class CameraController : MyMonoBehaviour
 {
-	private Vector3 lookPointToCameraVector; // カメラからプレイヤーまでの距離を格納
 	[SerializeField]
-	private Transform lookPoint; // カメラの注視点
+	private Transform lookPoint = null; // カメラの注視点
 	private const float horizontalRotationSpeed = 60.0f; // 水平方向へのカメラ移動速度
 	private const float verticaltalRotationSpeed = 60.0f; // 垂直方向へのカメラ移動速度
 	private const float facingUpLimit = 5.0f; // 視点移動の上方向制限
 	private const float facingDownLimit = 45.0f;  // 視点移動の下方向制限
-												  // private float rotationAmountXAxis = 0.0f; // X軸に回転した量を蓄積
-												  // private float rotationAmountYAxis = 0.0f; // Y軸に回転した量を蓄積
 	private const float minDistance = 2.0f; // 注視点に近づける限界距離
 	private float limitDistance; // 注視点から離れられる限界距離
 	private float defaultLookPointY; // 注視点の初期Y座標
