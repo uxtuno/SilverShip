@@ -48,7 +48,7 @@ public class Player : MyMonoBehaviour
 
 	protected override void LateUpdate()
 	{
-		//Cursor.lockState = CursorLockMode.Locked;
+		Cursor.lockState = CursorLockMode.Locked;
 
 		Move(); // プレイヤーの移動など
 
