@@ -23,8 +23,15 @@ public class CameraController : MyMonoBehaviour
 		defaultLookPointY = lookPoint.position.y;
 	}
 
-	// Update is called once per frame
-	protected override void LateUpdate()
+	//protected override void LateUpdate()
+	//{
+	//	float vx = Input.GetAxis("Mouse X");
+	//	float vy = Input.GetAxis("Mouse Y");
+
+	//	CameraMove(vx, vy);
+	//}
+
+	protected void FixedUpdate()
 	{
 		float vx = Input.GetAxis("Mouse X");
 		float vy = Input.GetAxis("Mouse Y");
@@ -47,6 +54,7 @@ public class CameraController : MyMonoBehaviour
 		}
 		lookPointToCamera = transform.position - lookPoint.position;
 		lookPointDistance = lookPointToCamera.magnitude;
+		transform.LookAt(lookPoint);
 
 		Vector3 position = Vector3.forward * lookPointDistance;
 		Quaternion q = Quaternion.LookRotation(lookPointToCamera);
