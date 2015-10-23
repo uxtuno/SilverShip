@@ -2388,8 +2388,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c762d2b539b9eab46908b67a4af19f00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  horizontalRotationSpeed: 60
-  verticaltalRotationSpeed: 60
+  horizontalRotationSpeed: 15
+  verticaltalRotationSpeed: 15
   facingUpLimit: 20
   facingDownLimit: 45
 --- !u!1 &629455974
@@ -3908,8 +3908,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffcc1de64d0226f4fa2288de76e04138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  debugMoveType: 0
-  speed: 2
+  speed: 5
+  slowSpeed: 2.5
+  jumpHeight: 4
 --- !u!143 &931185110
 CharacterController:
   m_ObjectHideFlags: 0
@@ -5061,7 +5062,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_Materials:
-  - {fileID: 2100000, guid: ce1e1cfe4b35f54408d3be0ad7f19b4a, type: 2}
+  - {fileID: 2100000, guid: 98292beaa99b528409314e373d4bf6c8, type: 2}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 1

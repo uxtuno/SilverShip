@@ -16,6 +16,23 @@ namespace Uxtuno
 	/// </summary>
 	public class CameraController : MyMonoBehaviour
 	{
+		private Transform _cameraTransform; // 制御するカメラ
+
+		/// <summary>
+		/// 制御しているカメラ自体のTransformを返す
+		/// </summary>
+		public Transform cameraTransform
+		{
+			get
+			{
+				if (_cameraTransform == null)
+				{
+					_cameraTransform = GetComponentInChildren<Camera>().transform;
+				}
+				return _cameraTransform;
+			}
+		}
+
 		private Transform playerLookPoint = null; // プレイヤー注視点
 		private Transform currentLookPoint = null; // 現在の注視点(ロックオン対象など)
 		[Tooltip("水平方向のカメラ移動速度"), SerializeField]
@@ -28,25 +45,31 @@ namespace Uxtuno
 		private float facingDownLimit = 45.0f;  // 視点移動の下方向制限
 		private const float minDistance = 2.0f; // 注視点に近づける限界距離
 		private float limitDistance; // 注視点から離れられる限界距離
+		private Quaternion newRotation; // 新しいカメラ角度
+		private float time; // 補間中の時間
+		private float interpolationTime = 0.5f; // 補間時間(秒)
 
 		void Start()
 		{
-
-			// 初期状態の距離をカメラが離れられる最大距離とする
-			limitDistance = (playerLookPoint.position - transform.position).magnitude;
+			newRotation = transform.rotation;
+			time = 1.0f; // 1.0f == 補間完了
 		}
 
-		// プレイヤーを追従する処理はプレイヤーの移動後に行う必要があるためここで行う
-		protected void Update()
+		void Update()
 		{
-			float vx = Input.GetAxis("Mouse X");
-			float vy = Input.GetAxis("Mouse Y");
+			//float vx = Input.GetAxis("Mouse X");
+			//float vy = Input.GetAxis("Mouse Y");
 
-			CameraMove(vx, vy);
+			//CameraMove(vx, vy);
 		}
 
-		private void CameraMove(float vx, float vy)
+		public void CameraMove(float vx, float vy)
 		{
+			if (vx == 0.0f && vy == 0.0f)
+			{
+				return;
+			}
+			time = 0.0f; // 補間開始
 			Vector3 angles = transform.eulerAngles;
 
 			angles.x += -vy * horizontalRotationSpeed * Time.deltaTime;
@@ -57,13 +80,13 @@ namespace Uxtuno
 
 			if (vy > 0.0f)
 			{
-				if(angles.x < -facingUpLimit)
+				if (angles.x < -facingUpLimit)
 				{
 					angles.x = -facingUpLimit;
 				}
 			}
 
-			if(vy < 0.0f)
+			if (vy < 0.0f)
 			{
 				if (angles.x > facingDownLimit)
 				{
@@ -73,46 +96,6 @@ namespace Uxtuno
 
 			angles.y += vx * verticaltalRotationSpeed * Time.deltaTime;
 			transform.eulerAngles = angles;
-
-			//// 注視点からカメラへのベクトル
-			//Vector3 lookPointToCamera = transform.position - playerLookPoint.position;
-			//float lookPointDistance = lookPointToCamera.magnitude;
-			//if (lookPointDistance > limitDistance)
-			//{
-			//	transform.position = playerLookPoint.position + lookPointToCamera.normalized * limitDistance;
-			//}
-			//else if (lookPointDistance < minDistance)
-			//{
-			//	transform.position = playerLookPoint.position + lookPointToCamera.normalized * minDistance;
-			//}
-			//lookPointToCamera = transform.position - playerLookPoint.position;
-			//lookPointDistance = lookPointToCamera.magnitude;
-			//transform.LookAt(playerLookPoint);
-
-			//Vector3 position = Vector3.forward * lookPointDistance;
-			//Quaternion q = Quaternion.LookRotation(lookPointToCamera);
-			//Vector3 v = q.eulerAngles;
-			//if (v.x > 180.0f)
-			//{
-			//	v.x -= 360.0f;
-			//}
-
-			//v.x += vy * verticaltalRotationSpeed * Time.deltaTime;
-			//v.y += vx * horizontalRotationSpeed * Time.deltaTime;
-			//v.z = 0.0f;
-			//if (v.x < -facingDownLimit)
-			//{
-			//	v.x = -facingDownLimit;
-			//}
-			//else if (v.x > facingUpLimit)
-			//{
-			//	v.x = facingUpLimit;
-			//}
-
-			//q.eulerAngles = v;
-			//position = q * position + playerLookPoint.position;
-			//transform.position = position;
-			//transform.LookAt(playerLookPoint);
 		}
 	}
 }

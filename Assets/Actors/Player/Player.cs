@@ -5,56 +5,64 @@ using System.Collections.Generic;
 
 namespace Uxtuno
 {
-
 	public class Player : MyMonoBehaviour
 	{
-		//　移動モード
-		private enum moveType
-		{
-			Type1, // カメラの方向に合わせる
-			Type2, // カメラの方向に合わせず移動
-		}
-		[SerializeField]
-		private moveType debugMoveType = moveType.Type1;
-
-		[SerializeField]
-		private float speed = 1.0f; // 移動速度
-		private float highSpeed = 5.0f; // 移動速度(ダッシュ時)
-		private CharacterController characterController = null;
+		[Tooltip("歩く速さ(単位:m/s)"), SerializeField]
+		private float speed = 5.0f; // 移動速度
+		[Tooltip("走る速さ(単位:m/s)"), SerializeField]
+		private float slowSpeed = 1.0f; // 移動速度(ダッシュ時)
+		[Tooltip("ジャンプできる高さ(単位:m)"), SerializeField]
+		private float jumpHeight = 2.0f;
 
 		private float jumpVY = 0.0f;
-		private float jumpPower = 7.0f;
+		private float jumpPower;
 
-		private Transform cameraTransform = null;   // プレイヤーカメラのトランスフォーム
+		private CharacterController characterController = null;
+		private CameraController cameraController;
 
-		private Transform playerMesh;
 		private Animator animator;
+		private Transform playerMesh;
 		private int speedId;
 		private int isJumpId;
 
 		protected void Awake()
 		{
+			// 指定の高さまで飛ぶための初速を計算
+			jumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * jumpHeight);
 			characterController = GetComponent<CharacterController>();
 			characterController.detectCollisions = false;
+			cameraController = GetComponentInChildren<CameraController>();
 			animator = GetComponentInChildren<Animator>(); // アニメーションをコントロールするためのAnimatorを子から取得
 			playerMesh = animator.transform; // Animatorがアタッチされているのがメッシュのはずだから
-			speedId = Animator.StringToHash("Speed"); // ハッシュIDを取得しておく
-			isJumpId = Animator.StringToHash("IsJump"); // ハッシュIDを取得しておく
+
+			// ハッシュIDを取得しておく
+			speedId = Animator.StringToHash("Speed");
+			isJumpId = Animator.StringToHash("IsJump");
+
+			animator.SetFloat(speedId, speed);
 		}
 
 		void Start()
 		{
-			cameraTransform = Camera.main.transform;
 		}
 
-		protected void LateUpdate()
+		protected void Update()
 		{
-			Cursor.lockState = CursorLockMode.Locked;
+			//Cursor.lockState = CursorLockMode.Locked;
 
 			Move(); // プレイヤーの移動など
 
-			float mouseX = Input.GetAxis(InputName.MouseX);
-			float mouseY = Input.GetAxis(InputName.MouseY);
+			if(Input.GetMouseButton(0))
+			{
+				Vector3 position = Camera.main.ScreenToViewportPoint(Input.mousePosition);
+				position.x -= 0.5f;
+				position.y -= 0.5f;
+
+				if(position.magnitude > 0.1f)
+				{
+					cameraController.CameraMove(position.x * 20.0f, position.y * 5.0f);
+				}
+			}
 		}
 
 		void Move()
@@ -63,32 +71,28 @@ namespace Uxtuno
 			// directionは進行方向を表すので上下入力はzに格納
 			direction.x = Input.GetAxisRaw(InputName.Horizontal);
 			direction.z = Input.GetAxisRaw(InputName.Vertical);
+			direction.Normalize();
+			if(animator.GetFloat(speedId) != 0.0f)
+			{
+				direction *= animator.GetFloat(speedId);
+			}
+			cameraController.CameraMove(direction.x, 0.0f);
 
 			Vector3 moveVector = Vector3.zero;
 			if (direction != Vector3.zero)
 			{
 				Vector3 rotateAngles = Vector3.zero;
+				// カメラの方向を加味して進行方向を計算
+				direction = cameraController.cameraTransform.rotation * direction;
 
-				// プレイヤーを進行方向に向ける処理
-				switch (debugMoveType)
-				{
-					case moveType.Type1: // カメラ方向を考慮した移動
-						direction = cameraTransform.rotation * direction.normalized;
-						//irection = Vector3.RotateTowards(playerMesh.forward, direction, 0.2f, 0.0f);
-						break;
-
-					case moveType.Type2: //　カメラ方向関係ない移動
-						direction = direction.normalized;
-						break;
-				}
-
-				rotateAngles.y = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg; // xz平面の進行方向から、Y軸回転角を得る
+				// xz平面の進行方向から、Y軸回転角を得る
+				rotateAngles.y = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
 				playerMesh.eulerAngles = rotateAngles;
 
 				if (Input.GetKey(KeyCode.LeftShift))
 				{
-					moveVector = playerMesh.forward * highSpeed;
-					animator.SetFloat(speedId, highSpeed);
+					moveVector = playerMesh.forward * slowSpeed;
+					animator.SetFloat(speedId, slowSpeed);
 				}
 				else
 				{
