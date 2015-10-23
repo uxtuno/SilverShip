@@ -60,7 +60,7 @@ namespace Uxtuno
 
 				if(position.magnitude > 0.1f)
 				{
-					cameraController.CameraMove(position.x * 20.0f, position.y * 5.0f);
+					cameraController.CameraMove(position.x * 20.0f, position.y * 8.0f);
 				}
 			}
 		}
