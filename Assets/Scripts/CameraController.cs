@@ -18,10 +18,14 @@ namespace Uxtuno
 	{
 		private Transform playerLookPoint = null; // プレイヤー注視点
 		private Transform currentLookPoint = null; // 現在の注視点(ロックオン対象など)
-		private const float horizontalRotationSpeed = 60.0f; // 水平方向へのカメラ移動速度
-		private const float verticaltalRotationSpeed = 60.0f; // 垂直方向へのカメラ移動速度
-		private const float facingUpLimit = 45.0f; // 視点移動の上方向制限
-		private const float facingDownLimit = 5.0f;  // 視点移動の下方向制限
+		[Tooltip("水平方向のカメラ移動速度"), SerializeField]
+		private float horizontalRotationSpeed = 60.0f; // 水平方向へのカメラ移動速度
+		[Tooltip("垂直方向のカメラ移動速度"), SerializeField]
+		private float verticaltalRotationSpeed = 60.0f; // 垂直方向へのカメラ移動速度
+		[Tooltip("上に向ける限界角度"), SerializeField]
+		private float facingUpLimit = 5.0f; // 視点移動の上方向制限
+		[Tooltip("下に向ける限界角度"), SerializeField]
+		private float facingDownLimit = 45.0f;  // 視点移動の下方向制限
 		private const float minDistance = 2.0f; // 注視点に近づける限界距離
 		private float limitDistance; // 注視点から離れられる限界距離
 
@@ -33,7 +37,7 @@ namespace Uxtuno
 		}
 
 		// プレイヤーを追従する処理はプレイヤーの移動後に行う必要があるためここで行う
-		protected override void Update()
+		protected void Update()
 		{
 			float vx = Input.GetAxis("Mouse X");
 			float vy = Input.GetAxis("Mouse Y");
@@ -46,28 +50,24 @@ namespace Uxtuno
 			Vector3 angles = transform.eulerAngles;
 
 			angles.x += -vy * horizontalRotationSpeed * Time.deltaTime;
-			if(vy > 0.0f)
+			if (angles.x > 180.0f)
 			{
-				if(angles.x > 180.0f)
+				angles.x -= 360.0f;
+			}
+
+			if (vy > 0.0f)
+			{
+				if(angles.x < -facingUpLimit)
 				{
-					angles.x -= 360.0f;
-				}
-				Debug.Log(angles.x);
-				if(angles.x < -facingDownLimit)
-				{
-					angles.x = -facingDownLimit;
+					angles.x = -facingUpLimit;
 				}
 			}
 
 			if(vy < 0.0f)
 			{
-				if (angles.x > 180.0f)
+				if (angles.x > facingDownLimit)
 				{
-					angles.x -= 360.0f;
-				}
-				if (angles.x > facingUpLimit)
-				{
-					angles.x = facingUpLimit;
+					angles.x = facingDownLimit;
 				}
 			}
 

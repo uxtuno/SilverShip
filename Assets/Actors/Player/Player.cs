@@ -32,9 +32,8 @@ namespace Uxtuno
 		private int speedId;
 		private int isJumpId;
 
-		protected override void Awake()
+		protected void Awake()
 		{
-			base.Awake();
 			characterController = GetComponent<CharacterController>();
 			characterController.detectCollisions = false;
 			animator = GetComponentInChildren<Animator>(); // アニメーションをコントロールするためのAnimatorを子から取得
@@ -48,7 +47,7 @@ namespace Uxtuno
 			cameraTransform = Camera.main.transform;
 		}
 
-		protected override void LateUpdate()
+		protected void LateUpdate()
 		{
 			Cursor.lockState = CursorLockMode.Locked;
 

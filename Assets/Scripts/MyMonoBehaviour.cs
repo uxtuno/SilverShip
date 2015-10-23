@@ -115,18 +115,6 @@ namespace Uxtuno
 			}
 		}
 
-		protected virtual void Awake()
-		{
-		}
-
-		protected virtual void Update()
-		{
-		}
-
-		protected virtual void LateUpdate()
-		{
-		}
-
 		public T GetSafeComponent<T>() where T : MonoBehaviour
 		{
 			T component = GetComponent<T>();
