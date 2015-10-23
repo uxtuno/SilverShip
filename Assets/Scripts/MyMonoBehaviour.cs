@@ -1,131 +1,107 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.Linq;
+using Uxtuno;
 
-namespace Uxtuno
+/// <summary>
+/// MonoBehaviourに独自の機能を追加する
+/// 使用する際、不便なのでnamespaceは付けていない
+/// </summary>
+public class MyMonoBehaviour : MonoBehaviour
 {
+	private Renderer _renderer; // rendererプロパティの実態
+
 	/// <summary>
-	/// MonoBehaviourに独自の機能を追加する
+	/// 自分自身のRendererを取得する
 	/// </summary>
-	public class MyMonoBehaviour : MonoBehaviour
+	public new virtual Renderer renderer
 	{
-		private Player _player = null; // playerプロパティの実態
-
-		/// <summary>
-		/// Playerを取得
-		/// </summary>
-		public Player player
+		get
 		{
-			get
+			if (_renderer == null)
 			{
-				if (_player == null)
-				{
-					GameObject go = GameObject.FindGameObjectWithTag(TagName.Player);
-					if (go != null)
-					{
-						_player = go.GetComponentInParent<Uxtuno.Player>();
-					}
-				}
-				return _player;
+				_renderer = GetComponent<Renderer>();
 			}
+
+			return _renderer;
+		}
+	}
+
+	private Collider _collider; // colliderプロパティの実態
+
+	/// <summary>
+	/// 自分自身のcollideを取得する
+	/// </summary>
+	public new virtual Collider collider
+	{
+		get
+		{
+			if (_collider == null)
+			{
+				_collider = GetComponent<Collider>();
+			}
+
+			return _collider;
+		}
+	}
+
+	private Rigidbody _rigidbody;   // rigidbodyプロパティの実態
+
+	/// <summary>
+	/// 自分自身のrigidbodyを取得する
+	/// </summary>
+	public new Rigidbody rigidbody
+	{
+		get
+		{
+			if (_rigidbody == null)
+			{
+				_rigidbody = GetComponent<Rigidbody>();
+			}
+
+			return _rigidbody;
+		}
+	}
+
+	/// <summary>
+	/// 表示状態
+	/// </summary>
+	public virtual bool IsShow
+	{
+		// 子も含めて初めに見つけたRendererの状態を返す
+		get
+		{
+			foreach (Renderer renderer in GetComponentsInChildren<Renderer>())
+			{
+				return renderer.enabled;
+			}
+
+			return false;
 		}
 
-		private Renderer _renderer; // rendererプロパティの実態
-
-		/// <summary>
-		/// 自分自身のRendererを取得する
-		/// </summary>
-		public new virtual Renderer renderer
+		// 子も含めて全てのRendererの表示状態を変更する
+		set
 		{
-			get
+			foreach (Renderer renderer in GetComponentsInChildren<Renderer>())
 			{
-				if (_renderer == null)
-				{
-					_renderer = GetComponent<Renderer>();
-				}
+				renderer.enabled = value;
+			}
 
-				return _renderer;
+			foreach (Light renderer in GetComponentsInChildren<Light>())
+			{
+				renderer.enabled = value;
 			}
 		}
+	}
 
-		private Collider _collider; // colliderプロパティの実態
+	public T GetSafeComponent<T>() where T : MonoBehaviour
+	{
+		T component = GetComponent<T>();
 
-		/// <summary>
-		/// 自分自身のcollideを取得する
-		/// </summary>
-		public new virtual Collider collider
+		if (component == null)
 		{
-			get
-			{
-				if (_collider == null)
-				{
-					_collider = GetComponent<Collider>();
-				}
-
-				return _collider;
-			}
+			Debug.LogError("Expected to find component of type "
+			   + typeof(T) + " but found none", this);
 		}
 
-		private Rigidbody _rigidbody;   // rigidbodyプロパティの実態
-
-		/// <summary>
-		/// 自分自身のrigidbodyを取得する
-		/// </summary>
-		public new Rigidbody rigidbody
-		{
-			get
-			{
-				if (_rigidbody == null)
-				{
-					_rigidbody = GetComponent<Rigidbody>();
-				}
-
-				return _rigidbody;
-			}
-		}
-
-		/// <summary>
-		/// 表示状態
-		/// </summary>
-		public virtual bool IsShow
-		{
-			// 子も含めて初めに見つけたRendererの状態を返す
-			get
-			{
-				foreach (Renderer renderer in GetComponentsInChildren<Renderer>())
-				{
-					return renderer.enabled;
-				}
-
-				return false;
-			}
-
-			// 子も含めて全てのRendererの表示状態を変更する
-			set
-			{
-				foreach (Renderer renderer in GetComponentsInChildren<Renderer>())
-				{
-					renderer.enabled = value;
-				}
-
-				foreach (Light renderer in GetComponentsInChildren<Light>())
-				{
-					renderer.enabled = value;
-				}
-			}
-		}
-
-		public T GetSafeComponent<T>() where T : MonoBehaviour
-		{
-			T component = GetComponent<T>();
-
-			if (component == null)
-			{
-				Debug.LogError("Expected to find component of type "
-				   + typeof(T) + " but found none", this);
-			}
-
-			return component;
-		}
+		return component;
 	}
 }
