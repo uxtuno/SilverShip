@@ -14,11 +14,11 @@ public class GameManager : MyMonoBehaviour
 	/// <summary>
 	/// 唯一のインスタンスを返す
 	/// </summary>
-	static GameManager instance
+	static public GameManager instance
 	{
 		get
 		{
-			if (instance == null)
+			if (_instance == null)
 			{
 				GameObject go = new GameObject("GameManager");
 				_instance = go.AddComponent<GameManager>();
@@ -31,7 +31,7 @@ public class GameManager : MyMonoBehaviour
 	public Player player
 	{
 		get {
-			if(player == null)
+			if(_player == null)
 			{
 				_player = GameObject.FindGameObjectWithTag(TagName.Player).GetComponent<Player>();
 			}

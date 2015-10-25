@@ -8,11 +8,19 @@ namespace Uxtuno
 	public class Player : MyMonoBehaviour
 	{
 		[Tooltip("歩く速さ(単位:m/s)"), SerializeField]
-		private float speed = 5.0f; // 移動速度
+		private float maxSpeed = 5.0f; // 移動速度
 		[Tooltip("走る速さ(単位:m/s)"), SerializeField]
-		private float slowSpeed = 1.0f; // 移動速度(ダッシュ時)
+		private float minSpeed = 1.0f; // 移動速度(ダッシュ時)
 		[Tooltip("ジャンプできる高さ(単位:m)"), SerializeField]
 		private float jumpHeight = 2.0f;
+		[Tooltip("水平方向のカメラ移動速度"), SerializeField]
+		private float horizontalRotationSpeed = 5.0f; // 水平方向へのカメラ移動速度
+		[Tooltip("垂直方向のカメラ移動速度"), SerializeField]
+		private float verticaltalRotationSpeed = 5.0f; // 垂直方向へのカメラ移動速度
+		[Tooltip("水平方向のカメラ回転閾値"), SerializeField]
+		private float horizontalRotationThreshold = 0.2f; // 水平方向のカメラ回転閾値
+		[Tooltip("垂直方向のカメラ回転閾値"), SerializeField]
+		private float verticalRotationThreshold = 0.2f; // 垂直方向のカメラ回転閾値
 
 		private float jumpVY = 0.0f;
 		private float jumpPower;
@@ -25,7 +33,22 @@ namespace Uxtuno
 		private int speedId;
 		private int isJumpId;
 
-		protected void Awake()
+		private Vector2 beginCameraDragPosition; // カメラ回転のためのドラッグ開始地点
+		[Tooltip("ドラッグの増幅倍率"), SerializeField]
+		private float cameraDragAmplification = 2.0f;
+
+		private Vector3 _moveVector = Vector3.zero;
+
+		/// <summary>
+		/// 直前の移動ベクトル
+		/// </summary>
+		public Vector3 moveVector
+		{
+			get { return _moveVector; }
+			private set { _moveVector = value; }
+		}
+
+		void Awake()
 		{
 			// 指定の高さまで飛ぶための初速を計算
 			jumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * jumpHeight);
@@ -39,29 +62,52 @@ namespace Uxtuno
 			speedId = Animator.StringToHash("Speed");
 			isJumpId = Animator.StringToHash("IsJump");
 
-			animator.SetFloat(speedId, speed);
+			animator.SetFloat(speedId, maxSpeed);
 		}
 
-		void Start()
+		void Update()
 		{
-		}
-
-		protected void Update()
-		{
-			//Cursor.lockState = CursorLockMode.Locked;
-
 			Move(); // プレイヤーの移動など
-
-			if(Input.GetMouseButton(0))
+			if(cameraController.distance < 1.0f)
 			{
-				Vector3 position = Camera.main.ScreenToViewportPoint(Input.mousePosition);
+				IsShow = false;
+			}
+			else if(!IsShow)
+			{
+				IsShow = true;
+			}
+
+			if (Input.GetMouseButtonDown(1))
+			{
+				beginCameraDragPosition = Camera.main.ScreenToViewportPoint(Input.mousePosition);
+				// 中央を(0, 0)にする
+				beginCameraDragPosition.x -= 0.5f;
+				beginCameraDragPosition.y -= 0.5f;
+			}
+
+			if (Input.GetMouseButton(1))
+			{
+				Vector2 position = Camera.main.ScreenToViewportPoint(Input.mousePosition);
+				// 中央を(0, 0)にする
 				position.x -= 0.5f;
 				position.y -= 0.5f;
-
-				if(position.magnitude > 0.1f)
+				position *= cameraDragAmplification; // 移動量を増幅させる
+				if (Mathf.Abs(position.y) < verticalRotationThreshold)
 				{
-					cameraController.CameraMove(position.x * 20.0f, position.y * 8.0f);
+					position.y = 0.0f;
 				}
+
+				if (Mathf.Abs(position.x) < horizontalRotationThreshold)
+				{
+					position.x = 0.0f;
+				}
+
+				if (position.sqrMagnitude > 1.0f)
+				{
+					position.Normalize();
+				}
+
+				cameraController.CameraMove(position.x * horizontalRotationSpeed * Time.deltaTime, position.y * verticaltalRotationSpeed * Time.deltaTime);
 			}
 		}
 
@@ -72,15 +118,22 @@ namespace Uxtuno
 			direction.x = Input.GetAxisRaw(InputName.Horizontal);
 			direction.z = Input.GetAxisRaw(InputName.Vertical);
 			direction.Normalize();
-			if(animator.GetFloat(speedId) != 0.0f)
-			{
-				direction *= animator.GetFloat(speedId);
-			}
-			cameraController.CameraMove(direction.x, 0.0f);
 
-			Vector3 moveVector = Vector3.zero;
+			float speed;
+			if (Input.GetKey(KeyCode.LeftShift))
+			{
+				speed = minSpeed;
+			}
+			else
+			{
+				speed = maxSpeed;
+			}
+
+			moveVector = Vector3.zero;
 			if (direction != Vector3.zero)
 			{
+				float distance = (cameraController.transform.position - cameraController.cameraTransform.position).magnitude;
+
 				Vector3 rotateAngles = Vector3.zero;
 				// カメラの方向を加味して進行方向を計算
 				direction = cameraController.cameraTransform.rotation * direction;
@@ -89,16 +142,8 @@ namespace Uxtuno
 				rotateAngles.y = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
 				playerMesh.eulerAngles = rotateAngles;
 
-				if (Input.GetKey(KeyCode.LeftShift))
-				{
-					moveVector = playerMesh.forward * slowSpeed;
-					animator.SetFloat(speedId, slowSpeed);
-				}
-				else
-				{
-					moveVector = playerMesh.forward * speed;
-					animator.SetFloat(speedId, speed);
-				}
+				moveVector = playerMesh.forward * speed;
+				animator.SetFloat(speedId, speed);
 			}
 			else
 			{
@@ -125,10 +170,19 @@ namespace Uxtuno
 				}
 			}
 
-			moveVector.y = jumpVY;
+			_moveVector.y = jumpVY;
 			if (moveVector != Vector3.zero)
 			{
+				Vector3 oldCameraPosition = cameraController.cameraTransform.position;
+				// プレイヤー移動前
+				Vector3 old = transform.position - oldCameraPosition;
 				characterController.Move(moveVector * Time.deltaTime);
+				// プレイヤー移動後
+				Vector3 now = transform.position - oldCameraPosition;
+
+				// プレイヤーが移動した時のY軸方向カメラ回転量を計算
+				float rotateAngleY = Mathf.Atan2(now.x * old.z - now.z * old.x, now.x * old.x + now.z * old.z) * Mathf.Rad2Deg;
+				cameraController.CameraMove(rotateAngleY, 0.0f);
 			}
 		}
 	}

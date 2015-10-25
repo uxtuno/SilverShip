@@ -33,34 +33,51 @@ namespace Uxtuno
 			}
 		}
 
-		private Transform playerLookPoint = null; // プレイヤー注視点
-		private Transform currentLookPoint = null; // 現在の注視点(ロックオン対象など)
-		[Tooltip("水平方向のカメラ移動速度"), SerializeField]
-		private float horizontalRotationSpeed = 60.0f; // 水平方向へのカメラ移動速度
-		[Tooltip("垂直方向のカメラ移動速度"), SerializeField]
-		private float verticaltalRotationSpeed = 60.0f; // 垂直方向へのカメラ移動速度
+		[Tooltip("カメラで追いかける対象"), SerializeField]
+		private Transform target = null;
 		[Tooltip("上に向ける限界角度"), SerializeField]
 		private float facingUpLimit = 5.0f; // 視点移動の上方向制限
 		[Tooltip("下に向ける限界角度"), SerializeField]
 		private float facingDownLimit = 45.0f;  // 視点移動の下方向制限
-		private const float minDistance = 2.0f; // 注視点に近づける限界距離
 		private float limitDistance; // 注視点から離れられる限界距離
 		private Quaternion newRotation; // 新しいカメラ角度
-		private float time; // 補間中の時間
-		private float interpolationTime = 0.5f; // 補間時間(秒)
+		private float _distance; // ターゲットまでの距離
+
+		/// <summary>
+		/// ターゲットまでの距離を返す
+		/// </summary>
+		public float distance
+		{
+			get { return _distance; }
+			private set { _distance = value; }
+		}
 
 		void Start()
 		{
 			newRotation = transform.rotation;
-			time = 1.0f; // 1.0f == 補間完了
+			transform.LookAt(target);
+			limitDistance = (target.position - cameraTransform.position).magnitude;
+			distance = limitDistance;
 		}
 
-		void Update()
+		void LateUpdate()
 		{
-			//float vx = Input.GetAxis("Mouse X");
-			//float vy = Input.GetAxis("Mouse Y");
+			transform.rotation = newRotation;
+			Player player = GameManager.instance.player;
 
-			//CameraMove(vx, vy);
+			RaycastHit hit;
+			Ray ray = new Ray(transform.position, -cameraTransform.forward);
+
+			if (Physics.Raycast(ray, out hit, limitDistance))
+			{
+				distance = hit.distance;
+			}
+			else
+			{
+				distance = limitDistance;
+			}
+			Vector3 newPosition = target.position - cameraTransform.forward * distance;
+			cameraTransform.position = Vector3.Lerp(cameraTransform.position, newPosition, 0.5f);
 		}
 
 		public void CameraMove(float vx, float vy)
@@ -69,10 +86,9 @@ namespace Uxtuno
 			{
 				return;
 			}
-			time = 0.0f; // 補間開始
-			Vector3 angles = transform.eulerAngles;
+			Vector3 angles = newRotation.eulerAngles;
 
-			angles.x += -vy * horizontalRotationSpeed * Time.deltaTime;
+			angles.x += -vy;
 			if (angles.x > 180.0f)
 			{
 				angles.x -= 360.0f;
@@ -94,8 +110,10 @@ namespace Uxtuno
 				}
 			}
 
-			angles.y += vx * verticaltalRotationSpeed * Time.deltaTime;
-			transform.eulerAngles = angles;
+			angles.y += vx;
+			angles.z = 0.0f;
+			newRotation.eulerAngles = angles;
+
 		}
 	}
 }
