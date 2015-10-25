@@ -3924,7 +3924,7 @@ Transform:
   - {fileID: 824995017}
   - {fileID: 523295784}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
 --- !u!136 &931185108
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -4337,7 +4337,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!23 &1123259479
 MeshRenderer:

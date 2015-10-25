@@ -62,19 +62,16 @@ public class MyMonoBehaviour : MonoBehaviour
 	}
 
 	/// <summary>
-	/// 表示状態
+	/// 描画状態
+	/// 子も含めた全ての描画状態を変更する
 	/// </summary>
-	public virtual bool IsShow
+	public virtual bool isShow
 	{
-		// 子も含めて初めに見つけたRendererの状態を返す
+		// 初めに見つかったRendererの状態を返す
+		// そのため全ての子のRenderer.enebledが等しい事を期待する
 		get
 		{
-			foreach (Renderer renderer in GetComponentsInChildren<Renderer>())
-			{
-				return renderer.enabled;
-			}
-
-			return false;
+			return GetComponentInChildren<Renderer>().enabled;
 		}
 
 		// 子も含めて全てのRendererの表示状態を変更する
@@ -85,9 +82,9 @@ public class MyMonoBehaviour : MonoBehaviour
 				renderer.enabled = value;
 			}
 
-			foreach (Light renderer in GetComponentsInChildren<Light>())
+			foreach (Light light in GetComponentsInChildren<Light>())
 			{
-				renderer.enabled = value;
+				light.enabled = value;
 			}
 		}
 	}

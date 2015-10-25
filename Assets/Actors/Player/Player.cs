@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 
 //[RequireComponent(typeof(CharacterController))]
 
@@ -70,11 +69,11 @@ namespace Uxtuno
 			Move(); // プレイヤーの移動など
 			if(cameraController.distance < 1.0f)
 			{
-				IsShow = false;
+				isShow = false;
 			}
-			else if(!IsShow)
+			else if(!isShow)
 			{
-				IsShow = true;
+				isShow = true;
 			}
 
 			if (Input.GetMouseButtonDown(1))
@@ -96,7 +95,7 @@ namespace Uxtuno
 				{
 					position.y = 0.0f;
 				}
-
+				
 				if (Mathf.Abs(position.x) < horizontalRotationThreshold)
 				{
 					position.x = 0.0f;
