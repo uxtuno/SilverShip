@@ -3,129 +3,187 @@ using System.Collections.Generic;
 
 //[RequireComponent(typeof(CharacterController))]
 
-public class Player : MyMonoBehaviour
+namespace Uxtuno
 {
-	//　移動モード
-	private enum moveType
+	public class Player : MyMonoBehaviour
 	{
-		Type1, // カメラの方向に合わせる
-		Type2, // カメラの方向に合わせず移動
-	}
-	[SerializeField]
-	private moveType debugMoveType = moveType.Type1;
+		[Tooltip("歩く速さ(単位:m/s)"), SerializeField]
+		private float maxSpeed = 5.0f; // 移動速度
+		[Tooltip("走る速さ(単位:m/s)"), SerializeField]
+		private float minSpeed = 1.0f; // 移動速度(ダッシュ時)
+		[Tooltip("ジャンプできる高さ(単位:m)"), SerializeField]
+		private float jumpHeight = 2.0f;
+		[Tooltip("水平方向のカメラ移動速度"), SerializeField]
+		private float horizontalRotationSpeed = 5.0f; // 水平方向へのカメラ移動速度
+		[Tooltip("垂直方向のカメラ移動速度"), SerializeField]
+		private float verticaltalRotationSpeed = 5.0f; // 垂直方向へのカメラ移動速度
+		[Tooltip("水平方向のカメラ回転閾値"), SerializeField]
+		private float horizontalRotationThreshold = 0.2f; // 水平方向のカメラ回転閾値
+		[Tooltip("垂直方向のカメラ回転閾値"), SerializeField]
+		private float verticalRotationThreshold = 0.2f; // 垂直方向のカメラ回転閾値
 
-	[SerializeField]
-	private float speed = 1.0f; // 移動速度
-	private float highSpeed = 5.0f; // 移動速度(ダッシュ時)
-	private CharacterController characterController = null;
+		private float jumpVY = 0.0f;
+		private float jumpPower;
 
-	private float jumpVY = 0.0f;
-	private float jumpPower = 7.0f;
+		private CharacterController characterController = null;
+		private CameraController cameraController;
 
-	private Transform cameraTransform = null;   // プレイヤーカメラのトランスフォーム
-	private float rotateSpeed = 1.5f;   // 視点回転の速度
-	private float facingUpLimit = 60.0f; // 視点移動の上方向制限
-	private float facingDownLimit = 70.0f;  // 視点移動の下方向制限
+		private Animator animator;
+		private Transform playerMesh;
+		private int speedId;
+		private int isJumpId;
 
-	private Animator animator;
-	private int speedId;
-	private int isJumpId;
+		private Vector2 beginCameraDragPosition; // カメラ回転のためのドラッグ開始地点
+		[Tooltip("ドラッグの増幅倍率"), SerializeField]
+		private float cameraDragAmplification = 2.0f;
 
-	protected override void Awake()
-	{
-		base.Awake();
-		characterController = GetComponent<CharacterController>();
-		characterController.detectCollisions = false;
-		animator = GetComponentInChildren<Animator>(); // アニメーションをコントロールするためのAnimatorを子から取得
-		speedId = Animator.StringToHash("Speed"); // ハッシュIDを取得しておく
-		isJumpId = Animator.StringToHash("IsJump"); // ハッシュIDを取得しておく
-	}
+		private Vector3 _moveVector = Vector3.zero;
 
-	void Start()
-	{
-		cameraTransform = Camera.main.transform;
-	}
-
-	protected override void LateUpdate()
-	{
-		Cursor.lockState = CursorLockMode.Locked;
-
-		Move(); // プレイヤーの移動など
-
-		float mouseX = Input.GetAxis("Mouse X");
-		float mouseY = Input.GetAxis("Mouse Y");
-	}
-
-	void Move()
-	{
-		Vector3 direction = Vector3.zero;
-		// directionは進行方向を表すので上下入力はzに格納
-		direction.x = Input.GetAxisRaw("Horizontal");
-		direction.z = Input.GetAxisRaw("Vertical");
-
-		Vector3 moveVector = Vector3.zero;
-		if (direction != Vector3.zero)
+		/// <summary>
+		/// 直前の移動ベクトル
+		/// </summary>
+		public Vector3 moveVector
 		{
-			Vector3 rotateAngles = Vector3.zero;
+			get { return _moveVector; }
+			private set { _moveVector = value; }
+		}
 
-			// プレイヤーを進行方向に向ける処理
-			//direction = cameraTransform.rotation * direction.normalized;
+		void Awake()
+		{
+			// 指定の高さまで飛ぶための初速を計算
+			jumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * jumpHeight);
+			characterController = GetComponent<CharacterController>();
+			characterController.detectCollisions = false;
+			cameraController = GetComponentInChildren<CameraController>();
+			animator = GetComponentInChildren<Animator>(); // アニメーションをコントロールするためのAnimatorを子から取得
+			playerMesh = animator.transform; // Animatorがアタッチされているのがメッシュのはずだから
 
-			switch (debugMoveType)
+			// ハッシュIDを取得しておく
+			speedId = Animator.StringToHash("Speed");
+			isJumpId = Animator.StringToHash("IsJump");
+
+			animator.SetFloat(speedId, maxSpeed);
+		}
+
+		void Update()
+		{
+			Move(); // プレイヤーの移動など
+			if(cameraController.distance < 1.0f)
 			{
-				case moveType.Type1: // カメラ方向を考慮した移動
-					direction = cameraTransform.rotation * direction.normalized;
-					direction = Vector3.RotateTowards(transform.forward, direction, 0.2f, 0.0f);
-					break;
-
-				case moveType.Type2: //　カメラ方向関係ない移動
-					direction = direction.normalized;
-					break;
+				IsShow = false;
+			}
+			else if(!IsShow)
+			{
+				IsShow = true;
 			}
 
-			rotateAngles.y = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg; // xz平面の進行方向から、Y軸回転角を得る
-			transform.eulerAngles = rotateAngles;
+			if (Input.GetMouseButtonDown(1))
+			{
+				beginCameraDragPosition = Camera.main.ScreenToViewportPoint(Input.mousePosition);
+				// 中央を(0, 0)にする
+				beginCameraDragPosition.x -= 0.5f;
+				beginCameraDragPosition.y -= 0.5f;
+			}
 
+			if (Input.GetMouseButton(1))
+			{
+				Vector2 position = Camera.main.ScreenToViewportPoint(Input.mousePosition);
+				// 中央を(0, 0)にする
+				position.x -= 0.5f;
+				position.y -= 0.5f;
+				position *= cameraDragAmplification; // 移動量を増幅させる
+				if (Mathf.Abs(position.y) < verticalRotationThreshold)
+				{
+					position.y = 0.0f;
+				}
+
+				if (Mathf.Abs(position.x) < horizontalRotationThreshold)
+				{
+					position.x = 0.0f;
+				}
+
+				if (position.sqrMagnitude > 1.0f)
+				{
+					position.Normalize();
+				}
+
+				cameraController.CameraMove(position.x * horizontalRotationSpeed * Time.deltaTime, position.y * verticaltalRotationSpeed * Time.deltaTime);
+			}
+		}
+
+		void Move()
+		{
+			Vector3 direction = Vector3.zero;
+			// directionは進行方向を表すので上下入力はzに格納
+			direction.x = Input.GetAxisRaw(InputName.Horizontal);
+			direction.z = Input.GetAxisRaw(InputName.Vertical);
+			direction.Normalize();
+
+			float speed;
 			if (Input.GetKey(KeyCode.LeftShift))
 			{
-				moveVector = transform.forward * highSpeed;
-				animator.SetFloat(speedId, highSpeed);
+				speed = minSpeed;
 			}
 			else
 			{
-				moveVector = transform.forward * speed;
+				speed = maxSpeed;
+			}
+
+			moveVector = Vector3.zero;
+			if (direction != Vector3.zero)
+			{
+				float distance = (cameraController.transform.position - cameraController.cameraTransform.position).magnitude;
+
+				Vector3 rotateAngles = Vector3.zero;
+				// カメラの方向を加味して進行方向を計算
+				direction = cameraController.cameraTransform.rotation * direction;
+
+				// xz平面の進行方向から、Y軸回転角を得る
+				rotateAngles.y = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+				playerMesh.eulerAngles = rotateAngles;
+
+				moveVector = playerMesh.forward * speed;
 				animator.SetFloat(speedId, speed);
 			}
-		}
-		else
-		{
-			animator.SetFloat(speedId, 0.0f); // 待機アニメーション
-		}
-
-		if (!characterController.isGrounded)
-		{
-			// 空中では重力により落下速度を加算する
-			jumpVY += Physics.gravity.y * Time.deltaTime;
-		}
-		else // 地面についている
-		{
-			// ジャンプさせる
-			if (Input.GetButtonDown("Jump") && !animator.GetBool(isJumpId))
-			{
-				jumpVY = jumpPower;
-				animator.SetBool(isJumpId, true);
-			}
 			else
 			{
-				animator.SetBool(isJumpId, false);
-				jumpVY = 0.0f;
+				animator.SetFloat(speedId, 0.0f); // 待機アニメーション
 			}
-		}
 
-		moveVector.y = jumpVY;
-		if(moveVector != Vector3.zero)
-		{
-			characterController.Move(moveVector * Time.deltaTime);
+			if (!characterController.isGrounded)
+			{
+				// 空中では重力により落下速度を加算する
+				jumpVY += Physics.gravity.y * Time.deltaTime;
+			}
+			else // 地面についている
+			{
+				// ジャンプさせる
+				if (Input.GetButtonDown("Jump") && !animator.GetBool(isJumpId))
+				{
+					jumpVY = jumpPower;
+					animator.SetBool(isJumpId, true);
+				}
+				else
+				{
+					animator.SetBool(isJumpId, false);
+					jumpVY = 0.0f;
+				}
+			}
+
+			_moveVector.y = jumpVY;
+			if (moveVector != Vector3.zero)
+			{
+				Vector3 oldCameraPosition = cameraController.cameraTransform.position;
+				// プレイヤー移動前
+				Vector3 old = transform.position - oldCameraPosition;
+				characterController.Move(moveVector * Time.deltaTime);
+				// プレイヤー移動後
+				Vector3 now = transform.position - oldCameraPosition;
+
+				// プレイヤーが移動した時のY軸方向カメラ回転量を計算
+				float rotateAngleY = Mathf.Atan2(now.x * old.z - now.z * old.x, now.x * old.x + now.z * old.z) * Mathf.Rad2Deg;
+				cameraController.CameraMove(rotateAngleY, 0.0f);
+			}
 		}
 	}
 }

@@ -1,15 +1,41 @@
 ﻿using UnityEngine;
-using System.Collections;
+using Uxtuno;
 
-public class GameManager : MonoBehaviour {
+/// <summary>
+/// ゲーム進行に必要な情報を保持し、制御する
+/// シングルトンクラスとして設計
+/// GameManager.instance でインスタンスを取得可能
+/// 使用する際、不便なのでnamespaceは付けていない
+/// </summary>
+public class GameManager : MyMonoBehaviour
+{
+	static GameManager _instance; // 唯一のインスタンス
 
-	// Use this for initialization
-	void Start () {
-	
+	/// <summary>
+	/// 唯一のインスタンスを返す
+	/// </summary>
+	static public GameManager instance
+	{
+		get
+		{
+			if (_instance == null)
+			{
+				GameObject go = new GameObject("GameManager");
+				_instance = go.AddComponent<GameManager>();
+			}
+			return _instance;
+		}
 	}
-	
-	// Update is called once per frame
-	void Update () {
-	
+
+	private Player _player;
+	public Player player
+	{
+		get {
+			if(_player == null)
+			{
+				_player = GameObject.FindGameObjectWithTag(TagName.Player).GetComponent<Player>();
+			}
+			return _player;
+		}
 	}
 }

@@ -1,87 +1,119 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CameraController : MyMonoBehaviour
+namespace Uxtuno
 {
-	private Vector3 lookPointToCameraVector; // カメラからプレイヤーまでの距離を格納
-	[SerializeField]
-	private Transform lookPoint; // カメラの注視点
-	private const float horizontalRotationSpeed = 60.0f; // 水平方向へのカメラ移動速度
-	private const float verticaltalRotationSpeed = 60.0f; // 垂直方向へのカメラ移動速度
-	private const float facingUpLimit = 5.0f; // 視点移動の上方向制限
-	private const float facingDownLimit = 45.0f;  // 視点移動の下方向制限
-												  // private float rotationAmountXAxis = 0.0f; // X軸に回転した量を蓄積
-												  // private float rotationAmountYAxis = 0.0f; // Y軸に回転した量を蓄積
-	private const float minDistance = 2.0f; // 注視点に近づける限界距離
-	private float limitDistance; // 注視点から離れられる限界距離
-	private float defaultLookPointY; // 注視点の初期Y座標
-
-	void Start()
+	/// <summary>
+	/// カメラを制御するクラス
+	/// 設計について:
+	/// シングルトンクラス
+	/// このクラスはPlayerクラスが持っていて
+	/// Playerクラスからのみアクセス出来ると
+	/// カメラは注視点を中心として回転する
+	/// 注視点はシーン上に複数存在してよい
+	/// 場面に応じて注視点を切り替えることで柔軟なカメラが可能
+	/// プレイヤーは常に画面に映す
+	/// </summary>
+	public class CameraController : MyMonoBehaviour
 	{
-		// 初期状態の距離をカメラが離れられる最大距離とする
-		limitDistance = (lookPoint.position - transform.position).magnitude;
-		defaultLookPointY = lookPoint.position.y;
+		private Transform _cameraTransform; // 制御するカメラ
+
+		/// <summary>
+		/// 制御しているカメラ自体のTransformを返す
+		/// </summary>
+		public Transform cameraTransform
+		{
+			get
+			{
+				if (_cameraTransform == null)
+				{
+					_cameraTransform = GetComponentInChildren<Camera>().transform;
+				}
+				return _cameraTransform;
+			}
+		}
+
+		[Tooltip("カメラで追いかける対象"), SerializeField]
+		private Transform target = null;
+		[Tooltip("上に向ける限界角度"), SerializeField]
+		private float facingUpLimit = 5.0f; // 視点移動の上方向制限
+		[Tooltip("下に向ける限界角度"), SerializeField]
+		private float facingDownLimit = 45.0f;  // 視点移動の下方向制限
+		private float limitDistance; // 注視点から離れられる限界距離
+		private Quaternion newRotation; // 新しいカメラ角度
+		private float _distance; // ターゲットまでの距離
+
+		/// <summary>
+		/// ターゲットまでの距離を返す
+		/// </summary>
+		public float distance
+		{
+			get { return _distance; }
+			private set { _distance = value; }
+		}
+
+		void Start()
+		{
+			newRotation = transform.rotation;
+			transform.LookAt(target);
+			limitDistance = (target.position - cameraTransform.position).magnitude;
+			distance = limitDistance;
+		}
+
+		void LateUpdate()
+		{
+			transform.rotation = newRotation;
+			Player player = GameManager.instance.player;
+
+			RaycastHit hit;
+			Ray ray = new Ray(transform.position, -cameraTransform.forward);
+
+			if (Physics.Raycast(ray, out hit, limitDistance))
+			{
+				distance = hit.distance;
+			}
+			else
+			{
+				distance = limitDistance;
+			}
+			Vector3 newPosition = target.position - cameraTransform.forward * distance;
+			cameraTransform.position = Vector3.Lerp(cameraTransform.position, newPosition, 0.5f);
+		}
+
+		public void CameraMove(float vx, float vy)
+		{
+			if (vx == 0.0f && vy == 0.0f)
+			{
+				return;
+			}
+			Vector3 angles = newRotation.eulerAngles;
+
+			angles.x += -vy;
+			if (angles.x > 180.0f)
+			{
+				angles.x -= 360.0f;
+			}
+
+			if (vy > 0.0f)
+			{
+				if (angles.x < -facingUpLimit)
+				{
+					angles.x = -facingUpLimit;
+				}
+			}
+
+			if (vy < 0.0f)
+			{
+				if (angles.x > facingDownLimit)
+				{
+					angles.x = facingDownLimit;
+				}
+			}
+
+			angles.y += vx;
+			angles.z = 0.0f;
+			newRotation.eulerAngles = angles;
+
+		}
 	}
-
-	//protected override void LateUpdate()
-	//{
-	//	float vx = Input.GetAxis("Mouse X");
-	//	float vy = Input.GetAxis("Mouse Y");
-
-	//	CameraMove(vx, vy);
-	//}
-
-	protected void FixedUpdate()
-	{
-		float vx = Input.GetAxis("Mouse X");
-		float vy = Input.GetAxis("Mouse Y");
-
-		CameraMove(vx, vy);
-	}
-
-	private void CameraMove(float vx, float vy)
-	{
-		// 注視点からカメラへのベクトル
-		Vector3 lookPointToCamera = transform.position - lookPoint.position;
-		float lookPointDistance = lookPointToCamera.magnitude;
-		if (lookPointDistance > limitDistance)
-		{
-			transform.position = lookPoint.position + lookPointToCamera.normalized * limitDistance;
-		}
-		else if (lookPointDistance < minDistance)
-		{
-			transform.position = lookPoint.position + lookPointToCamera.normalized * minDistance;
-		}
-		lookPointToCamera = transform.position - lookPoint.position;
-		lookPointDistance = lookPointToCamera.magnitude;
-		transform.LookAt(lookPoint);
-
-		Vector3 position = Vector3.forward * lookPointDistance;
-		Quaternion q = Quaternion.LookRotation(lookPointToCamera);
-		Vector3 v = q.eulerAngles;
-		if(v.x > 180.0f)
-		{
-			v.x -= 360.0f;
-		}
-
-		v.x += vy * verticaltalRotationSpeed * Time.deltaTime;
-		v.y += vx * horizontalRotationSpeed * Time.deltaTime;
-		v.z = 0.0f;
-		if (v.x < -facingDownLimit)
-		{
-			v.x = -facingDownLimit;
-		}
-		else if(v.x > facingUpLimit)
-		{
-			v.x = facingUpLimit;
-		}
-
-		q.eulerAngles = v;
-		position = q * position + lookPoint.position;
-		//position.y += (lookPoint.position.y - defaultLookPointY) / 2.0f;
-		Debug.Log(lookPoint.position.y - defaultLookPointY);
-		transform.position = position;
-		transform.LookAt(lookPoint);
-	}
-
 }
