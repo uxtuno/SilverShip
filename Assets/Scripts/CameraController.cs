@@ -52,6 +52,8 @@ namespace Uxtuno
 			private set { _distance = value; }
 		}
 
+		private Transform overlappedTransform; // カメラが接触したもの
+
 		void Start()
 		{
 			newRotation = transform.rotation;
@@ -66,11 +68,19 @@ namespace Uxtuno
 			Player player = GameManager.instance.player;
 
 			RaycastHit hit;
-			Ray ray = new Ray(transform.position, -cameraTransform.forward);
+			Ray ray = new Ray(target.position, -cameraTransform.forward);
+			Debug.DrawLine(ray.origin, ray.origin - cameraTransform.forward * limitDistance);
 
 			if (Physics.Raycast(ray, out hit, limitDistance))
 			{
-				distance = hit.distance;
+				if(hit.transform == overlappedTransform)
+				{
+					distance = hit.distance;
+				}
+				else
+				{
+					distance = limitDistance;
+				}
 			}
 			else
 			{
@@ -113,7 +123,20 @@ namespace Uxtuno
 			angles.y += vx;
 			angles.z = 0.0f;
 			newRotation.eulerAngles = angles;
+		}
 
+		void OnTriggerEnter(Collider other)
+		{
+			Debug.Log(other);
+			overlappedTransform = other.transform;
+		}
+
+		void OnTriggerExit(Collider other)
+		{
+			if(other.transform == overlappedTransform)
+			{
+				overlappedTransform = null;
+			}
 		}
 	}
 }
