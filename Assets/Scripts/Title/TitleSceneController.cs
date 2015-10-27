@@ -1,43 +1,53 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
 
-/// <summary>
-/// タイトルシーン管理クラス
-/// </summary>
-public class TitleSceneController : MonoBehaviour
+namespace Kuvo
 {
-	[SerializeField]
-	private GameObject flashingGameObject;			// 点滅対象のゲームオブジェクト
-	[SerializeField]
-	private string nextSceneName = string.Empty;	// 遷移先のシーン名
-
-	private IEnumerator Start()
+	/// <summary>
+	/// タイトルシーン管理クラス
+	/// </summary>
+	public class TitleSceneController : MonoBehaviour
 	{
-		if (!flashingGameObject)
+		[SerializeField]
+		private GameObject flashingGameObject;          // 点滅対象のゲームオブジェクト
+		[SerializeField]
+		private string nextSceneName = string.Empty;    // 遷移先のシーン名
+		private SoundCollector soundCollector { get; set; }
+
+		private void Awake()
 		{
-			Debug.LogError("点滅させるGameObjectがnullです");
-			yield break;
+			soundCollector = gameObject.AddComponent<SoundCollector>();
+			SoundPlayerSingleton.Instance.PlayBGM(soundCollector[SoundCollector.SoundName.BGM], true, SoundPlayerSingleton.FadeMode.FadeIn, 10.0f);
 		}
 
-		if(nextSceneName == string.Empty)
+		private IEnumerator Start()
 		{
-			nextSceneName = "questSelection";
+			if (!flashingGameObject)
+			{
+				Debug.LogError("点滅させるGameObjectがnullです");
+				yield break;
+			}
+
+			if (nextSceneName == string.Empty)
+			{
+				nextSceneName = "questSelection";
+			}
+
+			// 一定間隔でゲームオブジェクトを点滅させる
+			while (true)
+			{
+				flashingGameObject.SetActive(!flashingGameObject.activeInHierarchy);
+				yield return new WaitForSeconds(0.5f);
+			}
 		}
 
-		// 一定間隔でゲームオブジェクトを点滅させる
-		while (true)
+		private void Update()
 		{
-			flashingGameObject.SetActive(!flashingGameObject.activeInHierarchy);
-			yield return new WaitForSeconds(0.5f);
-		}
-	}
-
-	private void Update()
-	{
-		// いずれかのキーが入力されたらシーンを切り替える
-		if(Input.anyKeyDown)
-		{
-			Application.LoadLevel(nextSceneName);
+			// いずれかのキーが入力されたらシーンを切り替える
+			if (Input.anyKeyDown)
+			{
+				Application.LoadLevel(nextSceneName);
+			}
 		}
 	}
 }
