@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 
 //[RequireComponent(typeof(CharacterController))]
 
@@ -13,19 +12,11 @@ namespace Uxtuno
 		private float minSpeed = 1.0f; // 移動速度(ダッシュ時)
 		[Tooltip("ジャンプできる高さ(単位:m)"), SerializeField]
 		private float jumpHeight = 2.0f;
-		[Tooltip("水平方向のカメラ移動速度"), SerializeField]
-		private float horizontalRotationSpeed = 5.0f; // 水平方向へのカメラ移動速度
-		[Tooltip("垂直方向のカメラ移動速度"), SerializeField]
-		private float verticaltalRotationSpeed = 5.0f; // 垂直方向へのカメラ移動速度
-		[Tooltip("水平方向のカメラ回転閾値"), SerializeField]
-		private float horizontalRotationThreshold = 0.2f; // 水平方向のカメラ回転閾値
-		[Tooltip("垂直方向のカメラ回転閾値"), SerializeField]
-		private float verticalRotationThreshold = 0.2f; // 垂直方向のカメラ回転閾値
 
 		private float jumpVY = 0.0f;
 		private float jumpPower;
 
-		private CharacterController characterController = null;
+		private CharacterController characterController;
 		private CameraController cameraController;
 
 		private Animator animator;
@@ -33,9 +24,6 @@ namespace Uxtuno
 		private int speedId;
 		private int isJumpId;
 
-		private Vector2 beginCameraDragPosition; // カメラ回転のためのドラッグ開始地点
-		[Tooltip("ドラッグの増幅倍率"), SerializeField]
-		private float cameraDragAmplification = 2.0f;
 
 		private Vector3 _moveVector = Vector3.zero;
 
@@ -48,8 +36,10 @@ namespace Uxtuno
 			private set { _moveVector = value; }
 		}
 
-		void Awake()
+		void Start()
 		{
+			var a = gameObject.GetSafeComponent<TitleSceneController>();
+
 			// 指定の高さまで飛ぶための初速を計算
 			jumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * jumpHeight);
 			characterController = GetComponent<CharacterController>();
@@ -70,44 +60,11 @@ namespace Uxtuno
 			Move(); // プレイヤーの移動など
 			if(cameraController.distance < 1.0f)
 			{
-				IsShow = false;
+				isShow = false;
 			}
-			else if(!IsShow)
+			else if(!isShow)
 			{
-				IsShow = true;
-			}
-
-			if (Input.GetMouseButtonDown(1))
-			{
-				beginCameraDragPosition = Camera.main.ScreenToViewportPoint(Input.mousePosition);
-				// 中央を(0, 0)にする
-				beginCameraDragPosition.x -= 0.5f;
-				beginCameraDragPosition.y -= 0.5f;
-			}
-
-			if (Input.GetMouseButton(1))
-			{
-				Vector2 position = Camera.main.ScreenToViewportPoint(Input.mousePosition);
-				// 中央を(0, 0)にする
-				position.x -= 0.5f;
-				position.y -= 0.5f;
-				position *= cameraDragAmplification; // 移動量を増幅させる
-				if (Mathf.Abs(position.y) < verticalRotationThreshold)
-				{
-					position.y = 0.0f;
-				}
-
-				if (Mathf.Abs(position.x) < horizontalRotationThreshold)
-				{
-					position.x = 0.0f;
-				}
-
-				if (position.sqrMagnitude > 1.0f)
-				{
-					position.Normalize();
-				}
-
-				cameraController.CameraMove(position.x * horizontalRotationSpeed * Time.deltaTime, position.y * verticaltalRotationSpeed * Time.deltaTime);
+				isShow = true;
 			}
 		}
 
