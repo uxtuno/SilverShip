@@ -14,7 +14,6 @@ namespace Uxtuno
 		void Update()
 		{
 			Vector3 cameraToVector = cameraController.cameraTransform.position - transform.position;
-			Debug.Log(cameraToVector.magnitude);
 			if (cameraToVector.magnitude < 2.0f)
 			{
 				isShow = false;
