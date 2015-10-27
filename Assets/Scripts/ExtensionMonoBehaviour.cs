@@ -45,4 +45,27 @@ public static class ExtensionMonoBehaviour{
 			.Where(c => c != self.transform)
 			.ToArray();
 	}
+
+	public static T GetSafeComponent<T>(this GameObject self) where T : Component
+	{
+		T component = self.GetComponent<T>();
+		if(component == null)
+		{
+			Debug.LogError(typeof(T) + "がアタッチされていません");
+		}
+
+		return component;
+	}
+
+	public static T GetSafeComponent<T>(this Component self) where T : Component
+	{
+		T component = self.GetComponent<T>();
+		if (component == null)
+		{
+			Debug.LogError(typeof(T) + "がアタッチされていません", self.transform);
+		}
+
+		return component;
+	}
+
 }

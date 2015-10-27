@@ -38,6 +38,8 @@ namespace Uxtuno
 
 		void Start()
 		{
+			var a = gameObject.GetSafeComponent<TitleSceneController>();
+
 			// 指定の高さまで飛ぶための初速を計算
 			jumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * jumpHeight);
 			characterController = GetComponent<CharacterController>();

@@ -88,17 +88,4 @@ public class MyMonoBehaviour : MonoBehaviour
 			}
 		}
 	}
-
-	public T GetSafeComponent<T>() where T : MonoBehaviour
-	{
-		T component = GetComponent<T>();
-
-		if (component == null)
-		{
-			Debug.LogError("Expected to find component of type "
-			   + typeof(T) + " but found none", this);
-		}
-
-		return component;
-	}
 }
