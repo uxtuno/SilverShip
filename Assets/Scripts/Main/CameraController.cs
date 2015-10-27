@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 namespace Uxtuno
 {
@@ -46,47 +46,50 @@ namespace Uxtuno
 		/// <summary>
 		/// ターゲットまでの距離を返す
 		/// </summary>
-		public float distance
+		public float targetToDistance
 		{
 			get { return _distance; }
 			private set { _distance = value; }
 		}
 
-		private Transform overlappedTransform; // カメラが接触したもの
+		private List<Transform> overlappedObjects = new List<Transform>(); // カメラが接触したもの
+		private float radius; // 障害物と一定距離を置くために使用
 
 		void Start()
 		{
 			newRotation = transform.rotation;
 			transform.LookAt(target);
 			limitDistance = (target.position - cameraTransform.position).magnitude;
-			distance = limitDistance;
+			targetToDistance = limitDistance;
+			radius = this.GetSafeComponent<SphereCollider>().radius;
 		}
 
 		void LateUpdate()
 		{
 			transform.rotation = newRotation;
-			Player player = GameManager.instance.player;
+			//Player player = GameManager.instance.player;
 
-			RaycastHit hit;
-			Ray ray = new Ray(target.position, -cameraTransform.forward);
-			Debug.DrawLine(ray.origin, ray.origin - cameraTransform.forward * limitDistance);
-
-			if (Physics.Raycast(ray, out hit, limitDistance))
+			// 壁にぶつかっている時だけ処理を行う
+			if (overlappedObjects != null)
 			{
-				if(hit.transform == overlappedTransform)
+				RaycastHit hit;
+				LayerMask mask = LayerName.Wall.maskValue;
+				Ray ray = new Ray(target.position, -cameraTransform.forward);
+
+				targetToDistance = limitDistance;
+				if (Physics.Raycast(ray, out hit, limitDistance, mask))
 				{
-					distance = hit.distance;
-				}
-				else
-				{
-					distance = limitDistance;
+					foreach (Transform overlap in overlappedObjects)
+					{
+						if (hit.transform == overlap)
+						{
+							// 壁にぶつかったのでカメラの位置を壁の手前まで近づける
+							targetToDistance = hit.distance - radius;
+						}
+					}
 				}
 			}
-			else
-			{
-				distance = limitDistance;
-			}
-			Vector3 newPosition = target.position - cameraTransform.forward * distance;
+			Vector3 newPosition = target.position - cameraTransform.forward * targetToDistance;
 			cameraTransform.position = Vector3.Lerp(cameraTransform.position, newPosition, 0.5f);
 		}
 
@@ -127,14 +130,18 @@ namespace Uxtuno
 
 		void OnTriggerEnter(Collider other)
 		{
-			overlappedTransform = other.transform;
+			if (other.gameObject.layer == LayerName.Wall.id)
+			{
+				overlappedObjects.Add(other.transform);
+			}
 		}
 
 		void OnTriggerExit(Collider other)
 		{
-			if(other.transform == overlappedTransform)
+			int index = overlappedObjects.FindIndex((obj) => obj == other.transform);
+            if (index >= 0)
 			{
-				overlappedTransform = null;
+				overlappedObjects.RemoveAt(index);
 			}
 		}
 	}

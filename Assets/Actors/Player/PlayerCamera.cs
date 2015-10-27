@@ -30,7 +30,7 @@ namespace Uxtuno
 
 		void Update()
 		{
-			if (cameraController.distance < 1.0f)
+			if (cameraController.targetToDistance < 1.0f)
 			{
 				isShow = false;
 			}

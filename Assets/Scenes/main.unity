@@ -4384,7 +4384,7 @@ GameObject:
   - 33: {fileID: 1123259481}
   - 65: {fileID: 1123259480}
   - 23: {fileID: 1123259479}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Cube (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5420,6 +5420,10 @@ Prefab:
       propertyPath: m_StaticEditorFlags
       value: 4294967295
       objectReference: {fileID: 0}
+    - target: {fileID: 100216, guid: 2c26b485745441540856e3bebce15c86, type: 2}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 2c26b485745441540856e3bebce15c86, type: 2}
   m_IsPrefabParent: 0
@@ -6347,7 +6351,7 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: .100000001
+  m_Radius: .5
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1669203421
 GameObject:

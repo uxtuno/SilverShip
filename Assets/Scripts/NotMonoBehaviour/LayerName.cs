@@ -1,20 +1,25 @@
 public class LayerName
 {
 
-	/// <summary>
-	/// return "Default"
- 	/// </summary>
-	public const string @Default = "Default";
+	public struct Para{ 
+		public readonly int id;
+		public readonly int maskValue;
+		public readonly string name;
 
-	/// <summary>
-	/// return "TransparentFX"
- 	/// </summary>
-	public const string @TransparentFX = "TransparentFX";
+		public Para(int _id, int _maskValue, string _name)
+		{
+			id = _id;
+			maskValue = _maskValue;
+			name = _name;
+		}
+	}
 
-	/// <summary>
-	/// return "Ignore Raycast"
- 	/// </summary>
-	public const string @IgnoreRaycast = "Ignore Raycast";
+	public static Para Default = new Para(0, 1, "Default");
+	public static Para TransparentFX = new Para(1, 2, "TransparentFX");
+	public static Para IgnoreRaycast = new Para(2, 4, "IgnoreRaycast");
+	public static Para Water = new Para(4, 16, "Water");
+	public static Para UI = new Para(5, 32, "UI");
+	public static Para Wall = new Para(8, 256, "Wall");
 
 	/// <summary>
 	/// <para>0. "Default"</para>
@@ -25,7 +30,7 @@ public class LayerName
 	/// <para>5. "UI"</para>
 	/// <para>6. ""</para>
 	/// <para>7. ""</para>
-	/// <para>8. ""</para>
+	/// <para>8. "Wall"</para>
 	/// <para>9. ""</para>
 	/// <para>10. ""</para>
 	/// <para>11. ""</para>
@@ -50,5 +55,5 @@ public class LayerName
 	/// <para>30. ""</para>
 	/// <para>31. ""</para>
 	/// </summary>
-	public static readonly string[] names = new string[]{"Default","TransparentFX","Ignore Raycast","","Water","UI","","","","","","","","","","","","","","","","","","","","","","","","","",""};
+	public static readonly string[] names = new string[]{"Default","TransparentFX","Ignore Raycast","","Water","UI","","","Wall","","","","","","","","","","","","","","","","","","","","","","",""};
 }

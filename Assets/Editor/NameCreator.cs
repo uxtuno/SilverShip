@@ -144,11 +144,50 @@ public class NameCreator
 		builder.AppendLine("public class " + className + "Name");
 		builder.AppendLine("{");
 		{
-			AppendPropertyText(builder, names);
+			if (className == "Layer")
+			{
+				//AppendPropertyText(builder, names);
+				AppendStructText(builder, names);
+			}
+			else
+			{
+				AppendPropertyText(builder, names);
+			}
+
 			AppendArrayText(builder, names);
 		}
 		builder.AppendLine("}");
 		return builder;
+	}
+
+	static void AppendStructText(StringBuilder builder, IEnumerable<string> names)
+	{
+		builder.AppendLine(@"
+	public struct Para{ 
+		public readonly int id;
+		public readonly int maskValue;
+		public readonly string name;
+
+		public Para(int _id, int _maskValue, string _name)
+		{
+			id = _id;
+			maskValue = _maskValue;
+			name = _name;
+		}
+	}");
+
+		int i = 0;
+		builder.AppendLine();
+		foreach (var name in names)
+		{
+			if (string.IsNullOrEmpty(name))
+			{
+				++i;
+				continue;
+			}
+			builder.AppendFormat("\tpublic static Para {0} = new Para({1}, {2}, \"{0}\");\n", Replace(name), i, 1 << i);
+			++i;
+		}
 	}
 
 	static void AppendPropertyText(StringBuilder builder, IEnumerable<string> names)
@@ -157,7 +196,7 @@ public class NameCreator
 		foreach (var name in _names)
 		{
 			if (string.IsNullOrEmpty(name))
-				return;
+				continue;
 
 			builder.AppendFormat(@"
 	/// <summary>

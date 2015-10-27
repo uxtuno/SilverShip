@@ -12,7 +12,7 @@ namespace Uxtuno
 		private GameObject monsterPrefab = null;
 		private float fieldDepth = 100.0f; // フィールドの奥行
 		private float fieldWidth = 100.0f; // フィールドの幅
-		private int generateNumber = 100; // 生成数
+		private int generateNumber = 1; // 生成数
 
 		// Use this for initialization
 		void Start()
