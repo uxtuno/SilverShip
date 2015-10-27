@@ -51,7 +51,7 @@ public static class ExtensionMonoBehaviour{
 		T component = self.GetComponent<T>();
 		if(component == null)
 		{
-			Debug.LogError(typeof(T) + "がアタッチされていません");
+			Debug.LogError(typeof(T) + "がアタッチされていません", self.transform);
 		}
 
 		return component;
