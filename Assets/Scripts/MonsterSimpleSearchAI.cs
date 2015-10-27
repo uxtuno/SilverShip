@@ -7,7 +7,7 @@ namespace Uxtuno
 	/// モンスターAI
 	/// 一定時間置きに停止してプレイヤーを探し、見つかれば
 	/// その方向に直進する
-	/// 見つからなければ今向いてる方向に直進
+	/// ランダムに方向に方向を変え、直進
 	/// </summary>
 	public class MonsterSimpleSearchAI : MyMonoBehaviour
 	{

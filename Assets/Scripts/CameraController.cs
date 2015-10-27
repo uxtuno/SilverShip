@@ -127,7 +127,6 @@ namespace Uxtuno
 
 		void OnTriggerEnter(Collider other)
 		{
-			Debug.Log(other);
 			overlappedTransform = other.transform;
 		}
 
