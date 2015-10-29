@@ -8,7 +8,7 @@ using System.Collections;
 /// </summary>
 public class Actor : MonoBehaviour
 {
-	protected float hp { get; set; } = 0.0f;
+	protected float hp { get; set; }
 	protected int atack { get; set; }
 	protected int defence { get; set; }
 
