@@ -12,6 +12,7 @@ GameObject:
   - 143: {fileID: 14300000}
   - 82: {fileID: 8200000}
   - 114: {fileID: 11465272}
+  - 114: {fileID: 11409568}
   m_Layer: 2
   m_Name: monsterprefab
   m_TagString: Player
@@ -2353,13 +2354,24 @@ EditorExtensionImpl:
 --- !u!1002 &11400003
 EditorExtensionImpl:
   serializedVersion: 6
---- !u!114 &11465272
+--- !u!114 &11409568
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100000}
   m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b378f323d61738847ae8a3f50de09286, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &11465272
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a59b8be1197dcd84da1e0cdd2f7ddec7, type: 3}
   m_Name: 
@@ -2625,6 +2637,10 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: m_Layer
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
