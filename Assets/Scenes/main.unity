@@ -3993,7 +3993,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxSpeed: 4
   minSpeed: 2
-  jumpHeight: 2
+  jumpHeight: 5
 --- !u!143 &931185110
 CharacterController:
   m_ObjectHideFlags: 0
