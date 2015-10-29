@@ -579,6 +579,7 @@ GameObject:
   - 114: {fileID: 924248384}
   - 114: {fileID: 924248383}
   - 114: {fileID: 924248387}
+  - 114: {fileID: 924248386}
   m_Layer: 5
   m_Name: Quests
   m_TagString: Untagged
@@ -621,7 +622,7 @@ MonoBehaviour:
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 1343034001}
     m_SelectOnLeft: {fileID: 0}
-    m_SelectOnRight: {fileID: 1770727832}
+    m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
@@ -649,6 +650,18 @@ MonoBehaviour:
         m_Mode: 2
         m_Arguments:
           m_ObjectArgument: {fileID: 1770727830}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1580402136}
+        m_MethodName: OnSEPlay
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 8300000, guid: 61961d65c8ec13648bf232bdf9d0b087,
+            type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -690,6 +703,20 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 924248381}
+--- !u!114 &924248386
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 924248381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df315af86c197fe4997ead8dffe16fa7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetsAndMessages:
+  - target: {fileID: 1557397949}
+    message: "\u53D7\u8AFE\u3059\u308B\u30AF\u30A8\u30B9\u30C8\u3092\u9078\u629E\u3057\u307E\u3059"
 --- !u!114 &924248387
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -732,6 +759,7 @@ GameObject:
   - 114: {fileID: 938298920}
   - 114: {fileID: 938298919}
   - 114: {fileID: 938298922}
+  - 114: {fileID: 938298923}
   m_Layer: 5
   m_Name: Quest02
   m_TagString: Untagged
@@ -774,7 +802,7 @@ MonoBehaviour:
     m_Mode: 4
     m_SelectOnUp: {fileID: 1770727832}
     m_SelectOnDown: {fileID: 1770727832}
-    m_SelectOnLeft: {fileID: 924248383}
+    m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
@@ -804,6 +832,18 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 159028, guid: d4b9429de6b18ab4f8c2bf3bb614e7df,
             type: 2}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1580402136}
+        m_MethodName: OnSEPlay
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 8300000, guid: 61961d65c8ec13648bf232bdf9d0b087,
+            type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -874,9 +914,35 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+        - m_Target: {fileID: 1580402136}
+          m_MethodName: OnSEPlay
+          m_Mode: 2
+          m_Arguments:
+            m_ObjectArgument: {fileID: 8300000, guid: bfe5dc1f52c378a4593f6b531004c114,
+              type: 3}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
       m_TypeName: UnityEngine.EventSystems.EventTrigger+TriggerEvent, UnityEngine.UI,
         Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   delegates: []
+--- !u!114 &938298923
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 938298917}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df315af86c197fe4997ead8dffe16fa7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetsAndMessages:
+  - target: {fileID: 1557397949}
+    message: "\u672A\u77E5\u306E\u6575\u306E\u8A0E\u4F10\u3060\u2606"
 --- !u!1 &1021450205
 GameObject:
   m_ObjectHideFlags: 0
@@ -1129,6 +1195,7 @@ GameObject:
   - 114: {fileID: 1322760552}
   - 114: {fileID: 1322760551}
   - 114: {fileID: 1322760554}
+  - 114: {fileID: 1322760555}
   m_Layer: 5
   m_Name: ReturnToTheTitle
   m_TagString: Untagged
@@ -1204,6 +1271,18 @@ MonoBehaviour:
           m_StringArgument: title
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1580402136}
+        m_MethodName: OnSEPlay
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 8300000, guid: 61961d65c8ec13648bf232bdf9d0b087,
+            type: 3}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &1322760552
@@ -1269,6 +1348,20 @@ MonoBehaviour:
       m_TypeName: UnityEngine.EventSystems.EventTrigger+TriggerEvent, UnityEngine.UI,
         Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   delegates: []
+--- !u!114 &1322760555
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1322760549}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df315af86c197fe4997ead8dffe16fa7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetsAndMessages:
+  - target: {fileID: 1557397949}
+    message: "\u30BF\u30A4\u30C8\u30EB\u753B\u9762\u306B\u623B\u308A\u307E\u3059"
 --- !u!1 &1343033999
 GameObject:
   m_ObjectHideFlags: 0
@@ -1281,6 +1374,7 @@ GameObject:
   - 114: {fileID: 1343034002}
   - 114: {fileID: 1343034001}
   - 114: {fileID: 1343034004}
+  - 114: {fileID: 1343034005}
   m_Layer: 5
   m_Name: Shop
   m_TagString: Untagged
@@ -1344,7 +1438,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1343034002}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1580402136}
+        m_MethodName: OnSEPlay
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 8300000, guid: bfe5dc1f52c378a4593f6b531004c114,
+            type: 3}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &1343034002
@@ -1410,6 +1516,20 @@ MonoBehaviour:
       m_TypeName: UnityEngine.EventSystems.EventTrigger+TriggerEvent, UnityEngine.UI,
         Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   delegates: []
+--- !u!114 &1343034005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1343033999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df315af86c197fe4997ead8dffe16fa7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetsAndMessages:
+  - target: {fileID: 1557397949}
+    message: "\u958B\u5E97\u6E96\u5099\u4E2D\u3067\u3059"
 --- !u!1 &1483841735
 GameObject:
   m_ObjectHideFlags: 0
@@ -1673,6 +1793,7 @@ GameObject:
   - 114: {fileID: 1770727833}
   - 114: {fileID: 1770727832}
   - 114: {fileID: 1770727835}
+  - 114: {fileID: 1770727836}
   m_Layer: 5
   m_Name: Quest01
   m_TagString: Untagged
@@ -1715,7 +1836,7 @@ MonoBehaviour:
     m_Mode: 4
     m_SelectOnUp: {fileID: 938298919}
     m_SelectOnDown: {fileID: 938298919}
-    m_SelectOnLeft: {fileID: 924248383}
+    m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
   m_Colors:
@@ -1745,6 +1866,18 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 159028, guid: d4b9429de6b18ab4f8c2bf3bb614e7df,
             type: 2}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1580402136}
+        m_MethodName: OnSEPlay
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 8300000, guid: 61961d65c8ec13648bf232bdf9d0b087,
+            type: 3}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
@@ -1815,6 +1948,32 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+        - m_Target: {fileID: 1580402136}
+          m_MethodName: OnSEPlay
+          m_Mode: 2
+          m_Arguments:
+            m_ObjectArgument: {fileID: 8300000, guid: bfe5dc1f52c378a4593f6b531004c114,
+              type: 3}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
       m_TypeName: UnityEngine.EventSystems.EventTrigger+TriggerEvent, UnityEngine.UI,
         Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   delegates: []
+--- !u!114 &1770727836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1770727830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df315af86c197fe4997ead8dffe16fa7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetsAndMessages:
+  - target: {fileID: 1557397949}
+    message: "\u5996\u602A\u306E\u8A0E\u4F10\u3060\u2606"
