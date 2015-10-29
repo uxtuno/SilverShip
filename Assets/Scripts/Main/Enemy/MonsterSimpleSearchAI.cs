@@ -43,7 +43,7 @@ namespace Uxtuno
 				}
 
 				float t = 0.0f;
-				while (t < 3.0f)
+				while (t < straightSeconds)
 				{
 					transform.position += transform.forward * speed * Time.deltaTime;
 					yield return null;
