@@ -62,6 +62,9 @@ namespace Uxtuno
 			limitDistance = (target.position - cameraTransform.position).magnitude;
 			targetToDistance = limitDistance;
 			radius = this.GetSafeComponent<SphereCollider>().radius;
+
+			Player player = GameManager.instance.player;
+
 		}
 
 		void LateUpdate()
