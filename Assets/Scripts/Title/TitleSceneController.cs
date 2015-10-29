@@ -12,12 +12,12 @@ namespace Kuvo
 		private GameObject flashingGameObject;          // 点滅対象のゲームオブジェクト
 		[SerializeField]
 		private string nextSceneName = string.Empty;    // 遷移先のシーン名
-		private SoundCollector soundCollector { get; set; }
+		private TitleSoundCollector soundCollector { get; set; }
 
 		private void Awake()
 		{
-			soundCollector = gameObject.AddComponent<SoundCollector>();
-			SoundPlayerSingleton.Instance.PlayBGM(soundCollector[SoundCollector.SoundName.BGM], true, SoundPlayerSingleton.FadeMode.FadeIn, 10.0f);
+			soundCollector = gameObject.AddComponent<TitleSoundCollector>();
+			SoundPlayerSingleton.Instance.PlayBGM(soundCollector[TitleSoundCollector.SoundName.BGM], true, SoundPlayerSingleton.FadeMode.FadeIn, 10.0f);
 		}
 
 		private IEnumerator Start()
@@ -46,7 +46,7 @@ namespace Kuvo
 			// いずれかのキーが入力されたらシーンを切り替える
 			if (Input.anyKeyDown)
 			{
-				Application.LoadLevel(nextSceneName);
+				SceneChangerSingleton.Instance.FadeChange(nextSceneName);
 			}
 		}
 	}

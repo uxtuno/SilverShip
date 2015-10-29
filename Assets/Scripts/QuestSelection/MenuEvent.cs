@@ -61,7 +61,7 @@ namespace Kuvo
 		/// <param name="sceneName"> 遷移先のシーン名</param>
 		public void OnSceneChange(string sceneName)
 		{
-			Application.LoadLevel(sceneName);
+			SceneChangerSingleton.Instance.FadeChange(sceneName);
 		}
 
 		/// <summary>
@@ -148,6 +148,19 @@ namespace Kuvo
 
 			oldSelectedGameObject = EventSystem.current.currentSelectedGameObject;
 			EventSystem.current.SetSelectedGameObject(nextGameObject);
+		}
+
+		public void OnSEPlay(Object obj)
+		{
+			AudioClip audioClip = obj as AudioClip;
+
+			if (!audioClip)
+			{
+				Debug.LogError("指定されたObjectはAudioClipではありません");
+				return;
+			}
+
+			SoundPlayerSingleton.Instance.PlaySE(gameObject, audioClip);
 		}
 	}
 }
