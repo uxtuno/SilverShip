@@ -63,7 +63,7 @@ namespace Uxtuno
 			targetToDistance = limitDistance;
 			radius = this.GetSafeComponent<SphereCollider>().radius;
 
-			Player player = GameManager.instance.player;
+			//Player player = GameManager.instance.player;
 
 		}
 

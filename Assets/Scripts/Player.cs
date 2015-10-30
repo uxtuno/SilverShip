@@ -87,7 +87,7 @@ namespace Uxtuno
 			moveVector = Vector3.zero;
 			if (direction != Vector3.zero)
 			{
-				float distance = (cameraController.transform.position - cameraController.cameraTransform.position).magnitude;
+				//float distance = (cameraController.transform.position - cameraController.cameraTransform.position).magnitude;
 
 				Vector3 rotateAngles = Vector3.zero;
 				// カメラの方向を加味して進行方向を計算

@@ -26,7 +26,7 @@ namespace Uxtuno
 		{
 			foreach (Transform child in transform)
 			{
-				positions.Add(transform.position);
+				positions.Add(child.position);
 			}
 
 			curve.Initialize(10, new Vector3(0, 0, 0),

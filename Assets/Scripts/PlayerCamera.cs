@@ -47,9 +47,14 @@ namespace Uxtuno
 				beginCameraDragPosition.y -= 0.5f;
 			}
 
+			Vector3 position = Vector3.zero;
+			position.x = Input.GetAxisRaw(InputName.CameraX);
+			position.y = Input.GetAxisRaw(InputName.CameraY);
+			Debug.Log(position);
+
 			if (Input.GetMouseButton(1))
 			{
-				Vector2 position = Camera.main.ScreenToViewportPoint(Input.mousePosition);
+				position = Camera.main.ScreenToViewportPoint(Input.mousePosition);
 				// 中央を(0, 0)にする
 				position.x -= 0.5f;
 				position.y -= 0.5f;
@@ -69,8 +74,11 @@ namespace Uxtuno
 					position.Normalize();
 				}
 
-				cameraController.CameraMove(position.x * horizontalRotationSpeed * Time.deltaTime, position.y * verticaltalRotationSpeed * Time.deltaTime);
 			}
+
+			cameraController.CameraMove(position.x * horizontalRotationSpeed * Time.deltaTime, position.y * verticaltalRotationSpeed * Time.deltaTime);
+
+			
 		}
 	}
 }

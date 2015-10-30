@@ -38,4 +38,12 @@ public class GameManager : MyMonoBehaviour
 			return _player;
 		}
 	}
+
+	void Update()
+	{
+		if(Input.GetKeyDown(KeyCode.T))
+		{
+			Application.CaptureScreenshot("ScreenShot.png");
+		}
+	}
 }
