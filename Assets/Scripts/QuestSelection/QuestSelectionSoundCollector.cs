@@ -12,19 +12,19 @@ namespace Kuvo
 		public enum SoundName
 		{
 			NONE,
-			BGM,				// BGM
+			BGM,                // BGM
 			CursorSelect,       // カーソルの移動音
-			Submit,				// 決定音
-			Cancel,				// キャンセル音
+			Submit,             // 決定音
+			Cancel,             // キャンセル音
 		}
 
 		protected override void Awake()
 		{
 			sounds.Add(SoundName.NONE, null);
-			sounds.Add(SoundName.BGM, Resources.Load<AudioClip>("Sounds/Bureikou"));
-			sounds.Add(SoundName.CursorSelect, Resources.Load<AudioClip>("Sounds/Cursor"));
-			sounds.Add(SoundName.Submit, Resources.Load<AudioClip>("Sounds/Submit"));
-			sounds.Add(SoundName.Cancel, Resources.Load<AudioClip>("Sounds/Cancel"));
+			sounds.Add(SoundName.BGM, Resources.Load<AudioClip>("Sounds/Bureikou") as AudioClip);
+			sounds.Add(SoundName.CursorSelect, Resources.Load<AudioClip>("Sounds/Cursor") as AudioClip);
+			sounds.Add(SoundName.Submit, Resources.Load<AudioClip>("Sounds/Submit") as AudioClip);
+			sounds.Add(SoundName.Cancel, Resources.Load<AudioClip>("Sounds/Cancel") as AudioClip);
 		}
 	}
 }

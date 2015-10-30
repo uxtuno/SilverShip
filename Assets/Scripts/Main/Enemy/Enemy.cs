@@ -1,18 +1,24 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Uxtuno;
 
-namespace Uxtuno
+namespace Kuvo
 {
-	public class Enemy : MyMonoBehaviour
+	/// <summary>
+	/// 敵の共通動作を規定した抽象クラス
+	/// </summary>
+	abstract public class Enemy : MyMonoBehaviour
 	{
 		private CameraController cameraController;
-		void Start()
+
+		protected virtual void Start()
 		{
 			cameraController = GameObject.FindGameObjectWithTag(TagName.CameraController).GetComponent<CameraController>();
 		}
 
-		void Update()
+		protected virtual void Update()
 		{
+			// エネミーとカメラの距離に応じて描画状態を切り替える
 			Vector3 cameraToVector = cameraController.cameraTransform.position - transform.position;
 			if (cameraToVector.magnitude < 2.0f)
 			{
@@ -23,5 +29,10 @@ namespace Uxtuno
 				isShow = true;
 			}
 		}
+
+		/// <summary>
+		/// 近接攻撃
+		/// </summary>
+		abstract public void ShortRangeAttack();
 	}
 }

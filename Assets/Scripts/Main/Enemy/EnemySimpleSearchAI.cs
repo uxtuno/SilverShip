@@ -1,16 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Uxtuno;
 
-namespace Uxtuno
+namespace Kuvo
 {
 	/// <summary>
-	/// モンスターAI
+	/// エネミーAI
 	/// 一定時間置きに停止してプレイヤーを探し、見つかれば
 	/// その方向に直進する
 	/// ランダムに方向に方向を変え、直進
-	/// TODO : 敵のクラス名がEnemyだったりMonsterだったりするので統一したい
 	/// </summary>
-	public class MonsterSimpleSearchAI : MyMonoBehaviour
+	public class EnemySimpleSearchAI : MyMonoBehaviour
 	{
 		private float speed = 3.0f;
 		private float waitSeconds = 2.0f; // 待機時間
@@ -19,7 +19,7 @@ namespace Uxtuno
 		// Use this for initialization
 		IEnumerator Start()
 		{
-			for(;;)
+			for (;;)
 			{
 				yield return new WaitForSeconds(Random.value * waitSeconds);
 
@@ -38,7 +38,7 @@ namespace Uxtuno
 				else
 				{
 					Vector3 angles = Vector3.zero;
-					angles.y = (float)Random.Range(0, 360);
+					angles.y = Random.Range(0, 360);
 					transform.eulerAngles = angles;
 				}
 

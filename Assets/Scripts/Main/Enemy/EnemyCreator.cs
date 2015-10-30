@@ -1,14 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Uxtuno;
 
-namespace Uxtuno
+namespace Kuvo
 {
 	/// <summary>
 	/// TODO : このクラスは突貫工事なので後で書き直す。
 	/// </summary>
-	public class MonsterCreator : MyMonoBehaviour
+	public class EnemyCreator : MyMonoBehaviour
 	{
-		[Tooltip("生成するモンスターのプレハブ"), SerializeField]
+		[Tooltip("生成するエネミーのプレハブ"), SerializeField]
 		private GameObject monsterPrefab = null;
 		private float fieldDepth = 100.0f; // フィールドの奥行
 		private float fieldWidth = 100.0f; // フィールドの幅
@@ -18,7 +19,7 @@ namespace Uxtuno
 		void Start()
 		{
 			GameObject monsterFolder = new GameObject("Monsters");
-			for(int i = 0; i < generateNumber; ++i)
+			for (int i = 0; i < generateNumber; ++i)
 			{
 				float z = (Random.value * fieldDepth) - fieldDepth / 2.0f;
 				float x = (Random.value * fieldWidth) - fieldWidth / 2.0f;
