@@ -10,8 +10,10 @@ namespace Uxtuno
 		private float maxSpeed = 5.0f; // 移動速度
 		[Tooltip("走る速さ(単位:m/s)"), SerializeField]
 		private float minSpeed = 1.0f; // 移動速度(ダッシュ時)
-		[Tooltip("ジャンプできる高さ(単位:m)"), SerializeField]
+		[Tooltip("ジャンプの高さ(単位:m)"), SerializeField]
 		private float jumpHeight = 2.0f;
+		[Tooltip("ハイジャンプの高さ(単位:m)"), SerializeField]
+		private float highJumpHeight = 10.0f;
 
 		private float jumpVY = 0.0f;
 		private float jumpPower;
@@ -23,16 +25,6 @@ namespace Uxtuno
 		private Transform playerMesh;
 		private int speedId;
 		private int isJumpId;
-
-		private enum Jump
-		{
-			None,
-			MainButton,
-			SubButton,
-		}
-
-		private Jump jump = Jump.None;
-		private float highJumpInputTime = 0.3f; // ハイジャンプ入力猶予時間
 
 		private Vector3 _moveVector = Vector3.zero;
 
@@ -77,9 +69,6 @@ namespace Uxtuno
 
 		void Move()
 		{
-
-
-
 			Vector3 direction = Vector3.zero;
 			// directionは進行方向を表すので上下入力はzに格納
 			direction.x = Input.GetAxisRaw(InputName.Horizontal);
@@ -125,7 +114,8 @@ namespace Uxtuno
 			else // 地面についている
 			{
 				// ジャンプさせる
-				if (Input.GetButtonDown("Jump") && !animator.GetBool(isJumpId))
+				PlayerInput input = PlayerInput.instance;
+				if (input.highJump && !animator.GetBool(isJumpId))
 				{
 					jumpVY = jumpPower;
 					animator.SetBool(isJumpId, true);
@@ -148,7 +138,7 @@ namespace Uxtuno
 				Vector3 now = transform.position - oldCameraPosition;
 
 				// プレイヤーが移動した時のY軸方向カメラ回転量を計算
-				float rotateAngleY = Mathf.Atan2(now.x * old.z - now.z * old.x, now.x * old.x + now.z * old.z) * Mathf.Rad2Deg;
+				float rotateAngleY = Mathf.Atan2(now.x * old.z - now.z * old.x, now.x * old.x + now.z * old.z) * Mathf.Rad2Deg / 2.0f;
 				cameraController.CameraMove(rotateAngleY, 0.0f);
 			}
 		}

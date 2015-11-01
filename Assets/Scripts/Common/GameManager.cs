@@ -45,5 +45,8 @@ public class GameManager : MyMonoBehaviour
 		{
 			Application.CaptureScreenshot("ScreenShot.png");
 		}
+
+		// プレイヤーの入力情報を更新
+		PlayerInput.instance.Update(Time.deltaTime);
 	}
 }

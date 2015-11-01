@@ -2,6 +2,24 @@
 using System.Collections;
 
 public class PlayerInput {
+	private PlayerInput(){ }
+	private static PlayerInput _instance;
+	/// <summary>
+	/// 唯一のインスタンスを返す
+	/// </summary>
+	public static PlayerInput instance
+	{
+		get
+		{
+			if(_instance == null)
+			{
+				_instance = new PlayerInput();
+			}
+
+			return _instance;
+		}
+	}
+
 
 	public float horizontal
 	{
@@ -20,6 +38,9 @@ public class PlayerInput {
 		get
 		{
 			Vector2 rotationInput = Vector2.zero;
+
+			rotationInput.x = Input.GetAxisRaw(InputName.CameraX);
+			rotationInput.y = Input.GetAxisRaw(InputName.CameraY);
 			if (Input.GetMouseButton(1))
 			{
 				rotationInput = Camera.main.ScreenToViewportPoint(Input.mousePosition);
@@ -27,9 +48,7 @@ public class PlayerInput {
 				rotationInput.x -= 0.5f;
 				rotationInput.y -= 0.5f;
 			}
-
-			rotationInput.x = Input.GetAxisRaw(InputName.CameraX);
-			rotationInput.y = Input.GetAxisRaw(InputName.CameraY);
+			
 			return rotationInput;
 		}
 	}
@@ -48,7 +67,7 @@ public class PlayerInput {
 	}
 
 	private HighJumpKey highJumpKey = HighJumpKey.None;
-	private float highJumpInputTime = 0.3f;
+	private float highJumpInputTime = 0.5f;
 	private float highJumpInputCount = 0.0f;
 
 	public bool jump
@@ -65,6 +84,7 @@ public class PlayerInput {
 	public void Update(float elapsedTime)
 	{
 		// 入力情報を追加
+		highJumpKey = HighJumpKey.None;
 		if(Input.GetButton(InputName.Jump))
 		{
 			highJumpKey |= HighJumpKey.Main;
@@ -75,6 +95,8 @@ public class PlayerInput {
 			highJumpKey |= HighJumpKey.Sub;
 		}
 
+		Debug.Log(highJumpKey);
+
 		// 受付時間のうちに両方のボタンが入力されている
 		if (highJumpInputCount < highJumpInputTime && !highJump)
 		{
@@ -82,9 +104,9 @@ public class PlayerInput {
 			{
 				highJump = true;
 			}
-			else if(highJumpKey == HighJumpKey.None)
+			else
 			{
-				highJumpInputCount = 0.0f;
+				highJump = false;
 			}
 		}
 		else
@@ -92,9 +114,13 @@ public class PlayerInput {
 			highJump = false;
 		}
 
-		// ハイジャンプボタンのどちらかが押されていればカウントしていく
-		if (highJumpKey != HighJumpKey.None)
+		if (highJumpKey == HighJumpKey.None)
 		{
+			highJumpInputCount = 0.0f;
+		}
+		else if (highJumpKey != HighJumpKey.None)
+		{
+			// ハイジャンプボタンのどちらかが押されていればカウントしていく
 			highJumpInputCount += elapsedTime;
 		}
 		else
