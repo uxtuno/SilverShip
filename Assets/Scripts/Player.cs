@@ -24,6 +24,15 @@ namespace Uxtuno
 		private int speedId;
 		private int isJumpId;
 
+		private enum Jump
+		{
+			None,
+			MainButton,
+			SubButton,
+		}
+
+		private Jump jump = Jump.None;
+		private float highJumpInputTime = 0.3f; // ハイジャンプ入力猶予時間
 
 		private Vector3 _moveVector = Vector3.zero;
 
@@ -56,11 +65,11 @@ namespace Uxtuno
 		void Update()
 		{
 			Move(); // プレイヤーの移動など
-			if(cameraController.targetToDistance < 1.0f)
+			if (cameraController.targetToDistance < 1.0f)
 			{
 				isShow = false;
 			}
-			else if(!isShow)
+			else if (!isShow)
 			{
 				isShow = true;
 			}
@@ -68,6 +77,9 @@ namespace Uxtuno
 
 		void Move()
 		{
+
+
+
 			Vector3 direction = Vector3.zero;
 			// directionは進行方向を表すので上下入力はzに格納
 			direction.x = Input.GetAxisRaw(InputName.Horizontal);

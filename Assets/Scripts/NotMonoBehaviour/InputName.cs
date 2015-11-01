@@ -32,6 +32,11 @@ public class InputName
 	public const string @Jump = "Jump";
 
 	/// <summary>
+	/// return "HighJump"
+ 	/// </summary>
+	public const string @HighJump = "HighJump";
+
+	/// <summary>
 	/// return "Mouse X"
  	/// </summary>
 	public const string @MouseX = "Mouse X";
@@ -67,26 +72,34 @@ public class InputName
 	public const string @CameraY = "CameraY";
 
 	/// <summary>
+	/// return "Atack"
+ 	/// </summary>
+	public const string @Atack = "Atack";
+
+	/// <summary>
 	/// <para>0. "Horizontal"</para>
 	/// <para>1. "Vertical"</para>
 	/// <para>2. "Fire1"</para>
 	/// <para>3. "Fire2"</para>
 	/// <para>4. "Fire3"</para>
 	/// <para>5. "Jump"</para>
-	/// <para>6. "Mouse X"</para>
-	/// <para>7. "Mouse Y"</para>
-	/// <para>8. "Mouse ScrollWheel"</para>
-	/// <para>9. "Horizontal"</para>
-	/// <para>10. "Vertical"</para>
-	/// <para>11. "Fire1"</para>
-	/// <para>12. "Fire2"</para>
-	/// <para>13. "Fire3"</para>
-	/// <para>14. "Jump"</para>
-	/// <para>15. "Submit"</para>
-	/// <para>16. "Submit"</para>
-	/// <para>17. "Cancel"</para>
-	/// <para>18. "CameraX"</para>
-	/// <para>19. "CameraY"</para>
+	/// <para>6. "Jump"</para>
+	/// <para>7. "HighJump"</para>
+	/// <para>8. "Mouse X"</para>
+	/// <para>9. "Mouse Y"</para>
+	/// <para>10. "Mouse ScrollWheel"</para>
+	/// <para>11. "Horizontal"</para>
+	/// <para>12. "Vertical"</para>
+	/// <para>13. "Fire1"</para>
+	/// <para>14. "Fire2"</para>
+	/// <para>15. "Fire3"</para>
+	/// <para>16. "Jump"</para>
+	/// <para>17. "Submit"</para>
+	/// <para>18. "Submit"</para>
+	/// <para>19. "Cancel"</para>
+	/// <para>20. "CameraX"</para>
+	/// <para>21. "CameraY"</para>
+	/// <para>22. "Atack"</para>
 	/// </summary>
-	public static readonly string[] names = new string[]{"Horizontal","Vertical","Fire1","Fire2","Fire3","Jump","Mouse X","Mouse Y","Mouse ScrollWheel","Horizontal","Vertical","Fire1","Fire2","Fire3","Jump","Submit","Submit","Cancel","CameraX","CameraY"};
+	public static readonly string[] names = new string[]{"Horizontal","Vertical","Fire1","Fire2","Fire3","Jump","Jump","HighJump","Mouse X","Mouse Y","Mouse ScrollWheel","Horizontal","Vertical","Fire1","Fire2","Fire3","Jump","Submit","Submit","Cancel","CameraX","CameraY","Atack"};
 }
