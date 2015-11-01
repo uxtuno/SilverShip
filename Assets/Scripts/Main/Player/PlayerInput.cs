@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PlayerInput {
-	private PlayerInput(){ }
+public class PlayerInput
+{
+	private PlayerInput() { }
 	private static PlayerInput _instance;
 	/// <summary>
 	/// 唯一のインスタンスを返す
@@ -11,7 +12,7 @@ public class PlayerInput {
 	{
 		get
 		{
-			if(_instance == null)
+			if (_instance == null)
 			{
 				_instance = new PlayerInput();
 			}
@@ -20,112 +21,83 @@ public class PlayerInput {
 		}
 	}
 
-
-	public float horizontal
-	{
-		get { return Input.GetAxis(InputName.Horizontal); }
-	}
-
-	public float vertical {
-		get { return Input.GetAxis(InputName.Vertical); }
-	}
+	/// <summary>
+	/// 水平方向の入力
+	/// </summary>
+	public float horizontal { get; private set; }
 
 	/// <summary>
-	/// カメラ回転入力
+	/// 垂直方向の入力
 	/// </summary>
-    public Vector2 cameraRotation
-	{
-		get
-		{
-			Vector2 rotationInput = Vector2.zero;
-
-			rotationInput.x = Input.GetAxisRaw(InputName.CameraX);
-			rotationInput.y = Input.GetAxisRaw(InputName.CameraY);
-			if (Input.GetMouseButton(1))
-			{
-				rotationInput = Camera.main.ScreenToViewportPoint(Input.mousePosition);
-				// 中央を(0, 0)にする
-				rotationInput.x -= 0.5f;
-				rotationInput.y -= 0.5f;
-			}
-			
-			return rotationInput;
-		}
-	}
+	public float vertical { get; private set; }
 
 	/// <summary>
-	/// ハイジャンプ入力には二つのキーの同時押しが必要
-	/// そのためのキーそれぞれを列挙体で表す。
-	/// 現在はハイジャンプ限定の仕組みだが、いずれ汎用的な処理にするべき
+	/// カメラの水平方向入力
 	/// </summary>
-	public enum HighJumpKey
-	{
-		None,
-		Main,
-		Sub,
-		All = Main | Sub,
-	}
+	public float cameraHorizontal { get; private set; }
 
-	private HighJumpKey highJumpKey = HighJumpKey.None;
-	private float highJumpInputTime = 0.5f;
-	private float highJumpInputCount = 0.0f;
+	/// <summary>
+	/// カメラの垂直方向入力
+	/// </summary>
+	public float cameraVertical { get; private set; }
 
-	public bool jump
-	{
-		get { return Input.GetButtonDown(InputName.Jump); }
-	}
-
-	public bool highJump { get; private set; }
+	/// <summary>
+	/// 攻撃ボタン
+	/// </summary>
 	public bool atack { get; private set; }
 
 	/// <summary>
+	/// ジャンプボタン
+	/// </summary>
+	public bool jump { get; private set; }
+
+	/// <summary>
+	/// 結界発動ボタン
+	/// </summary>
+	public bool barrier { get; private set; }
+
+	/// <summary>
+	/// アイテム入手ボタン
+	/// </summary>
+	public bool itemGet { get; private set; }
+
+	/// <summary>
 	/// プレイヤー入力情報更新
+	/// GameManagerが毎フレーム呼ぶこと
 	/// </summary>
 	public void Update(float elapsedTime)
 	{
-		// 入力情報を追加
-		highJumpKey = HighJumpKey.None;
-		if(Input.GetButton(InputName.Jump))
+		// プレイヤーの移動入力
+		horizontal = Input.GetAxisRaw(InputName.Horizontal);
+		vertical = Input.GetAxisRaw(InputName.Vertical);
+
+		// カメラ回転入力(-1 ~ 1)
+		cameraHorizontal = Input.GetAxisRaw(InputName.CameraX);
+		cameraVertical = Input.GetAxisRaw(InputName.CameraY);
+
+		// 微小な値を無視
+        if (Mathf.Abs(cameraHorizontal) < 0.05f)
+			cameraHorizontal = 0.0f;
+		if (Mathf.Abs(cameraVertical) < 0.1f)
+			cameraVertical = 0.0f;
+
+		// 画面クリック時のカメラ回転
+		if (Input.GetMouseButton(1))
 		{
-			highJumpKey |= HighJumpKey.Main;
+			Vector3 rotationInput = Camera.main.ScreenToViewportPoint(Input.mousePosition);
+			// 中央を(0, 0)にする
+			rotationInput.x -= 0.5f;
+			rotationInput.y -= 0.5f;
+			rotationInput *= 2.0f;
+
+			cameraHorizontal = rotationInput.x;
+			cameraVertical = rotationInput.y;
 		}
 
-		if(Input.GetButton(InputName.HighJump))
-		{
-			highJumpKey |= HighJumpKey.Sub;
-		}
-
-		Debug.Log(highJumpKey);
-
-		// 受付時間のうちに両方のボタンが入力されている
-		if (highJumpInputCount < highJumpInputTime && !highJump)
-		{
-			if (highJumpKey == HighJumpKey.All)
-			{
-				highJump = true;
-			}
-			else
-			{
-				highJump = false;
-			}
-		}
-		else
-		{
-			highJump = false;
-		}
-
-		if (highJumpKey == HighJumpKey.None)
-		{
-			highJumpInputCount = 0.0f;
-		}
-		else if (highJumpKey != HighJumpKey.None)
-		{
-			// ハイジャンプボタンのどちらかが押されていればカウントしていく
-			highJumpInputCount += elapsedTime;
-		}
-		else
-		{
-			highJumpInputCount = 0.0f;
-		}
+		// ゲームコントローラのABXY
+		atack = Input.GetButtonDown(InputName.Atack);
+		jump = Input.GetButtonDown(InputName.Jump);
+		barrier = Input.GetButtonDown(InputName.Barrier);
+		itemGet = Input.GetButtonDown(InputName.ItemGet);
 	}
 }

@@ -40,7 +40,9 @@ namespace Uxtuno
 			}
 
 			PlayerInput input = PlayerInput.instance;
-			Vector3 position = input.cameraRotation;
+			Vector3 position = Vector3.zero;
+			position.x = input.cameraHorizontal;
+			position.y = input.cameraVertical;
 
 			//if (Input.GetMouseButton(1))
 			//{
@@ -61,6 +63,7 @@ namespace Uxtuno
 			//	}
 			//}
 
+			Debug.Log(position.x);
 			cameraController.CameraMove(position.x * horizontalRotationSpeed * Time.deltaTime, position.y * verticaltalRotationSpeed * Time.deltaTime);
 		}
 	}

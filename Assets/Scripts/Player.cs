@@ -57,7 +57,7 @@ namespace Uxtuno
 		void Update()
 		{
 			Move(); // プレイヤーの移動など
-			if (cameraController.targetToDistance < 1.0f)
+			if (cameraController.targetToDistance < 0.2f)
 			{
 				isShow = false;
 			}
@@ -115,7 +115,7 @@ namespace Uxtuno
 			{
 				// ジャンプさせる
 				PlayerInput input = PlayerInput.instance;
-				if (input.highJump && !animator.GetBool(isJumpId))
+				if (input.jump && !animator.GetBool(isJumpId))
 				{
 					jumpVY = jumpPower;
 					animator.SetBool(isJumpId, true);
