@@ -64,7 +64,6 @@ namespace Uxtuno
 			radius = this.GetSafeComponent<SphereCollider>().radius;
 
 			//Player player = GameManager.instance.player;
-
 		}
 
 		void LateUpdate()
@@ -87,13 +86,13 @@ namespace Uxtuno
 						if (hit.transform == overlap)
 						{
 							// 壁にぶつかったのでカメラの位置を壁の手前まで近づける
-							targetToDistance = hit.distance - radius;
+							targetToDistance = hit.distance - radius * 0.2f;
 						}
 					}
 				}
 			}
 			Vector3 newPosition = target.position - cameraTransform.forward * targetToDistance;
-			cameraTransform.position = Vector3.Lerp(cameraTransform.position, newPosition, 0.5f);
+			cameraTransform.position = Vector3.Lerp(cameraTransform.position, newPosition, 1f);
 		}
 
 		public void CameraMove(float vx, float vy)
@@ -104,7 +103,7 @@ namespace Uxtuno
 			}
 			Vector3 angles = newRotation.eulerAngles;
 
-			angles.x += -vy;
+			angles.x -= vy;
 			if (angles.x > 180.0f)
 			{
 				angles.x -= 360.0f;

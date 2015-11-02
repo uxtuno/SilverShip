@@ -39,46 +39,32 @@ namespace Uxtuno
 				isShow = true;
 			}
 
-			if (Input.GetMouseButtonDown(1))
-			{
-				beginCameraDragPosition = Camera.main.ScreenToViewportPoint(Input.mousePosition);
-				// 中央を(0, 0)にする
-				beginCameraDragPosition.x -= 0.5f;
-				beginCameraDragPosition.y -= 0.5f;
-			}
-
+			PlayerInput input = PlayerInput.instance;
 			Vector3 position = Vector3.zero;
-			position.x = Input.GetAxisRaw(InputName.CameraX);
-			position.y = Input.GetAxisRaw(InputName.CameraY);
-			Debug.Log(position);
+			position.x = input.cameraHorizontal;
+			position.y = input.cameraVertical;
 
-			if (Input.GetMouseButton(1))
-			{
-				position = Camera.main.ScreenToViewportPoint(Input.mousePosition);
-				// 中央を(0, 0)にする
-				position.x -= 0.5f;
-				position.y -= 0.5f;
-				position *= cameraDragAmplification; // 移動量を増幅させる
-				if (Mathf.Abs(position.y) < verticalRotationThreshold)
-				{
-					position.y = 0.0f;
-				}
+			//if (Input.GetMouseButton(1))
+			//{
+			//	position *= cameraDragAmplification; // 移動量を増幅させる
+			//	if (Mathf.Abs(position.y) < verticalRotationThreshold)
+			//	{
+			//		position.y = 0.0f;
+			//	}
 
-				if (Mathf.Abs(position.x) < horizontalRotationThreshold)
-				{
-					position.x = 0.0f;
-				}
+			//	if (Mathf.Abs(position.x) < horizontalRotationThreshold)
+			//	{
+			//		position.x = 0.0f;
+			//	}
 
-				if (position.sqrMagnitude > 1.0f)
-				{
-					position.Normalize();
-				}
+			//	if (position.sqrMagnitude > 1.0f)
+			//	{
+			//		position.Normalize();
+			//	}
+			//}
 
-			}
-
+			Debug.Log(position.x);
 			cameraController.CameraMove(position.x * horizontalRotationSpeed * Time.deltaTime, position.y * verticaltalRotationSpeed * Time.deltaTime);
-
-			
 		}
 	}
 }
