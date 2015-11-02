@@ -37,6 +37,22 @@ namespace Uxtuno
 			private set { _moveVector = value; }
 		}
 
+		// プレイヤーの状態
+		private enum State
+		{
+			None,
+			Normal, // 待機、移動
+			JumpPossible, // ジャンプ入力可能状態
+			Jumping, // ジャンプ中
+			HighJumping, // ハイジャンプ中
+			Fall, // 落下中
+			Attack, // 攻撃状態
+		}
+
+		private State currentState; // 現在の状態
+		private State oldState; // 前のフレームでの状態
+		private int count; // 各状態で使う共通のカウンタ
+
 		void Start()
 		{
 			// 指定の高さまで飛ぶための初速を計算
@@ -51,12 +67,33 @@ namespace Uxtuno
 			speedId = Animator.StringToHash("Speed");
 			isJumpId = Animator.StringToHash("IsJump");
 
+			currentState = State.Normal;
+			oldState = currentState;
 			animator.SetFloat(speedId, maxSpeed);
 		}
 
 		void Update()
 		{
-			Move(); // プレイヤーの移動など
+			//Move(); // プレイヤーの移動など
+
+			switch(currentState)
+			{
+				case State.Normal:
+					Normal();
+					break;
+				case State.JumpPossible:
+					jumpPossibe();
+                    break;
+				case State.Jumping:
+					break;
+				case State.HighJumping:
+					break;
+				case State.Fall:
+					break;
+				case State.Attack:
+					break;
+			}
+
 			if (cameraController.targetToDistance < 0.2f)
 			{
 				isShow = false;
@@ -65,6 +102,58 @@ namespace Uxtuno
 			{
 				isShow = true;
 			}
+		}
+
+		private void Normal()
+		{
+			PlayerInput input = PlayerInput.instance;
+			Vector3 direction = Vector3.zero;
+			// directionは進行方向を表すので上下入力はzに格納
+			direction.x = Input.GetAxisRaw(InputName.Horizontal);
+			direction.z = Input.GetAxisRaw(InputName.Vertical);
+			direction.Normalize();
+
+			float speed;
+			if (Input.GetKey(KeyCode.LeftShift))
+			{
+				speed = minSpeed;
+			}
+			else
+			{
+				speed = maxSpeed;
+			}
+
+			moveVector = Vector3.zero;
+			if (direction != Vector3.zero)
+			{
+				//float distance = (cameraController.transform.position - cameraController.cameraTransform.position).magnitude;
+
+				Vector3 rotateAngles = Vector3.zero;
+				// カメラの方向を加味して進行方向を計算
+				direction = cameraController.cameraTransform.rotation * direction;
+
+				// xz平面の進行方向から、Y軸回転角を得る
+				rotateAngles.y = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+				playerMesh.eulerAngles = rotateAngles;
+
+				moveVector = playerMesh.forward * speed;
+				animator.SetFloat(speedId, speed);
+			}
+			else
+			{
+				animator.SetFloat(speedId, 0.0f); // 待機アニメーション
+			}
+
+			if (!characterController.isGrounded)
+			{
+				// ジャンプ可能状態へ移行
+				currentState = State.JumpPossible;
+			}
+		}
+
+		private void jumpPossibe()
+		{
+
 		}
 
 		void Move()

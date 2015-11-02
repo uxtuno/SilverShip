@@ -44,7 +44,7 @@ public class PlayerInput
 	/// <summary>
 	/// 攻撃ボタン
 	/// </summary>
-	public bool atack { get; private set; }
+	public bool attack { get; private set; }
 
 	/// <summary>
 	/// ジャンプボタン
@@ -78,7 +78,7 @@ public class PlayerInput
 		// 微小な値を無視
         if (Mathf.Abs(cameraHorizontal) < 0.05f)
 			cameraHorizontal = 0.0f;
-		if (Mathf.Abs(cameraVertical) < 0.1f)
+		if (Mathf.Abs(cameraVertical) < 0.05f)
 			cameraVertical = 0.0f;
 
 		// 画面クリック時のカメラ回転
@@ -95,7 +95,7 @@ public class PlayerInput
 		}
 
 		// ゲームコントローラのABXY
-		atack = Input.GetButtonDown(InputName.Atack);
+		attack = Input.GetButtonDown(InputName.Atack);
 		jump = Input.GetButtonDown(InputName.Jump);
 		barrier = Input.GetButtonDown(InputName.Barrier);
 		itemGet = Input.GetButtonDown(InputName.ItemGet);
