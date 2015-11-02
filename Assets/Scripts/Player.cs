@@ -49,16 +49,21 @@ namespace Uxtuno
 			None,
 			Normal, // 待機、移動
 			Depression, // 踏み込み中
-            JumpPossible, // ジャンプ入力可能状態
+			JumpPossible, // ジャンプ入力可能状態
 			Jumping, // ジャンプ中
 			HighJumping, // ハイジャンプ中
 			Fall, // 落下中
 			Attack, // 攻撃状態
+			TwoJump, // 二段ジャンプ
 		}
 
 		private State currentState; // 現在の状態
 		private State oldState; // 前のフレームでの状態
 		private int count; // 各状態で使う共通のカウンタ
+
+		private float twoJumpForce;
+		private float twoJumpAttenuation = 0.05f;
+		private Vector3 twoJumpDirection;
 
 		void Start()
 		{
@@ -85,7 +90,8 @@ namespace Uxtuno
 			//Move(); // プレイヤーの移動など
 			moveVector = Vector3.zero;
 
-			do {
+			do
+			{
 				oldState = currentState;
 				switch (currentState)
 				{
@@ -97,7 +103,7 @@ namespace Uxtuno
 						break;
 					case State.Depression:
 						Depression();
-                        break;
+						break;
 					case State.Jumping:
 						Jumping();
 						break;
@@ -109,9 +115,12 @@ namespace Uxtuno
 						break;
 					case State.Attack:
 						break;
+					case State.TwoJump:
+						TwoJump();
+						break;
 				}
 
-				if(oldState != currentState)
+				if (oldState != currentState)
 				{
 					count = 0;
 				}
@@ -252,10 +261,10 @@ namespace Uxtuno
 		private void Depression()
 		{
 			PlayerInput input = PlayerInput.instance;
-			if(count < 6)
+			if (count < 6)
 			{
 				++count;
-				if(input.attack)
+				if (input.attack)
 				{
 					jumpVY = highJumpPower;
 					currentState = State.HighJumping;
@@ -270,7 +279,32 @@ namespace Uxtuno
 
 		private void Jumping()
 		{
+			PlayerInput input = PlayerInput.instance;
 			Vector3 direction = Vector3.zero;
+			if (input.jump)
+			{
+				// directionは進行方向を表すので上下入力はzに格納
+				direction.x = Input.GetAxisRaw(InputName.Horizontal);
+				direction.z = Input.GetAxisRaw(InputName.Vertical);
+				direction.Normalize();
+				twoJumpDirection = cameraController.cameraTransform.rotation * direction;
+				//// xz平面の進行方向から、Y軸回転角を得る
+				Vector3 angles = playerMesh.eulerAngles;
+				angles.y = Mathf.Atan2(twoJumpDirection.x, twoJumpDirection.z) * Mathf.Rad2Deg;
+				 
+				playerMesh.eulerAngles = angles;
+
+				if(twoJumpDirection == Vector3.zero)
+				{
+					twoJumpDirection = -playerMesh.forward;
+					twoJumpDirection.y = 0.0f;
+				}
+
+				twoJumpForce = 15.0f;
+				currentState = State.TwoJump;
+				return;
+			}
+
 			// directionは進行方向を表すので上下入力はzに格納
 			direction.x = Input.GetAxisRaw(InputName.Horizontal);
 			direction.z = Input.GetAxisRaw(InputName.Vertical);
@@ -366,6 +400,17 @@ namespace Uxtuno
 			{
 				currentState = State.Normal;
 				jumpVY = 0.0f;
+			}
+		}
+
+		private void TwoJump()
+		{
+			moveVector = twoJumpDirection * twoJumpForce;
+			twoJumpForce -= twoJumpAttenuation;
+			if (twoJumpForce < 13.0f)
+			{
+				jumpVY = 0.0f;
+				currentState = State.Fall;
 			}
 		}
 
