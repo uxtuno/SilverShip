@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Enemy
   - CameraController
+  - AttackArea
   layers:
   - Default
   - TransparentFX

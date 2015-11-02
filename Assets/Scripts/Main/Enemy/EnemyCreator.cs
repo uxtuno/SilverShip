@@ -18,7 +18,7 @@ namespace Kuvo
 		// Use this for initialization
 		void Start()
 		{
-			GameObject monsterFolder = new GameObject("Monsters");
+			GameObject enemyFolder = new GameObject("Enemies");
 			for (int i = 0; i < generateNumber; ++i)
 			{
 				float z = (Random.value * fieldDepth) - fieldDepth / 2.0f;
@@ -27,8 +27,8 @@ namespace Kuvo
 				Quaternion q = Quaternion.identity;
 				float r = Random.Range(0.0f, 360.0f);
 				q.eulerAngles = new Vector3(0.0f, r, 0.0f);
-				GameObject monster = (GameObject)Instantiate(monsterPrefab, new Vector3(x, 0.0f, z), q);
-				monster.transform.parent = monsterFolder.transform;
+				GameObject monster = (GameObject)Instantiate(monsterPrefab, new Vector3(x, 2.0f, z), q);
+				monster.transform.parent = enemyFolder.transform;
 			}
 		}
 

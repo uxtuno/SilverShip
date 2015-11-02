@@ -7,9 +7,50 @@ namespace Kuvo
 	/// <summary>
 	/// 敵の共通動作を規定した抽象クラス
 	/// </summary>
-	abstract public class Enemy : MyMonoBehaviour
+	abstract public class Enemy : Actor
 	{
 		private CameraController cameraController;
+
+		/// <summary>
+		/// エネミーを目視することができる最も近い距離
+		/// (エネミーの大きさに応じて変更する必要がある)
+		/// </summary>
+		abstract protected float sight { get; set; }
+
+		private GameObject _shortRangeAttackAreaObject;   // attackAreaObjectプロパティの実体
+
+		/// <summary>
+		/// 攻撃判定用のゲームオブジェクトを取得する
+		/// </summary>
+		protected GameObject shortRangeAttackAreaObject
+		{
+			get
+			{
+				if (!_shortRangeAttackAreaObject)
+				{
+
+					foreach (GameObject child in gameObject.GetChildren(true))
+					{
+						if (child.tag == TagName.AttackArea)
+						{
+							_shortRangeAttackAreaObject = child;
+						}
+					}
+					
+					if(!_shortRangeAttackAreaObject.GetComponent<AttackArea>())
+					{
+						_shortRangeAttackAreaObject.AddComponent<AttackArea>();
+					}
+
+					if (!_shortRangeAttackAreaObject)
+					{
+						Debug.LogError("攻撃判定用のゲームオブジェクトが見つかりませんでした。");
+					}
+				}
+
+				return _shortRangeAttackAreaObject;
+			}
+		}
 
 		protected virtual void Start()
 		{
@@ -18,9 +59,9 @@ namespace Kuvo
 
 		protected virtual void Update()
 		{
-			// エネミーとカメラの距離に応じて描画状態を切り替える
+			// カメラとの距離に応じて描画状態を切り替える
 			Vector3 cameraToVector = cameraController.cameraTransform.position - transform.position;
-			if (cameraToVector.magnitude < 2.0f)
+			if (cameraToVector.magnitude < sight)
 			{
 				isShow = false;
 			}
@@ -33,6 +74,6 @@ namespace Kuvo
 		/// <summary>
 		/// 近接攻撃
 		/// </summary>
-		abstract public void ShortRangeAttack();
+		abstract public IEnumerator ShortRangeAttack();
 	}
 }
