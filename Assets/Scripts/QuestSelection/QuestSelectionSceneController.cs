@@ -14,7 +14,7 @@ namespace Kuvo
 		private QuestSelectionSoundCollector soundCollector { get; set; }
 		private bool isFirstSelected { get; set; }
 
-		private void Awake()
+		private void Start()
 		{
 			oldSelectedGameObject = EventSystem.current.currentSelectedGameObject;
 			soundCollector = gameObject.AddComponent<QuestSelectionSoundCollector>();
