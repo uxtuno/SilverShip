@@ -63,7 +63,6 @@ namespace Uxtuno
 			//	}
 			//}
 
-			Debug.Log(position.x);
 			cameraController.CameraMove(position.x * horizontalRotationSpeed * Time.deltaTime, position.y * verticaltalRotationSpeed * Time.deltaTime);
 		}
 	}
