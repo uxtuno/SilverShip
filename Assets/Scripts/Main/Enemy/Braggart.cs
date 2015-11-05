@@ -6,7 +6,7 @@ namespace Kuvo
 	/// <summary>
 	/// 天狗クラス
 	/// </summary>
-	public class Braggart : Enemy
+	public partial class Braggart : Enemy
 	{
 		private enum FlyState
 		{
@@ -14,6 +14,9 @@ namespace Kuvo
 			Down,
 		}
 
+
+		[SerializeField]
+		private GameObject bulletPrefab = null;
 
 		/// <summary>
 		/// 天狗を目視することができる最も近い距離
@@ -36,6 +39,13 @@ namespace Kuvo
 			StartCoroutine(Flying(0.5f));
 		}
 
+		protected override void Update()
+		{
+			if(Input.GetKey(KeyCode.B))
+			{
+				LongRengeAttack();
+			}
+		}
 
 		/// <summary>
 		/// 近接攻撃

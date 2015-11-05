@@ -17,7 +17,7 @@ namespace Kuvo
 		/// </summary>
 		abstract protected float sight { get; set; }
 
-		private GameObject _shortRangeAttackAreaObject;   // attackAreaObjectプロパティの実体
+		private GameObject _shortRangeAttackAreaObject;   // shortRangeAttackAreaObjectプロパティの実体
 
 		/// <summary>
 		/// 攻撃判定用のゲームオブジェクトを取得する
@@ -28,7 +28,6 @@ namespace Kuvo
 			{
 				if (!_shortRangeAttackAreaObject)
 				{
-
 					foreach (GameObject child in gameObject.GetChildren(true))
 					{
 						if (child.tag == TagName.AttackArea)

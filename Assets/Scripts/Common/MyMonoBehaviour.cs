@@ -8,7 +8,7 @@ namespace Uxtuno
 	/// </summary>
 	public class MyMonoBehaviour : MonoBehaviour
 	{
-		private Renderer _renderer; // rendererプロパティの実態
+		private Renderer _renderer; // rendererプロパティの実体
 
 		/// <summary>
 		/// 自分自身のRendererを取得する
@@ -26,7 +26,7 @@ namespace Uxtuno
 			}
 		}
 
-		private Collider _collider; // colliderプロパティの実態
+		private Collider _collider; // colliderプロパティの実体
 
 		/// <summary>
 		/// 自分自身のcollideを取得する
@@ -44,7 +44,7 @@ namespace Uxtuno
 			}
 		}
 
-		private Rigidbody _rigidbody;   // rigidbodyプロパティの実態
+		private Rigidbody _rigidbody;   // rigidbodyプロパティの実体
 
 		/// <summary>
 		/// 自分自身のrigidbodyを取得する
