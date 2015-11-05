@@ -13,8 +13,8 @@ namespace Uxtuno
 	{
 		[Tooltip("歩く速さ(単位:m/s)"), SerializeField]
 		private float maxSpeed = 5.0f; // 移動速度
-		[Tooltip("走る速さ(単位:m/s)"), SerializeField]
-		private float minSpeed = 1.0f; // 移動速度(ダッシュ時)
+		//[Tooltip("走る速さ(単位:m/s)"), SerializeField]
+		//private float minSpeed = 1.0f; // 移動速度(ダッシュ時)
 		[Tooltip("ジャンプの高さ(単位:m)"), SerializeField]
 		private float jumpHeight = 2.0f;
 		[Tooltip("ハイジャンプの高さ(単位:m)"), SerializeField]
@@ -286,16 +286,8 @@ namespace Uxtuno
 			float speed = 3.0f;
 			if (direction != Vector3.zero)
 			{
-				//float distance = (cameraController.transform.position - cameraController.cameraTransform.position).magnitude;
-
-				Vector3 rotateAngles = Vector3.zero;
 				// カメラの方向を加味して進行方向を計算
 				direction = cameraController.cameraTransform.rotation * direction;
-
-				//// xz平面の進行方向から、Y軸回転角を得る
-				//rotateAngles.y = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
-				//playerMesh.eulerAngles = rotateAngles;
-
 				moveVector = direction * speed;
 			}
 

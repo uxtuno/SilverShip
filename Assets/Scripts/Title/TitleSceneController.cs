@@ -9,7 +9,7 @@ namespace Kuvo
 	public class TitleSceneController : MonoBehaviour
 	{
 		[SerializeField]
-		private GameObject flashingGameObject;          // 点滅対象のゲームオブジェクト
+		private GameObject flashingGameObject = null;          // 点滅対象のゲームオブジェクト
 		[SerializeField]
 		private string nextSceneName = string.Empty;    // 遷移先のシーン名
 		private TitleSoundCollector soundCollector { get; set; }
