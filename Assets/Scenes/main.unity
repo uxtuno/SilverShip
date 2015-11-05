@@ -4086,7 +4086,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 6
-  minSpeed: 2
   jumpHeight: 5
   highJumpHeight: 10
 --- !u!143 &931185110
@@ -4120,9 +4119,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   horizontalRotationSpeed: 100
   verticaltalRotationSpeed: 40
-  horizontalRotationThreshold: .200000003
-  verticalRotationThreshold: .200000003
-  cameraDragAmplification: 4
 --- !u!1 &950410643
 GameObject:
   m_ObjectHideFlags: 0
