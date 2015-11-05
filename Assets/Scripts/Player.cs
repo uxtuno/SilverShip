@@ -63,7 +63,7 @@ namespace Uxtuno
 		private float count; // 各状態で使う共通のカウンタ
 
 		private float twoJumpForce;
-		private float twoJumpAttenuation = 0.05f;
+		private float twoJumpAttenuation = 0.04f;
 		private Vector3 twoJumpDirection;
 
 		void Start()
@@ -134,7 +134,7 @@ namespace Uxtuno
 
 				// プレイヤーが移動した時のY軸方向カメラ回転量を計算
 				float rotateAngleY = Mathf.Atan2(now.x * old.z - now.z * old.x, now.x * old.x + now.z * old.z) * Mathf.Rad2Deg / 2.0f;
-				cameraController.CameraMove(rotateAngleY, 0.0f);
+				//cameraController.CameraMove(rotateAngleY, 0.0f);
 			}
 
 			if (cameraController.targetToDistance < 0.2f)
@@ -284,11 +284,18 @@ namespace Uxtuno
 			direction.Normalize();
 
 			float speed = 3.0f;
+			moveVector = twoJumpDirection * twoJumpForce;
+			twoJumpForce -= twoJumpAttenuation * 6.0f;
+			if(twoJumpForce < 0.0f)
+			{
+				twoJumpForce = 0.0f;
+			}
+
 			if (direction != Vector3.zero)
 			{
 				// カメラの方向を加味して進行方向を計算
 				direction = cameraController.cameraTransform.rotation * direction;
-				moveVector = direction * speed;
+				moveVector += direction * speed;
 			}
 
 			Gravity();
@@ -303,10 +310,10 @@ namespace Uxtuno
 		{
 			moveVector = twoJumpDirection * twoJumpForce;
 			twoJumpForce -= twoJumpAttenuation;
-			if (twoJumpForce < 13.0f)
+			if (twoJumpForce < 13.0f || !Input.GetButton(InputName.Jump))
 			{
 				jumpVY = 0.0f;
-				currentState = State.Fall;
+				ChangeState(State.Fall);
 			}
 		}
 
@@ -346,6 +353,7 @@ namespace Uxtuno
 			{
 				case State.Normal:
 					animator.SetBool(isJumpId, false);
+					twoJumpForce = 0.0f;
 					break;
 				case State.Depression:
 					animator.SetBool(isJumpId, true);

@@ -4,7 +4,7 @@ using System.Collections;
 public class PlayerInput
 {
 	private PlayerInput() { }
-	private static PlayerInput _instance;
+	private static PlayerInput _instance; // 唯一のインスタンス
 	/// <summary>
 	/// 唯一のインスタンスを返す
 	/// </summary>
@@ -76,9 +76,9 @@ public class PlayerInput
 		cameraVertical = Input.GetAxisRaw(InputName.CameraY);
 
 		// 微小な値を無視
-        if (Mathf.Abs(cameraHorizontal) < 0.05f)
+        if (Mathf.Abs(cameraHorizontal) < 0.2f)
 			cameraHorizontal = 0.0f;
-		if (Mathf.Abs(cameraVertical) < 0.05f)
+		if (Mathf.Abs(cameraVertical) < 0.2f)
 			cameraVertical = 0.0f;
 
 		// 画面クリック時のカメラ回転
