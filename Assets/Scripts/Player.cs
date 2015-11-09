@@ -19,6 +19,11 @@ namespace Uxtuno
 		private float jumpHeight = 2.0f;
 		[Tooltip("ハイジャンプの高さ(単位:m)"), SerializeField]
 		private float highJumpHeight = 10.0f;
+		[Tooltip("水平方向のカメラ移動速度"), SerializeField]
+		private float horizontalRotationSpeed = 100.0f; // 水平方向へのカメラ移動速度
+		[Tooltip("垂直方向のカメラ移動速度"), SerializeField]
+		private float verticaltalRotationSpeed = 40.0f; // 垂直方向へのカメラ移動速度
+		private const float near = 0.2f; // カメラに映る最小距離
 
 		private float jumpVY = 0.0f;
 		private float jumpPower;
@@ -74,6 +79,11 @@ namespace Uxtuno
 			characterController = GetComponent<CharacterController>();
 			characterController.detectCollisions = false;
 			cameraController = GetComponentInChildren<CameraController>();
+			if (cameraController == null)
+			{
+				Debug.LogError("プレイヤーにカメラがありません");
+			}
+
 			animator = GetComponentInChildren<Animator>(); // アニメーションをコントロールするためのAnimatorを子から取得
 			playerMesh = animator.transform; // Animatorがアタッチされているのがメッシュのはずだから
 
@@ -87,12 +97,21 @@ namespace Uxtuno
 
 			// プレイヤーの入力を管理するクラス
 			playerInput = PlayerInput.instance;
-
 			ChangeState(State.Normal);
 		}
 
 		void Update()
 		{
+			// カメラに近すぎると非表示に
+			if (cameraController.targetToDistance < near)
+			{
+				isShow = false;
+			}
+			else if (!isShow)
+			{
+				isShow = true;
+			}
+
 			//Move(); // プレイヤーの移動など
 			moveVector = Vector3.zero;
 
@@ -122,8 +141,17 @@ namespace Uxtuno
 				}
 			} while (oldState != currentState);
 
+			// カメラの回転入力
+			Vector2 cameraMove = Vector3.zero;
+			cameraMove.x = playerInput.cameraHorizontal;
+			cameraMove.y = playerInput.cameraVertical;
+
 			_moveVector.y = jumpVY;
-			if (moveVector != Vector3.zero)
+			if(cameraMove != Vector2.zero)
+			{
+				cameraController.CameraMove(cameraMove.x * horizontalRotationSpeed * Time.deltaTime, cameraMove.y * verticaltalRotationSpeed * Time.deltaTime);
+			}
+			else if (moveVector != Vector3.zero)
 			{
 				Vector3 oldCameraPosition = cameraController.cameraTransform.position;
 				// プレイヤー移動前
@@ -134,16 +162,7 @@ namespace Uxtuno
 
 				// プレイヤーが移動した時のY軸方向カメラ回転量を計算
 				float rotateAngleY = Mathf.Atan2(now.x * old.z - now.z * old.x, now.x * old.x + now.z * old.z) * Mathf.Rad2Deg / 2.0f;
-				//cameraController.CameraMove(rotateAngleY, 0.0f);
-			}
-
-			if (cameraController.targetToDistance < 0.2f)
-			{
-				isShow = false;
-			}
-			else if (!isShow)
-			{
-				isShow = true;
+				cameraController.CameraMove(rotateAngleY, 0.0f);
 			}
 		}
 
