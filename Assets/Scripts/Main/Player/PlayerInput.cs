@@ -89,6 +89,10 @@ public class PlayerInput
 			rotationInput.x -= 0.5f;
 			rotationInput.y -= 0.5f;
 			rotationInput *= 2.0f;
+			if(Mathf.Abs(rotationInput.y) < 0.5f)
+			{
+				rotationInput.y = 0.0f;
+            }
 
 			cameraHorizontal = rotationInput.x;
 			cameraVertical = rotationInput.y;

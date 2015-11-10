@@ -13,12 +13,19 @@ namespace Uxtuno
 	{
 		[Tooltip("歩く速さ(単位:m/s)"), SerializeField]
 		private float maxSpeed = 5.0f; // 移動速度
-		//[Tooltip("走る速さ(単位:m/s)"), SerializeField]
-		//private float minSpeed = 1.0f; // 移動速度(ダッシュ時)
+									   //[Tooltip("走る速さ(単位:m/s)"), SerializeField]
+									   //private float minSpeed = 1.0f; // 移動速度(ダッシュ時)
 		[Tooltip("ジャンプの高さ(単位:m)"), SerializeField]
 		private float jumpHeight = 2.0f;
 		[Tooltip("ハイジャンプの高さ(単位:m)"), SerializeField]
 		private float highJumpHeight = 10.0f;
+		[Tooltip("水平方向のカメラ移動速度"), SerializeField]
+		private float horizontalRotationSpeed = 120.0f; // 水平方向へのカメラ移動速度
+		[Tooltip("垂直方向のカメラ移動速度"), SerializeField]
+		private float verticaltalRotationSpeed = 40.0f; // 垂直方向へのカメラ移動速度
+		private const float near = 0.5f; // カメラに映る最小距離
+		private const float maxCameraRotateY = 5.0f; // プレイヤーが移動したときの最大カメラ回転量
+		private float gravityForce = 1.5f;
 
 		private float jumpVY = 0.0f;
 		private float jumpPower;
@@ -26,6 +33,7 @@ namespace Uxtuno
 
 		private CharacterController characterController;
 		private CameraController cameraController;
+		private ContainedObjects containedObjects;
 
 		private Animator animator;
 		private Transform playerMesh;
@@ -66,14 +74,29 @@ namespace Uxtuno
 		private float twoJumpAttenuation = 0.04f;
 		private Vector3 twoJumpDirection;
 
+		private Transform lockOnTarget; // ロックオン対象エネミー
+		[SerializeField]
+		private GameObject lockOnIconPrefab = null;
+		private Transform lockOnIcon = null;
+
+		[SerializeField]
+		private GameObject playerAttackEffectPrefab = null;
+		private GameObject playerAttackEffect;
+
 		void Start()
 		{
 			// 指定の高さまで飛ぶための初速を計算
-			jumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * jumpHeight);
-			highJumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * highJumpHeight);
+			jumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * gravityForce * jumpHeight);
+			highJumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * gravityForce * highJumpHeight);
 			characterController = GetComponent<CharacterController>();
 			characterController.detectCollisions = false;
 			cameraController = GetComponentInChildren<CameraController>();
+			if (cameraController == null)
+			{
+				Debug.LogError("プレイヤーにカメラがありません");
+			}
+			containedObjects = GetComponentInChildren<ContainedObjects>();
+
 			animator = GetComponentInChildren<Animator>(); // アニメーションをコントロールするためのAnimatorを子から取得
 			playerMesh = animator.transform; // Animatorがアタッチされているのがメッシュのはずだから
 
@@ -87,12 +110,21 @@ namespace Uxtuno
 
 			// プレイヤーの入力を管理するクラス
 			playerInput = PlayerInput.instance;
-
 			ChangeState(State.Normal);
 		}
 
 		void Update()
 		{
+			// カメラに近すぎると非表示に
+			if (cameraController.targetToDistance < near)
+			{
+				isShow = false;
+			}
+			else if (!isShow)
+			{
+				isShow = true;
+			}
+
 			//Move(); // プレイヤーの移動など
 			moveVector = Vector3.zero;
 
@@ -115,6 +147,7 @@ namespace Uxtuno
 						Fall();
 						break;
 					case State.Attack:
+						Attack();
 						break;
 					case State.TwoJump:
 						TwoJump();
@@ -122,6 +155,12 @@ namespace Uxtuno
 				}
 			} while (oldState != currentState);
 
+			// カメラの回転入力
+			Vector2 cameraMove = Vector3.zero;
+			cameraMove.x = playerInput.cameraHorizontal;
+			cameraMove.y = playerInput.cameraVertical;
+
+			float cameraRotateY = 0.0f; // プレイヤーが移動したときのカメラ回転量
 			_moveVector.y = jumpVY;
 			if (moveVector != Vector3.zero)
 			{
@@ -132,24 +171,77 @@ namespace Uxtuno
 				// プレイヤー移動後
 				Vector3 now = transform.position - oldCameraPosition;
 
-				// プレイヤーが移動した時のY軸方向カメラ回転量を計算
-				float rotateAngleY = Mathf.Atan2(now.x * old.z - now.z * old.x, now.x * old.x + now.z * old.z) * Mathf.Rad2Deg / 2.0f;
-				//cameraController.CameraMove(rotateAngleY, 0.0f);
+				// プレイヤーが移動した時のY軸カメラ回転量を計算
+				cameraRotateY = Mathf.Atan2(now.x * old.z - now.z * old.x, now.x * old.x + now.z * old.z) * Mathf.Rad2Deg * 0.8f;
+				cameraRotateY = Mathf.Clamp(cameraRotateY, -maxCameraRotateY, maxCameraRotateY);
+
+				float minDistance2 = 999.0f;
+				Transform tempLockOnTarget = null; // ロックオン対象候補を入れる
+				foreach (Transform enemy in containedObjects)
+				{
+					float distance2 = (transform.position - enemy.position).sqrMagnitude;
+					if (minDistance2 > distance2)
+					{
+						minDistance2 = distance2;
+						tempLockOnTarget = enemy;
+					}
+				}
+
+				// ロックオン対象が決定したので正式にロックオン
+				if (tempLockOnTarget != null && lockOnTarget != tempLockOnTarget)
+				{
+					lockOnTarget = tempLockOnTarget;
+					if(lockOnIcon == null)
+					{
+						lockOnIcon = Instantiate(lockOnIconPrefab).transform;
+					}
+					lockOnIcon.position = lockOnTarget.position;
+					print(lockOnTarget.ToString() + "をロックオンしました");
+				}
 			}
 
-			if (cameraController.targetToDistance < 0.2f)
+			float limitDistance = 6.0f;
+			limitDistance *= limitDistance;
+			// ロックオン対象から離れすぎると解除
+			if (lockOnTarget != null)
 			{
-				isShow = false;
+				if ((lockOnTarget.position - transform.position).sqrMagnitude > limitDistance)
+				{
+					lockOnTarget = null;
+					Destroy(lockOnIcon.gameObject);
+					print("ロックオンを解除しました");
+				}
 			}
-			else if (!isShow)
+
+			if (cameraMove != Vector2.zero)
 			{
-				isShow = true;
+				cameraController.CameraMove(cameraMove.x * horizontalRotationSpeed * Time.deltaTime, cameraMove.y * verticaltalRotationSpeed * Time.deltaTime);
+			}
+			else if (cameraRotateY != 0.0f)
+			{
+				cameraController.CameraMove(cameraRotateY, 0.0f);
 			}
 		}
 
 		private void Normal()
 		{
 			Gravity();
+			Vector3 direction = Vector3.zero;
+
+			if (lockOnTarget != null)
+			{
+				if (playerInput.attack)
+				{
+					Vector3 rotateAngles = Vector3.zero;
+					direction = lockOnTarget.position - transform.position;
+					// xz平面の進行方向から、Y軸回転角を得る
+					rotateAngles.y = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+					playerMesh.eulerAngles = rotateAngles;
+					ChangeState(State.Attack);
+					return;
+				}
+			}
+
 			// 数フレームは地面に着いているものとし、ジャンプ入力を有効にする
 			if (isGrounded)
 			{
@@ -182,7 +274,7 @@ namespace Uxtuno
 				}
 			}
 
-			Vector3 direction = calclateMoveDirection();
+			direction = calclateMoveDirection();
 			float speed = maxSpeed;
 			if (direction != Vector3.zero)
 			{
@@ -238,7 +330,7 @@ namespace Uxtuno
 			Vector3 direction = calclateMoveDirection();
 			if (playerInput.jump && currentState == State.Jumping && count > 0.3f)
 			{
-				if(direction != Vector3.zero)
+				if (direction != Vector3.zero)
 				{
 					//// xz平面の進行方向から、Y軸回転角を得る
 					Vector3 angles = playerMesh.eulerAngles;
@@ -262,7 +354,7 @@ namespace Uxtuno
 			count += Time.deltaTime;
 			Gravity();
 
-			if(characterController.isGrounded && count > 1.0f)
+			if (characterController.isGrounded && count > 1.0f)
 			{
 				ChangeState(State.Normal);
 				return;
@@ -286,7 +378,7 @@ namespace Uxtuno
 			float speed = 3.0f;
 			moveVector = twoJumpDirection * twoJumpForce;
 			twoJumpForce -= twoJumpAttenuation * 6.0f;
-			if(twoJumpForce < 0.0f)
+			if (twoJumpForce < 0.0f)
 			{
 				twoJumpForce = 0.0f;
 			}
@@ -317,6 +409,16 @@ namespace Uxtuno
 			}
 		}
 
+		private void Attack()
+		{
+			count += Time.deltaTime;
+			if(count > 1.0f)
+			{
+				Destroy(playerAttackEffect);
+				ChangeState(State.Normal);
+			}
+		}
+
 		/// <summary>
 		/// 入力方向とカメラの向きから進行方向ベクトルを計算
 		/// </summary>
@@ -338,7 +440,7 @@ namespace Uxtuno
 		/// </summary>
 		private void Gravity()
 		{
-			jumpVY += Physics.gravity.y * Time.deltaTime;
+			jumpVY += Physics.gravity.y * gravityForce * Time.deltaTime;
 		}
 
 		/// <summary>
@@ -365,6 +467,7 @@ namespace Uxtuno
 				case State.Fall:
 					break;
 				case State.Attack:
+					playerAttackEffect = (GameObject)Instantiate(playerAttackEffectPrefab, transform.position, playerMesh.rotation);
 					break;
 			}
 
