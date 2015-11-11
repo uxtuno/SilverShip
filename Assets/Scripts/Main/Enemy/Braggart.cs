@@ -19,6 +19,8 @@ namespace Kuvo
 		/// 天狗を目視することができる最も近い距離
 		/// </summary>
 		protected override float sight { get; set; }
+		[SerializeField]
+		private GameObject bulletPrafab = null;
 
 		public void Awake()
 		{
@@ -26,16 +28,21 @@ namespace Kuvo
 			attack = 1;
 			defence = 2;
 			sight = 1.5f;
-			shortRangeAttackAreaObject.GetComponent<AttackArea>().Set(attack, 1.0f);
 		}
 
 		protected override void Start()
 		{
 			base.Start();
 
+			shortRangeAttackAreaObject.GetComponent<AttackArea>().Set(attack, 1.0f);
+
 			StartCoroutine(Flying(0.5f));
 		}
 
+		protected override void Update()
+		{
+			base.Update();
+		}
 
 		/// <summary>
 		/// 近接攻撃
@@ -48,6 +55,26 @@ namespace Kuvo
 
 			shortRangeAttackAreaObject.SetActive(false);
 
+		}
+
+		/// <summary>
+		/// 遠距離攻撃
+		/// </summary>
+		/// <returns> 発射した弾</returns>
+		public GameObject LongRangeAttack()
+		{
+			GameObject bullet = Instantiate(bulletPrafab, transform.position, transform.rotation) as GameObject;
+			if(!bullet)
+			{
+				Destroy(bullet);
+				return null;
+			}
+			else
+			{
+				bullet.transform.SetParent(transform);
+			}
+
+			return bullet;
 		}
 
 		private IEnumerator Flying(float deflectionHeight)
