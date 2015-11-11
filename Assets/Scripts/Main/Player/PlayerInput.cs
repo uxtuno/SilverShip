@@ -62,6 +62,11 @@ public class PlayerInput
 	public bool itemGet { get; private set; }
 
 	/// <summary>
+	/// カメラを前方に向ける
+	/// </summary>
+	public bool cameraToFront { get; private set; }
+
+	/// <summary>
 	/// プレイヤー入力情報更新
 	/// GameManagerが毎フレーム呼ぶこと
 	/// </summary>
@@ -103,5 +108,7 @@ public class PlayerInput
 		jump = Input.GetButtonDown(InputName.Jump);
 		barrier = Input.GetButtonDown(InputName.Barrier);
 		itemGet = Input.GetButtonDown(InputName.ItemGet);
+
+		cameraToFront = Input.GetButtonDown(InputName.CameraToFront);
 	}
 }
