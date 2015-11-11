@@ -44,6 +44,8 @@ namespace Uxtuno
 		private Vector3 _moveVector = Vector3.zero;
 		private bool isGrounded; // 地面に着いているか
 
+		private static readonly Vector3 cameraFront = new Vector3(0.0f, -0.1f, 1.0f);
+
 		/// <summary>
 		/// 直前の移動ベクトル
 		/// </summary>
@@ -227,6 +229,11 @@ namespace Uxtuno
 		{
 			Gravity();
 			Vector3 direction = Vector3.zero;
+
+			if(playerInput.cameraToFront)
+			{
+				cameraController.SetRotation(Quaternion.LookRotation(playerMesh.rotation * cameraFront));
+			}
 
 			if (lockOnTarget != null)
 			{
@@ -468,6 +475,10 @@ namespace Uxtuno
 					break;
 				case State.Attack:
 					playerAttackEffect = (GameObject)Instantiate(playerAttackEffectPrefab, transform.position, playerMesh.rotation);
+					Vector3 position = cameraController.transform.position;
+					//position.y = cameraController.cameraTransform.position.y; // 高さは現在のカメラの高さを参照
+					
+					cameraController.SetRotation(Quaternion.LookRotation(lockOnTarget.position - position));
 					break;
 			}
 
