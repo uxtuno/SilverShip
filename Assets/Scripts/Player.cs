@@ -73,7 +73,7 @@ namespace Uxtuno
 		private float count; // 各状態で使う共通のカウンタ
 
 		private float twoJumpForce;
-		private float twoJumpAttenuation = 0.04f;
+		private float twoJumpAttenuation = 0.5f;
 		private Vector3 twoJumpDirection;
 
 		private Actor lockOnTarget; // ロックオン対象エネミー
@@ -197,6 +197,7 @@ namespace Uxtuno
 					{
 						lockOnIcon = Instantiate(lockOnIconPrefab).transform;
 					}
+					lockOnIcon.parent = lockOnTarget.transform;
 					print(lockOnTarget.ToString() + "をロックオンしました");
 					lockOnIcon.position = lockOnTarget.lockOnPoint.position;
 				}
@@ -313,9 +314,9 @@ namespace Uxtuno
 		/// </summary>
 		private void Depression()
 		{
-			if (count < 10)
+			if (count < 0.3f)
 			{
-				++count;
+				count += Time.deltaTime;
 				if (playerInput.attack)
 				{
 					jumpVY = highJumpPower;
@@ -335,15 +336,16 @@ namespace Uxtuno
 		private void Jumping()
 		{
 			Vector3 direction = calclateMoveDirection();
+			if (direction != Vector3.zero)
+			{
+				//// xz平面の進行方向から、Y軸回転角を得る
+				Vector3 angles = playerMesh.eulerAngles;
+				angles.y = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+				playerMesh.eulerAngles = angles;
+			}
+
 			if (playerInput.jump && currentState == State.Jumping && count > 0.3f)
 			{
-				if (direction != Vector3.zero)
-				{
-					//// xz平面の進行方向から、Y軸回転角を得る
-					Vector3 angles = playerMesh.eulerAngles;
-					angles.y = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
-					playerMesh.eulerAngles = angles;
-				}
 				twoJumpDirection = playerMesh.forward;
 				twoJumpForce = 15.0f;
 				ChangeState(State.TwoJump);
@@ -408,7 +410,7 @@ namespace Uxtuno
 		private void TwoJump()
 		{
 			moveVector = twoJumpDirection * twoJumpForce;
-			twoJumpForce -= twoJumpAttenuation;
+			twoJumpForce -= twoJumpAttenuation * Time.deltaTime;
 			if (twoJumpForce < 13.0f || !Input.GetButton(InputName.Jump))
 			{
 				jumpVY = 0.0f;
@@ -478,7 +480,7 @@ namespace Uxtuno
 					Vector3 position = cameraController.transform.position;
 					//position.y = cameraController.cameraTransform.position.y; // 高さは現在のカメラの高さを参照
 
-					cameraController.SetRotation(Quaternion.LookRotation(lockOnTarget.lockOnPoint.position - position));
+					//cameraController.SetRotation(Quaternion.LookRotation(lockOnTarget.lockOnPoint.position - position));
 					break;
 			}
 
