@@ -9,7 +9,7 @@ namespace Uxtuno
 	/// 状態遷移プログラミングにより、各状態の処理はすべて状態メソッドの中に記述している
 	/// それにより重複部分が多くなっているので、後でコードを見直す必要あり
 	/// </summary>
-	public class Player : MyMonoBehaviour
+	public class Player : Actor
 	{
 		[Tooltip("歩く速さ(単位:m/s)"), SerializeField]
 		private float maxSpeed = 5.0f; // 移動速度
