@@ -12,8 +12,7 @@ public class Bullet : MonoBehaviour
 	float speed = 3.0f;
 	void Start()
 	{
-		Transform target = GameManager.instance.player.transform;
-		//target.position += Vector3.up;
+		Transform target = GameManager.instance.player.lockOnPoint;
 		transform.LookAt(target);
 	}
 

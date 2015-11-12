@@ -4,9 +4,9 @@ using System.Collections;
 namespace Kuvo
 {
 	/// <summary>
-	/// 天狗クラス
+	/// 飛行する敵クラス(現在は天狗を想定)
 	/// </summary>
-	public partial class Braggart : Enemy
+	public class Braggart : Enemy
 	{
 		private enum FlyState
 		{
@@ -14,22 +14,15 @@ namespace Kuvo
 			Down,
 		}
 
-
-		[SerializeField]
-		private GameObject bulletPrefab = null;
-
 		/// <summary>
 		/// 天狗を目視することができる最も近い距離
 		/// </summary>
 		protected override float sight { get; set; }
-<<<<<<< HEAD
 		[SerializeField]
 		private GameObject bulletPrafab = null;
 		private GameObject bulletCollecter = null;
-=======
->>>>>>> feature/SilverShipKuvo
 
-		public void Awake()
+		protected override void Awake()
 		{
 			hp = 30;
 			attack = 1;
@@ -42,27 +35,24 @@ namespace Kuvo
 		{
 			base.Start();
 
-<<<<<<< HEAD
 			shortRangeAttackAreaObject.GetComponent<AttackArea>().Set(attack, 1.0f);
 			bulletCollecter = GameObject.Find("BulletCollecter");
 
-=======
->>>>>>> feature/SilverShipKuvo
 			StartCoroutine(Flying(0.5f));
 		}
 
+		float counter = 0;
 		protected override void Update()
 		{
-<<<<<<< HEAD
 			base.Update();
-			if(Input.GetKey(KeyCode.B))
+			counter += Time.deltaTime;
+			if (Input.GetKey(KeyCode.B))
 			{
-				LongRangeAttack();
-=======
-			if(Input.GetKey(KeyCode.B))
-			{
-				LongRengeAttack();
->>>>>>> feature/SilverShipKuvo
+				if (counter > 0.25)
+				{
+					StartCoroutine(LongRangeAttack());
+					counter = 0;
+				}
 			}
 		}
 
@@ -71,37 +61,76 @@ namespace Kuvo
 		/// </summary>
 		public override IEnumerator ShortRangeAttack()
 		{
+			if (currentState == ActionState.Attack)
+			{
+				yield break;
+			}
+
+			currentState = ActionState.Attack;
+
+			// ここに予備動作
+			float counter = 0;
+			while (true)
+			{
+				counter += Time.deltaTime;
+				transform.localScale *= 0.2f;
+				if (counter > 5)
+				{
+					transform.localScale = Vector3.one;
+					break;
+				}
+				yield return new WaitForEndOfFrame();
+			}
+
 			shortRangeAttackAreaObject.SetActive(true);
 
 			yield return new WaitForSeconds(1.0f);
 
 			shortRangeAttackAreaObject.SetActive(false);
-
+			currentState = ActionState.None;
 		}
 
-<<<<<<< HEAD
 		/// <summary>
 		/// 遠距離攻撃
 		/// </summary>
-		/// <returns> 発射した弾</returns>
-		public GameObject LongRangeAttack()
+		public IEnumerator LongRangeAttack()
 		{
+			if (currentState == ActionState.Attack)
+			{
+				yield break;
+			}
+
+			currentState = ActionState.Attack;
+
+			// ここに予備動作
+			float counter = 0;
+			transform.localScale *= 2.5f;
+			while (true)
+			{
+				counter += Time.deltaTime;
+				if (counter > 0.5)
+				{
+					transform.localScale = Vector3.one;
+					break;
+				}
+				yield return new WaitForEndOfFrame();
+			}
+
 			GameObject bullet = Instantiate(bulletPrafab, transform.position, transform.rotation) as GameObject;
-			if(!bullet)
+			if (!bullet)
 			{
 				Destroy(bullet);
-				return null;
+				currentState = ActionState.None;
+				yield break;
 			}
 			else
 			{
 				bullet.transform.SetParent(bulletCollecter.transform);
 			}
 
-			return bullet;
+			currentState = ActionState.None;
 		}
 
-=======
->>>>>>> feature/SilverShipKuvo
 		private IEnumerator Flying(float deflectionHeight)
 		{
 			float y = transform.localPosition.y;

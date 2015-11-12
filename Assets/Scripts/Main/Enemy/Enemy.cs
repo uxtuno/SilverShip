@@ -9,6 +9,17 @@ namespace Kuvo
 	/// </summary>
 	abstract public class Enemy : Actor
 	{
+		public enum ActionState
+		{
+			None,
+			Bone,
+			Move,
+			Attack,
+			Death,
+		}
+
+		public ActionState currentState { get; protected set; }
+
 		private CameraController cameraController;
 
 		/// <summary>
@@ -48,8 +59,18 @@ namespace Kuvo
 			}
 		}
 
+		protected virtual void Awake()
+		{
+			currentState = ActionState.Bone;
+		}
+
 		protected virtual void Start()
 		{
+			if (currentState != ActionState.Bone)
+			{
+				currentState = ActionState.Bone;
+			}
+
 			cameraController = GameObject.FindGameObjectWithTag(TagName.CameraController).GetComponent<CameraController>();
 		}
 
