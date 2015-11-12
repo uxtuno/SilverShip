@@ -12,6 +12,26 @@ public class Actor : MyMonoBehaviour
 	protected float hp { get; set; }
 	protected int attack { get; set; }
 	protected int defence { get; set; }
+	private Transform _lockOnPoint;
+
+	public Transform lockOnPoint
+	{
+		get
+		{
+			if(_lockOnPoint == null)
+			{
+				foreach(Transform child in transform)
+				{
+					if(child.tag == TagName.LockOnPoint)
+					{
+						_lockOnPoint = child;
+						break;
+					}
+				}
+			}
+			return _lockOnPoint;
+		}
+	}
 
 	/// <summary>
 	/// ダメージを与える

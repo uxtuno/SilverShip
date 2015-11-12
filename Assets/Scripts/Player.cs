@@ -76,7 +76,7 @@ namespace Uxtuno
 		private float twoJumpAttenuation = 0.04f;
 		private Vector3 twoJumpDirection;
 
-		private Transform lockOnTarget; // ロックオン対象エネミー
+		private Actor lockOnTarget; // ロックオン対象エネミー
 		[SerializeField]
 		private GameObject lockOnIconPrefab = null;
 		private Transform lockOnIcon = null;
@@ -192,13 +192,13 @@ namespace Uxtuno
 				// ロックオン対象が決定したので正式にロックオン
 				if (tempLockOnTarget != null && lockOnTarget != tempLockOnTarget)
 				{
-					lockOnTarget = tempLockOnTarget;
+					lockOnTarget = tempLockOnTarget.GetComponent<Actor>();
 					if(lockOnIcon == null)
 					{
 						lockOnIcon = Instantiate(lockOnIconPrefab).transform;
 					}
-					lockOnIcon.position = lockOnTarget.position;
 					print(lockOnTarget.ToString() + "をロックオンしました");
+					lockOnIcon.position = lockOnTarget.lockOnPoint.position;
 				}
 			}
 
@@ -207,7 +207,7 @@ namespace Uxtuno
 			// ロックオン対象から離れすぎると解除
 			if (lockOnTarget != null)
 			{
-				if ((lockOnTarget.position - transform.position).sqrMagnitude > limitDistance)
+				if ((lockOnTarget.lockOnPoint.position - transform.position).sqrMagnitude > limitDistance)
 				{
 					lockOnTarget = null;
 					Destroy(lockOnIcon.gameObject);
@@ -240,7 +240,7 @@ namespace Uxtuno
 				if (playerInput.attack)
 				{
 					Vector3 rotateAngles = Vector3.zero;
-					direction = lockOnTarget.position - transform.position;
+					direction = lockOnTarget.lockOnPoint.position - transform.position;
 					// xz平面の進行方向から、Y軸回転角を得る
 					rotateAngles.y = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
 					playerMesh.eulerAngles = rotateAngles;
@@ -477,8 +477,8 @@ namespace Uxtuno
 					playerAttackEffect = (GameObject)Instantiate(playerAttackEffectPrefab, transform.position, playerMesh.rotation);
 					Vector3 position = cameraController.transform.position;
 					//position.y = cameraController.cameraTransform.position.y; // 高さは現在のカメラの高さを参照
-					
-					cameraController.SetRotation(Quaternion.LookRotation(lockOnTarget.position - position));
+
+					cameraController.SetRotation(Quaternion.LookRotation(lockOnTarget.lockOnPoint.position - position));
 					break;
 			}
 

@@ -8,6 +8,7 @@ TagManager:
   - CameraController
   - AttackArea
   - Fire
+  - LockOnPoint
   layers:
   - Default
   - TransparentFX
