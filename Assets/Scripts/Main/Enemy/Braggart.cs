@@ -21,6 +21,7 @@ namespace Kuvo
 		protected override float sight { get; set; }
 		[SerializeField]
 		private GameObject bulletPrafab = null;
+		private GameObject bulletCollecter = null;
 
 		public void Awake()
 		{
@@ -35,6 +36,7 @@ namespace Kuvo
 			base.Start();
 
 			shortRangeAttackAreaObject.GetComponent<AttackArea>().Set(attack, 1.0f);
+			bulletCollecter = GameObject.Find("BulletCollecter");
 
 			StartCoroutine(Flying(0.5f));
 		}
@@ -42,6 +44,10 @@ namespace Kuvo
 		protected override void Update()
 		{
 			base.Update();
+			if(Input.GetKeyDown(KeyCode.B))
+			{
+				LongRangeAttack();
+			}
 		}
 
 		/// <summary>
@@ -71,7 +77,7 @@ namespace Kuvo
 			}
 			else
 			{
-				bullet.transform.SetParent(transform);
+				bullet.transform.SetParent(bulletCollecter.transform);
 			}
 
 			return bullet;
