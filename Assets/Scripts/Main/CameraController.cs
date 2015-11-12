@@ -73,11 +73,12 @@ namespace Uxtuno
 			defaultDistance = (target.position - cameraTransform.position).magnitude;
 			targetToDistance = defaultDistance;
 			transform.LookAt(target);
+			transform.rotation = newRotation;
 		}
 
 		void LateUpdate()
 		{
-			transform.rotation = newRotation;
+			transform.rotation = Quaternion.Lerp(transform.rotation, newRotation, 0.2f); // TODO:
 			//cameraTransform.LookAt(target);
 			// 壁にぶつかっている時だけ処理を行う
 			if (overlappedObjects != null)
@@ -100,7 +101,7 @@ namespace Uxtuno
 				}
 			}
 			Vector3 newPosition = target.position - cameraTransform.forward * targetToDistance;
-			cameraTransform.position = Vector3.Lerp(cameraTransform.position, newPosition, 0.2f);
+			cameraTransform.position = Vector3.Lerp(cameraTransform.position, newPosition, 0.2f); // TODO
 		}
 
 		public void CameraMove(float vx, float vy)
@@ -153,6 +154,15 @@ namespace Uxtuno
 			{
 				overlappedObjects.RemoveAt(index);
 			}
+		}
+
+		/// <summary>
+		/// カメラの新しい方向を指定
+		/// </summary>
+		/// <param name="rotation"></param>
+		public void SetRotation(Quaternion rotation)
+		{
+			newRotation = rotation;
 		}
 	}
 }
