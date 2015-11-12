@@ -20,10 +20,18 @@ public class Bullet : MonoBehaviour
 	void Update()
 	{
 		transform.Translate(Vector3.forward * speed * Time.deltaTime);
+
+		if(transform.position.y > 60.0f || transform.position.y < -5.0f)
+		{
+			Destroy(gameObject);
+		}
 	}
 
 	public void OnTriggerEnter(Collider other)
 	{
-		Destroy(gameObject);
+		if (other.tag == TagName.Player)
+		{
+			Destroy(gameObject);
+		}
 	}
 }

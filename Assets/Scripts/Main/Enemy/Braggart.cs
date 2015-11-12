@@ -44,7 +44,7 @@ namespace Kuvo
 		protected override void Update()
 		{
 			base.Update();
-			if(Input.GetKeyDown(KeyCode.B))
+			if(Input.GetKey(KeyCode.B))
 			{
 				LongRangeAttack();
 			}
