@@ -6270,7 +6270,7 @@ MonoBehaviour:
   jumpHeight: 5
   highJumpHeight: 10
   horizontalRotationSpeed: 120
-  verticaltalRotationSpeed: 60
+  verticaltalRotationSpeed: 50
   lockOnIconPrefab: {fileID: 178232, guid: 5472ecbd9faeb7b469a481afbf81a34a, type: 2}
   playerAttackEffectPrefab: {fileID: 120926, guid: 087b282d2a64a524a9c2fccbeeb8ec2b,
     type: 2}
@@ -6634,10 +6634,10 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: .5
-  m_Height: 1
+  m_Radius: .400000006
+  m_Height: 2
   m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 1.08000004, z: 0}
 --- !u!137 &13700052
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1
