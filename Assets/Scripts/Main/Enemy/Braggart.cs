@@ -6,7 +6,7 @@ namespace Kuvo
 	/// <summary>
 	/// 天狗クラス
 	/// </summary>
-	public class Braggart : Enemy
+	public partial class Braggart : Enemy
 	{
 		private enum FlyState
 		{
@@ -15,13 +15,19 @@ namespace Kuvo
 		}
 
 
+		[SerializeField]
+		private GameObject bulletPrefab = null;
+
 		/// <summary>
 		/// 天狗を目視することができる最も近い距離
 		/// </summary>
 		protected override float sight { get; set; }
+<<<<<<< HEAD
 		[SerializeField]
 		private GameObject bulletPrafab = null;
 		private GameObject bulletCollecter = null;
+=======
+>>>>>>> feature/SilverShipKuvo
 
 		public void Awake()
 		{
@@ -29,24 +35,34 @@ namespace Kuvo
 			attack = 1;
 			defence = 2;
 			sight = 1.5f;
+			shortRangeAttackAreaObject.GetComponent<AttackArea>().Set(attack, 1.0f);
 		}
 
 		protected override void Start()
 		{
 			base.Start();
 
+<<<<<<< HEAD
 			shortRangeAttackAreaObject.GetComponent<AttackArea>().Set(attack, 1.0f);
 			bulletCollecter = GameObject.Find("BulletCollecter");
 
+=======
+>>>>>>> feature/SilverShipKuvo
 			StartCoroutine(Flying(0.5f));
 		}
 
 		protected override void Update()
 		{
+<<<<<<< HEAD
 			base.Update();
 			if(Input.GetKey(KeyCode.B))
 			{
 				LongRangeAttack();
+=======
+			if(Input.GetKey(KeyCode.B))
+			{
+				LongRengeAttack();
+>>>>>>> feature/SilverShipKuvo
 			}
 		}
 
@@ -63,6 +79,7 @@ namespace Kuvo
 
 		}
 
+<<<<<<< HEAD
 		/// <summary>
 		/// 遠距離攻撃
 		/// </summary>
@@ -83,6 +100,8 @@ namespace Kuvo
 			return bullet;
 		}
 
+=======
+>>>>>>> feature/SilverShipKuvo
 		private IEnumerator Flying(float deflectionHeight)
 		{
 			float y = transform.localPosition.y;

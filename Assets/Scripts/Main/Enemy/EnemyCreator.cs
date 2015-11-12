@@ -13,12 +13,13 @@ namespace Kuvo
 		private GameObject monsterPrefab = null;
 		private float fieldDepth = 100.0f; // フィールドの奥行
 		private float fieldWidth = 100.0f; // フィールドの幅
-		private int generateNumber = 5; // 生成数
-		private GameObject enemyFolder = null;
+		[SerializeField]
+		private int generateNumber = 50; // 生成数
+
 		// Use this for initialization
 		void Start()
 		{
-			enemyFolder = new GameObject("Enemies");
+			GameObject enemyFolder = new GameObject("Enemies");
 			for (int i = 0; i < generateNumber; ++i)
 			{
 				float z = (Random.value * fieldDepth) - fieldDepth / 2.0f;
@@ -30,6 +31,11 @@ namespace Kuvo
 				GameObject monster = (GameObject)Instantiate(monsterPrefab, new Vector3(x, 2.0f, z), q);
 				monster.transform.parent = enemyFolder.transform;
 			}
+		}
+
+		// Update is called once per frame
+		void Update()
+		{
 		}
 	}
 }
