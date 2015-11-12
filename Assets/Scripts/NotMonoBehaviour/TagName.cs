@@ -52,6 +52,11 @@ public class TagName
 	public const string @AttackArea = "AttackArea";
 
 	/// <summary>
+	/// return "Fire"
+ 	/// </summary>
+	public const string @Fire = "Fire";
+
+	/// <summary>
 	/// <para>0. "Untagged"</para>
 	/// <para>1. "Respawn"</para>
 	/// <para>2. "Finish"</para>
@@ -62,6 +67,7 @@ public class TagName
 	/// <para>7. "Enemy"</para>
 	/// <para>8. "CameraController"</para>
 	/// <para>9. "AttackArea"</para>
+	/// <para>10. "Fire"</para>
 	/// </summary>
-	public static readonly string[] names = new string[]{"Untagged","Respawn","Finish","EditorOnly","MainCamera","Player","GameController","Enemy","CameraController","AttackArea"};
+	public static readonly string[] names = new string[]{"Untagged","Respawn","Finish","EditorOnly","MainCamera","Player","GameController","Enemy","CameraController","AttackArea","Fire"};
 }

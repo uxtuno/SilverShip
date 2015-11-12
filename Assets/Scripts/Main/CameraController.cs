@@ -33,13 +33,24 @@ namespace Uxtuno
 			}
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		public Vector3 originalCameraPosition
+		{
+			get
+			{
+				return target.position - cameraTransform.forward * defaultDistance;
+			}
+		}
+
 		[Tooltip("カメラで追いかける対象"), SerializeField]
 		private Transform target = null;
 		[Tooltip("上に向ける限界角度"), SerializeField]
 		private float facingUpLimit = 5.0f; // 視点移動の上方向制限
 		[Tooltip("下に向ける限界角度"), SerializeField]
 		private float facingDownLimit = 45.0f;  // 視点移動の下方向制限
-		private float limitDistance; // 注視点から離れられる限界距離
+		private float defaultDistance; // 注視点からカメラへの初期距離
 		private Quaternion newRotation; // 新しいカメラ角度
 		private float _distance; // ターゲットまでの距離
 
@@ -57,20 +68,18 @@ namespace Uxtuno
 
 		void Start()
 		{
+			radius = GetComponentInChildren<SphereCollider>().radius;
 			newRotation = transform.rotation;
+			defaultDistance = (target.position - cameraTransform.position).magnitude;
+			targetToDistance = defaultDistance;
 			transform.LookAt(target);
-			limitDistance = (target.position - cameraTransform.position).magnitude;
-			targetToDistance = limitDistance;
-			radius = this.GetSafeComponent<SphereCollider>().radius;
-
-			//Player player = GameManager.instance.player;
+			transform.rotation = newRotation;
 		}
 
 		void LateUpdate()
 		{
-			transform.rotation = newRotation;
-			//Player player = GameManager.instance.player;
-
+			transform.rotation = Quaternion.Lerp(transform.rotation, newRotation, 0.2f); // TODO:
+			//cameraTransform.LookAt(target);
 			// 壁にぶつかっている時だけ処理を行う
 			if (overlappedObjects != null)
 			{
@@ -78,21 +87,21 @@ namespace Uxtuno
 				LayerMask mask = LayerName.Wall.maskValue;
 				Ray ray = new Ray(target.position, -cameraTransform.forward);
 
-				targetToDistance = limitDistance;
-				if (Physics.Raycast(ray, out hit, limitDistance, mask))
+				targetToDistance = defaultDistance;
+				if (Physics.Raycast(ray, out hit, defaultDistance, mask))
 				{
 					foreach (Transform overlap in overlappedObjects)
 					{
 						if (hit.transform == overlap)
 						{
 							// 壁にぶつかったのでカメラの位置を壁の手前まで近づける
-							targetToDistance = hit.distance - radius * 0.2f;
+							targetToDistance = hit.distance;
 						}
 					}
 				}
 			}
 			Vector3 newPosition = target.position - cameraTransform.forward * targetToDistance;
-			cameraTransform.position = Vector3.Lerp(cameraTransform.position, newPosition, 1f);
+			cameraTransform.position = Vector3.Lerp(cameraTransform.position, newPosition, 0.2f); // TODO
 		}
 
 		public void CameraMove(float vx, float vy)
@@ -141,10 +150,19 @@ namespace Uxtuno
 		void OnTriggerExit(Collider other)
 		{
 			int index = overlappedObjects.FindIndex((obj) => obj == other.transform);
-            if (index >= 0)
+			if (index >= 0)
 			{
 				overlappedObjects.RemoveAt(index);
 			}
+		}
+
+		/// <summary>
+		/// カメラの新しい方向を指定
+		/// </summary>
+		/// <param name="rotation"></param>
+		public void SetRotation(Quaternion rotation)
+		{
+			newRotation = rotation;
 		}
 	}
 }
