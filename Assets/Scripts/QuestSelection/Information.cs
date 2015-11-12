@@ -15,12 +15,12 @@ namespace Kuvo
 		[Serializable]
 		private struct TargetAndMessage
 		{
-			public Text target;
-			public string message;
+			public Text target { get; set; }
+			public string message { get; set; }
 		}
 
 		[SerializeField]
-		private List<TargetAndMessage> targetsAndMessages;
+		private List<TargetAndMessage> targetsAndMessages = null;
 
 		/// <summary>
 		/// 選択状態になると呼び出される

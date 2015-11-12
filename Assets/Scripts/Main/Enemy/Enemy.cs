@@ -36,11 +36,8 @@ namespace Kuvo
 							_shortRangeAttackAreaObject = child;
 						}
 					}
-					
-					if(!_shortRangeAttackAreaObject.GetComponent<AttackArea>())
-					{
-						_shortRangeAttackAreaObject.AddComponent<AttackArea>();
-					}
+
+					_shortRangeAttackAreaObject.GetSafeComponent<AttackArea>();
 
 					if (!_shortRangeAttackAreaObject)
 					{

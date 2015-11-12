@@ -15,7 +15,7 @@ GameObject:
   - 114: {fileID: 11409568}
   m_Layer: 2
   m_Name: monsterprefab
-  m_TagString: Player
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1198,6 +1198,21 @@ GameObject:
 --- !u!1002 &100131
 EditorExtensionImpl:
   serializedVersion: 6
+--- !u!1 &104298
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 433342}
+  m_Layer: 2
+  m_Name: LockOnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &110418
 GameObject:
   m_ObjectHideFlags: 0
@@ -1240,6 +1255,7 @@ Transform:
   - {fileID: 400104}
   - {fileID: 400098}
   - {fileID: 480388}
+  - {fileID: 433342}
   m_Father: {fileID: 0}
   m_RootOrder: 0
 --- !u!1002 &400001
@@ -2272,6 +2288,18 @@ Transform:
 --- !u!1002 &400131
 EditorExtensionImpl:
   serializedVersion: 6
+--- !u!4 &433342
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 104298}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -.0549999997, y: .542999983, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 400000}
+  m_RootOrder: 14
 --- !u!4 &480388
 Transform:
   m_ObjectHideFlags: 1
@@ -2432,6 +2460,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91ae1b1cacae2c348bd68b912bee05aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bulletPrafab: {fileID: 142162, guid: edde6246251768746845b5a030dfa576, type: 2}
 --- !u!114 &11465272
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2724,6 +2753,14 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: m_Enabled
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: bulletPrafab
+      value: 
+      objectReference: {fileID: 142162, guid: edde6246251768746845b5a030dfa576, type: 2}
+    - target: {fileID: 0}
+      propertyPath: m_TagString
+      value: Enemy
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
