@@ -16,6 +16,16 @@ public class TempEnemy : Enemy {
 		}
 	}
 
+	protected override IEnumerator AirStagger()
+	{
+		yield break;
+	}
+
+	protected override IEnumerator GroundStagger()
+	{
+		yield break;
+	}
+
 	public override IEnumerator ShortRangeAttack()
 	{
 		yield break;

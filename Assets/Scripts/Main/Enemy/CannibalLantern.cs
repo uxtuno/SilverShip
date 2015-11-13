@@ -8,7 +8,7 @@ namespace Kuvo
 	/// </summary>
 	public class CannibalLantern : Enemy
 	{
-        private enum FlyState
+		private enum FlyState
 		{
 			Up,
 			Down,
@@ -48,8 +48,33 @@ namespace Kuvo
 			counter += Time.deltaTime;
 			if (Input.GetKeyDown(KeyCode.B))
 			{
-				hp = 0;
+				Damage(10, 1);
 			}
+		}
+
+		/// <summary>
+		/// 空中でよろける
+		/// </summary>
+		protected override IEnumerator AirStagger()
+		{
+			print("ぐはっ！");
+			GameObject primitiveCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+			primitiveCube.transform.position = lockOnPoint.position;
+			primitiveCube.transform.rotation = lockOnPoint.rotation;
+			primitiveCube.transform.SetParent(transform);
+
+			yield return new WaitForSeconds(1);
+
+			Destroy(primitiveCube);
+		}
+
+		/// <summary>
+		/// 地上でよろける
+		/// </summary>
+		protected override IEnumerator GroundStagger()
+		{
+			StartCoroutine(AirStagger());
+			yield break;
 		}
 
 		/// <summary>

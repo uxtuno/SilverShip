@@ -20,6 +20,11 @@ namespace Kuvo
 
 		public ActionState currentState { get; protected set; }
 
+		/// <summary>
+		/// 地面の上に立っているかどうか
+		/// </summary>
+		public bool haveGround { get; protected set; }
+
 		private CameraController cameraController;
 
 		/// <summary>
@@ -62,6 +67,7 @@ namespace Kuvo
 		protected virtual void Awake()
 		{
 			currentState = ActionState.Bone;
+			haveGround = false;
 		}
 
 		protected virtual void Start()
@@ -99,6 +105,40 @@ namespace Kuvo
 			}
 		}
 
+		protected virtual void OnCollisionExit(Collision collision)
+		{
+			if (collision.transform.tag == TagName.Scaffold)
+			{
+				haveGround = false;
+			}
+		}
+
+		public void OnCollisionEnter(Collision collision)
+		{
+			if (collision.transform.tag == TagName.Scaffold)
+			{
+				haveGround = true;
+			}
+		}
+
+		public override void Damage(int attackPower, float magnification)
+		{
+			base.Damage(attackPower, magnification);
+			if (haveGround)
+			{
+				StartCoroutine(GroundStagger());
+			}
+			else
+			{
+				StartCoroutine(AirStagger());
+			}
+		}
+
+		/// <summary>
+		/// 指定秒をかけて死亡する
+		/// </summary>
+		/// <param name="second"> インスタンスが消滅するまでの時間</param>
+		/// <returns></returns>
 		protected virtual IEnumerator OnDie(float second)
 		{
 			float time = 0.0f;
@@ -111,6 +151,16 @@ namespace Kuvo
 			Debug.Log("死んだー", gameObject);
 			Destroy(gameObject);
 		}
+
+		/// <summary>
+		/// 空中でよろける
+		/// </summary>
+		abstract protected IEnumerator AirStagger();
+
+		/// <summary>
+		/// 地上でよろける
+		/// </summary>
+		abstract protected IEnumerator GroundStagger();
 
 		/// <summary>
 		/// 近接攻撃
