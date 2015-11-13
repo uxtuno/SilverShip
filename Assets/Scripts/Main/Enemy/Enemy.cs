@@ -86,6 +86,30 @@ namespace Kuvo
 			{
 				isShow = true;
 			}
+
+		}
+
+		protected virtual void LateUpdate()
+		{
+			if (hp <= 0 && currentState != ActionState.Death)
+			{
+				currentState = ActionState.Death;
+				StopAllCoroutines();
+				StartCoroutine(OnDie(2));
+			}
+		}
+
+		protected virtual IEnumerator OnDie(float second)
+		{
+			float time = 0.0f;
+			while (time < second)
+			{
+				time += Time.deltaTime;
+
+				yield return new WaitForEndOfFrame();
+			}
+			Debug.Log("死んだー", gameObject);
+			Destroy(gameObject);
 		}
 
 		/// <summary>

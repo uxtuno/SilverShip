@@ -4,18 +4,18 @@ using System.Collections;
 namespace Kuvo
 {
 	/// <summary>
-	/// 飛行する敵クラス(現在は天狗を想定)
+	/// 人食い提灯クラス
 	/// </summary>
-	public class Braggart : Enemy
+	public class CannibalLantern : Enemy
 	{
-		private enum FlyState
+        private enum FlyState
 		{
 			Up,
 			Down,
 		}
 
 		/// <summary>
-		/// 天狗を目視することができる最も近い距離
+		/// 人食い提灯を目視することができる最も近い距離
 		/// </summary>
 		protected override float sight { get; set; }
 		[SerializeField]
@@ -46,13 +46,9 @@ namespace Kuvo
 		{
 			base.Update();
 			counter += Time.deltaTime;
-			if (Input.GetKey(KeyCode.B))
+			if (Input.GetKeyDown(KeyCode.B))
 			{
-				if (counter > 0.25)
-				{
-					StartCoroutine(LongRangeAttack());
-					counter = 0;
-				}
+				hp = 0;
 			}
 		}
 
