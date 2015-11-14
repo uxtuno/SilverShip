@@ -230,6 +230,10 @@ namespace Uxtuno
 		{
 			Gravity();
 			Vector3 direction = Vector3.zero;
+			if(playerInput.)
+			{
+
+			}
 
 			if(playerInput.cameraToFront)
 			{
