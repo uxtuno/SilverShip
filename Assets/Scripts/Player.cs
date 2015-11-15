@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using System.Linq;
+using Kuvo;
 
 //[RequireComponent(typeof(CharacterController))]
 
@@ -193,7 +195,7 @@ namespace Uxtuno
 				if (tempLockOnTarget != null && lockOnTarget != tempLockOnTarget)
 				{
 					lockOnTarget = tempLockOnTarget.GetComponent<Actor>();
-					if(lockOnIcon == null)
+					if (lockOnIcon == null)
 					{
 						lockOnIcon = Instantiate(lockOnIconPrefab).transform;
 					}
@@ -230,12 +232,13 @@ namespace Uxtuno
 		{
 			Gravity();
 			Vector3 direction = Vector3.zero;
-			if(playerInput.)
-			{
 
+			if (playerInput.lockOn)
+			{
+				LockOn();
 			}
 
-			if(playerInput.cameraToFront)
+			if (playerInput.cameraToFront)
 			{
 				cameraController.SetRotation(Quaternion.LookRotation(playerMesh.rotation * cameraFront));
 			}
@@ -425,7 +428,7 @@ namespace Uxtuno
 		private void Attack()
 		{
 			count += Time.deltaTime;
-			if(count > 1.0f)
+			if (count > 1.0f)
 			{
 				Destroy(playerAttackEffect);
 				ChangeState(State.Normal);
@@ -454,6 +457,34 @@ namespace Uxtuno
 		private void Gravity()
 		{
 			jumpVY += Physics.gravity.y * gravityForce * Time.deltaTime;
+		}
+
+		private const float LockOnAngleHulfRange = 45.0f; // ロックオン可能角度の半分
+		private const float LockOnDistance = 20.0f; // ロックオン可能距離
+
+		/// <summary>
+		/// ロックオン動作
+		/// </summary>
+		private void LockOn()
+		{
+			Transform actor = null;
+			// 敵のリストを取得
+			Transform[] enemies = GameObject.FindGameObjectsWithTag(TagName.Enemy).Select((obj) => obj.transform).ToArray();
+			float playerAngle = cameraController.cameraTransform.eulerAngles.y;
+			foreach (Transform enemy in enemies)
+			{
+				if (Utility.hitTestArcPoint(cameraController.cameraTransform.position.z, cameraController.cameraTransform.position.x, LockOnDistance, playerAngle - LockOnAngleHulfRange, playerAngle + LockOnAngleHulfRange, enemy.position.z, enemy.position.x))
+				{
+					actor = enemy;
+					print((actor.position - cameraController.cameraTransform.position).magnitude);
+				}
+			}
+
+			if (actor != null)
+			{
+				Quaternion q = Quaternion.LookRotation(actor.GetComponent<Actor>().lockOnPoint.position - cameraController.transform.position);
+				cameraController.SetRotation(q);
+			}
 		}
 
 		/// <summary>
