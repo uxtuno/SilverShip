@@ -176,7 +176,7 @@ namespace Uxtuno
 				Vector3 now = transform.position - oldCameraPosition;
 
 				// プレイヤーが移動した時のY軸カメラ回転量を計算
-				cameraRotateY = Mathf.Atan2(now.x * old.z - now.z * old.x, now.x * old.x + now.z * old.z) * Mathf.Rad2Deg * 0.8f;
+				cameraRotateY = Mathf.Atan2(now.x * old.z - now.z * old.x, now.x * old.x + now.z * old.z) * Mathf.Rad2Deg;
 				cameraRotateY = Mathf.Clamp(cameraRotateY, -maxCameraRotateY, maxCameraRotateY);
 
 				float minDistance2 = 999.0f;
@@ -192,7 +192,7 @@ namespace Uxtuno
 				}
 
 				// ロックオン対象が決定したので正式にロックオン
-				if (tempLockOnTarget != null && lockOnTarget != tempLockOnTarget)
+				if (tempLockOnTarget != null && lockOnTarget != tempLockOnTarget.GetComponent<Actor>())
 				{
 					lockOnTarget = tempLockOnTarget.GetComponent<Actor>();
 					if (lockOnIcon == null)
@@ -201,7 +201,9 @@ namespace Uxtuno
 					}
 					lockOnIcon.parent = lockOnTarget.transform;
 					print(lockOnTarget.ToString() + "をロックオンしました");
-					lockOnIcon.position = lockOnTarget.lockOnPoint.position;
+					//Camera.main.WorldToViewportPoint(lockOnTarget.lockOnPoint.position);
+                    lockOnIcon.position = lockOnTarget.lockOnPoint.position;
+					lockOnIcon.GetSafeComponent<LockOnIcon>().lockOnPoint = lockOnTarget.lockOnPoint;
 				}
 			}
 
