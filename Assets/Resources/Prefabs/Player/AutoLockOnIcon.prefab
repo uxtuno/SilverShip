@@ -12,7 +12,7 @@ GameObject:
   - 114: {fileID: 11488778}
   - 114: {fileID: 11485374}
   m_Layer: 5
-  m_Name: LockOnIcon
+  m_Name: AutoLockOnIcon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

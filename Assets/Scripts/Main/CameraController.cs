@@ -34,15 +34,9 @@ namespace Uxtuno
 		}
 
 		/// <summary>
-		/// 
+		/// カメラの実際の回転角度を返す
 		/// </summary>
-		public Vector3 originalCameraPosition
-		{
-			get
-			{
-				return target.position - cameraTransform.forward * defaultDistance;
-			}
-		}
+		public Quaternion actualRotation { get { return newRotation; } }
 
 		[Tooltip("カメラで追いかける対象"), SerializeField]
 		private Transform target = null;
@@ -65,6 +59,7 @@ namespace Uxtuno
 
 		private List<Transform> overlappedObjects = new List<Transform>(); // カメラが接触したもの
 		private float radius; // 障害物と一定距離を置くために使用
+		private bool isSetRotation = false;
 
 		void Start()
 		{
@@ -78,8 +73,16 @@ namespace Uxtuno
 
 		void LateUpdate()
 		{
-			transform.rotation = Quaternion.Lerp(transform.rotation, newRotation, 0.2f); // TODO:
-			//cameraTransform.LookAt(target);
+			if (isSetRotation)
+			{
+				isSetRotation = false;
+				transform.rotation = newRotation;
+			}
+			else
+			{
+				transform.rotation = Quaternion.Lerp(transform.rotation, newRotation, 0.4f); // TODO:
+			}
+				//cameraTransform.LookAt(target);
 			// 壁にぶつかっている時だけ処理を行う
 			if (overlappedObjects != null)
 			{
@@ -101,9 +104,24 @@ namespace Uxtuno
 				}
 			}
 			Vector3 newPosition = target.position - cameraTransform.forward * targetToDistance;
-			cameraTransform.position = Vector3.Lerp(cameraTransform.position, newPosition, 0.2f); // TODO
+			cameraTransform.position = Vector3.Lerp(cameraTransform.position, newPosition, 0.4f); // TODO
 		}
 
+		/// <summary>
+		/// カメラの回転(補間なし)
+		/// </summary>
+		/// <param name="rotation"></param>
+		public void CameraActualMove(float vx, float vy)
+		{
+			CameraMove(vx, vy);
+			isSetRotation = true;
+		}
+
+		/// <summary>
+		/// カメラを回転させる
+		/// </summary>
+		/// <param name="vx">水平方向角度</param>
+		/// <param name="vy">垂直方向角度</param>
 		public void CameraMove(float vx, float vy)
 		{
 			if (vx == 0.0f && vy == 0.0f)
@@ -163,6 +181,27 @@ namespace Uxtuno
 		public void SetRotation(Quaternion rotation)
 		{
 			newRotation = rotation;
+		}
+		
+		/// <summary>
+		/// 新しい追尾対象を設定
+		/// </summary>
+		/// <param name="target"></param>
+		public void SetTarget(Transform target)
+		{
+			this.target = target;
+			if(target != null)
+			{
+			}
+		}
+
+		/// <summary>
+		/// 中止点からターゲットまでの距離を設定
+		/// </summary>
+		/// <param name="distance"></param>
+		public void SetDistance(float distance)
+		{
+			defaultDistance = distance;
 		}
 	}
 }
