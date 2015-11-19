@@ -38,7 +38,7 @@ namespace Kuvo
 			shortRangeAttackAreaObject.GetComponent<AttackArea>().Set(attack, 1.0f);
 			bulletCollecter = GameObject.Find("BulletCollecter");
 
-			StartCoroutine(Flying(0.5f));
+			//StartCoroutine(Flying(0.5f));
 		}
 
 		float counter = 0;
@@ -146,6 +146,7 @@ namespace Kuvo
 			}
 			else
 			{
+				bullet.GetSafeComponent<AttackArea>().Set(attack, 1.0f);
 				bullet.transform.SetParent(bulletCollecter.transform);
 			}
 

@@ -1,23 +1,26 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class AttackArea : MonoBehaviour
+namespace Kuvo
 {
-	public int? power { get; set; }
-	public float? magnification { get; set; }
-
-	public void OnTriggerEnter(Collider other)
+	public class AttackArea : MonoBehaviour
 	{
-		if (power == null || magnification == null)
+		public int? power { get; set; }
+		public float? magnification { get; set; }
+
+		public void OnTriggerEnter(Collider other)
 		{
-			return;
+			if (power == null || magnification == null)
+			{
+				return;
+			}
+			GameManager.instance.player.Damage((int)power, (float)magnification);
 		}
-		//GameManager.instance.player.Damage((int)power, (float)magnification);
-	}
 
-	public void Set(int power, float magnification)
-	{
-		this.power = power;
-		this.magnification = magnification;
+		public void Set(int power, float magnification)
+		{
+			this.power = power;
+			this.magnification = magnification;
+		}
 	}
 }
