@@ -4,7 +4,8 @@ using System.Collections;
 /// <summary>
 /// カメラからの距離を一定にする
 /// </summary>
-public class LockOnIcon : MonoBehaviour {
+public class LockOnIcon : MonoBehaviour
+{
 
 	[SerializeField]
 	private float cameraToDistance = 5.0f; // カメラまでの距離
@@ -19,7 +20,7 @@ public class LockOnIcon : MonoBehaviour {
 	void Start()
 	{
 		// 未設定の場合でも動作するように
-		if(lockOnPoint == null)
+		if (lockOnPoint == null)
 		{
 			lockOnPoint = new GameObject("lockOnTarget").transform;
 			lockOnPoint.position = transform.position;
@@ -28,15 +29,23 @@ public class LockOnIcon : MonoBehaviour {
 		}
 	}
 
-	void LateUpdate () {
+	void LateUpdate()
+	{
 		Vector3 viewPortPoint = Camera.main.WorldToViewportPoint(lockOnPoint.position);
-		viewPortPoint.z = cameraToDistance;
+		if (Vector3.Angle(Camera.main.transform.forward, transform.position - Camera.main.transform.position) < 90.0f)
+		{
+			viewPortPoint.z = cameraToDistance;
+		}
+		else
+		{
+			viewPortPoint.z = -10.0f;
+		}
 		transform.position = Camera.main.ViewportToWorldPoint(viewPortPoint);
 	}
 
 	void OnDestroy()
 	{
-		if(isCreate)
+		if (isCreate)
 		{
 			Destroy(lockOnPoint.gameObject);
 		}
