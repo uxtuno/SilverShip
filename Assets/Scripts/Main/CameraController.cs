@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Uxtuno
 {
@@ -41,12 +42,14 @@ namespace Uxtuno
 		[Tooltip("カメラで追いかける対象"), SerializeField]
 		private Transform target = null;
 		[Tooltip("上に向ける限界角度"), SerializeField]
-		private float facingUpLimit = 5.0f; // 視点移動の上方向制限
+		private float facingUpLimit = 5.0f;                 // 視点移動の上方向制限
 		[Tooltip("下に向ける限界角度"), SerializeField]
-		private float facingDownLimit = 45.0f;  // 視点移動の下方向制限
-		private float defaultDistance; // 注視点からカメラへの初期距離
-		private Quaternion newRotation; // 新しいカメラ角度
-		private float _distance; // ターゲットまでの距離
+		private float facingDownLimit = 45.0f;              // 視点移動の下方向制限
+		private float defaultDistance;                      // 注視点からカメラへの初期距離
+		private Quaternion newRotation;                     // 新しいカメラ角度
+		private float _distance;                            // ターゲットまでの距離
+		private float currentInterpolationSeconds = 0.2f;   // 補間時間
+		private float currentInterpolationCount;            // 補間カウント
 
 		/// <summary>
 		/// ターゲットまでの距離を返す
@@ -57,7 +60,7 @@ namespace Uxtuno
 			private set { _distance = value; }
 		}
 
-		private List<Transform> overlappedObjects = new List<Transform>(); // カメラが接触したもの
+		private IList<Transform> overlappedObjects = new List<Transform>(); // カメラが接触したもの
 		private float radius; // 障害物と一定距離を置くために使用
 		private bool isSetRotation = false;
 
@@ -82,7 +85,7 @@ namespace Uxtuno
 			{
 				transform.rotation = Quaternion.Lerp(transform.rotation, newRotation, 0.4f); // TODO:
 			}
-				//cameraTransform.LookAt(target);
+			//cameraTransform.LookAt(target);
 			// 壁にぶつかっている時だけ処理を行う
 			if (overlappedObjects != null)
 			{
@@ -167,7 +170,8 @@ namespace Uxtuno
 
 		void OnTriggerExit(Collider other)
 		{
-			int index = overlappedObjects.FindIndex((obj) => obj == other.transform);
+			int index = overlappedObjects.IndexOf(other.transform);
+			//int index = overlappedObjects.FindIndex((obj) => obj == other.transform);
 			if (index >= 0)
 			{
 				overlappedObjects.RemoveAt(index);
@@ -182,7 +186,7 @@ namespace Uxtuno
 		{
 			newRotation = rotation;
 		}
-		
+
 		/// <summary>
 		/// 新しい追尾対象を設定
 		/// </summary>
@@ -190,7 +194,7 @@ namespace Uxtuno
 		public void SetTarget(Transform target)
 		{
 			this.target = target;
-			if(target != null)
+			if (target != null)
 			{
 			}
 		}
