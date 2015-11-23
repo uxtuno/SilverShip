@@ -93,6 +93,12 @@ namespace Uxtuno
 		private GameObject playerAttackEffect;
 
 		private Transform lookPoint; // カメラの中止点
+		private bool isCameraInvalidControll = false; // カメラ操作不能状態
+
+		void Awake()
+		{
+			cameraController = GetComponentInChildren<CameraController>();
+		}
 
 		void Start()
 		{
@@ -101,7 +107,6 @@ namespace Uxtuno
 			highJumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * gravityForce * highJumpHeight);
 			characterController = GetComponent<CharacterController>();
 			characterController.detectCollisions = false;
-			cameraController = GetComponentInChildren<CameraController>();
 			if (cameraController == null)
 			{
 				Debug.LogError("プレイヤーにカメラがありません");
@@ -226,12 +231,12 @@ namespace Uxtuno
 				if ((lockOnTarget.lockOnPoint.position - transform.position).sqrMagnitude > limitDistance)
 				{
 					lockOnTarget = null;
-					if(autoLockOnIcon != null)
+					if (autoLockOnIcon != null)
 					{
 						Destroy(autoLockOnIcon.gameObject);
 					}
 					print("ロックオンを解除しました");
-					cameraController.SetTarget(lockOnPoint);
+					cameraController.ResetTarget();
 					cameraController.SetDistance(3.0f);
 					isManualLockOn = false;
 				}
@@ -239,13 +244,20 @@ namespace Uxtuno
 
 			if (!isManualLockOn)
 			{
-				if (cameraMove != Vector2.zero)
+				if(!isCameraInvalidControll)
 				{
-					cameraController.CameraMove(cameraMove.x * horizontalRotationSpeed * Time.deltaTime, cameraMove.y * verticaltalRotationSpeed * Time.deltaTime);
+					if (cameraMove != Vector2.zero)
+					{
+						cameraController.CameraMove(cameraMove.x * horizontalRotationSpeed * Time.deltaTime, cameraMove.y * verticaltalRotationSpeed * Time.deltaTime, 0.2f);
+					}
+					else if (cameraRotateY != 0.0f)
+					{
+						cameraController.CameraMove(cameraRotateY, 0.0f, 0.1f);
+					}
 				}
-				else if (cameraRotateY != 0.0f)
+				else if (!cameraController.isInterpolation)
 				{
-					cameraController.CameraMove(cameraRotateY, 0.0f);
+					isCameraInvalidControll = false;
 				}
 			}
 			else
@@ -306,7 +318,7 @@ namespace Uxtuno
 
 			if (playerInput.lockOn)
 			{
-				if(!isManualLockOn)
+				if (!isManualLockOn)
 				{
 					LockOn();
 				}
@@ -314,7 +326,7 @@ namespace Uxtuno
 				{
 					// Todo :
 					lockOnTarget = null;
-					if(autoLockOnIcon != null)
+					if (autoLockOnIcon != null)
 					{
 						Destroy(autoLockOnIcon.gameObject);
 					}
@@ -329,7 +341,8 @@ namespace Uxtuno
 
 			if (playerInput.cameraToFront)
 			{
-				cameraController.SetRotation(Quaternion.LookRotation(playerMesh.rotation * cameraFront));
+				cameraController.SetNextRotation(Quaternion.LookRotation(playerMesh.rotation * cameraFront), 0.3f, CameraController.InterpolationMode.Curve);
+				isCameraInvalidControll = true;
 			}
 
 			if (lockOnTarget != null)
@@ -581,7 +594,7 @@ namespace Uxtuno
 				cameraController.SetTarget(lookPoint);
 				cameraController.transform.parent = null;
 				Quaternion q = Quaternion.LookRotation(lockOnEnemy.GetComponent<Actor>().lockOnPoint.position - cameraController.transform.position);
-				cameraController.SetRotation(q);
+				cameraController.SetNextRotation(q);
 			}
 		}
 

@@ -1,18 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Uxtuno
 {
 	/// <summary>
 	/// カメラを制御するクラス
-	/// 設計について:
+	/// 設計につぁE��:
 	/// シングルトンクラス
-	/// このクラスはPlayerクラスが持っていて
+	/// こ��EクラスはPlayerクラスが持ってぁE��
 	/// Playerクラスからのみアクセス出来ると
-	/// カメラは注視点を中心として回転する
-	/// 注視点はシーン上に複数存在してよい
-	/// 場面に応じて注視点を切り替えることで柔軟なカメラが可能
+	/// カメラは注視点を中忁E��して回転する
+	/// 注視点はシーン上に褁E��存在してよい
+	/// 場面に応じて注視点を��Eり替えることで柔軟なカメラが可能
 	/// プレイヤーは常に画面に映す
 	/// </summary>
 	public class CameraController : MyMonoBehaviour
@@ -41,15 +40,46 @@ namespace Uxtuno
 
 		[Tooltip("カメラで追いかける対象"), SerializeField]
 		private Transform target = null;
+		private Transform defaultTarget;
 		[Tooltip("上に向ける限界角度"), SerializeField]
 		private float facingUpLimit = 5.0f;                 // 視点移動の上方向制限
 		[Tooltip("下に向ける限界角度"), SerializeField]
 		private float facingDownLimit = 45.0f;              // 視点移動の下方向制限
-		private float defaultDistance;                      // 注視点からカメラへの初期距離
-		private Quaternion newRotation;                     // 新しいカメラ角度
+		private float defaultDistance;
+		private Quaternion _newRotation;// 注視点からカメラへの初期距離
+
+		/// <summary>
+		/// 新しいカメラ角度
+		/// </summary>
+		private Quaternion newRotation
+		{
+			get { return _newRotation; }
+			set
+			{
+					_newRotation = value;
+			}
+		} 
+		private Quaternion oldRotation;                     // 補間開始時のカメラ角度
 		private float _distance;                            // ターゲットまでの距離
 		private float currentInterpolationSeconds = 0.2f;   // 補間時間
 		private float currentInterpolationCount;            // 補間カウント
+
+		/// <summary>
+		/// 補間中かどうか
+		/// </summary>
+		public bool isInterpolation { get; private set; }
+
+		/// <summary>
+		/// 補間モード
+		/// </summary>
+		public enum InterpolationMode
+		{
+			// 線形補間
+			Liner,
+			// 曲線補間
+			Curve,
+		}
+		private InterpolationMode currentInterpolationMode = InterpolationMode.Curve; // 現在の補間モード
 
 		/// <summary>
 		/// ターゲットまでの距離を返す
@@ -62,28 +92,46 @@ namespace Uxtuno
 
 		private IList<Transform> overlappedObjects = new List<Transform>(); // カメラが接触したもの
 		private float radius; // 障害物と一定距離を置くために使用
-		private bool isSetRotation = false;
 
 		void Start()
 		{
 			radius = GetComponentInChildren<SphereCollider>().radius;
-			newRotation = transform.rotation;
 			defaultDistance = (target.position - cameraTransform.position).magnitude;
 			targetToDistance = defaultDistance;
-			transform.LookAt(target);
-			transform.rotation = newRotation;
+			isInterpolation = false;
+			
+			cameraTransform.LookAt(target);
+			cameraTransform.parent = target;
+			oldRotation = target.rotation;
+			newRotation = oldRotation;
+			defaultTarget = target; // デフォルトのターゲット
 		}
 
 		void LateUpdate()
 		{
-			if (isSetRotation)
+			if (!isInterpolation)
 			{
-				isSetRotation = false;
-				transform.rotation = newRotation;
+				target.rotation = newRotation;
 			}
 			else
 			{
-				transform.rotation = Quaternion.Lerp(transform.rotation, newRotation, 0.4f); // TODO:
+				// 補間中の経過時間を0~1に正規化
+				currentInterpolationCount += Time.deltaTime * (1 / currentInterpolationSeconds);
+				// 補間位置
+				float currentInterpolationPosition = currentInterpolationCount;
+				if (currentInterpolationMode == InterpolationMode.Curve)
+				{
+					// 補間位置を計算。0~1をsin()によって滑らかに補間
+					currentInterpolationPosition = Mathf.Sin((Mathf.PI * 0.5f) * currentInterpolationCount);
+				}
+
+				target.rotation = Quaternion.Slerp(oldRotation, newRotation, currentInterpolationPosition);
+
+				// 補間終了
+				if (currentInterpolationCount >= 1.0f)
+				{
+					isInterpolation = false;
+				}
 			}
 			//cameraTransform.LookAt(target);
 			// 壁にぶつかっている時だけ処理を行う
@@ -116,8 +164,8 @@ namespace Uxtuno
 		/// <param name="rotation"></param>
 		public void CameraActualMove(float vx, float vy)
 		{
-			CameraMove(vx, vy);
-			isSetRotation = true;
+			CameraMove(vx, vy, 0.0f);
+			isInterpolation = false;
 		}
 
 		/// <summary>
@@ -125,13 +173,15 @@ namespace Uxtuno
 		/// </summary>
 		/// <param name="vx">水平方向角度</param>
 		/// <param name="vy">垂直方向角度</param>
-		public void CameraMove(float vx, float vy)
+		/// <param name="mode">補間モード</param>
+		public void CameraMove(float vx, float vy, float interpolationSeconds = 1.0f, InterpolationMode mode = InterpolationMode.Curve)
 		{
 			if (vx == 0.0f && vy == 0.0f)
 			{
 				return;
 			}
 			Vector3 angles = newRotation.eulerAngles;
+			Quaternion nextRotation = Quaternion.identity;
 
 			angles.x -= vy;
 			if (angles.x > 180.0f)
@@ -157,7 +207,8 @@ namespace Uxtuno
 
 			angles.y += vx;
 			angles.z = 0.0f;
-			newRotation.eulerAngles = angles;
+			nextRotation.eulerAngles = angles;
+			SetNextRotation(nextRotation, interpolationSeconds, mode);
 		}
 
 		void OnTriggerEnter(Collider other)
@@ -181,10 +232,30 @@ namespace Uxtuno
 		/// <summary>
 		/// カメラの新しい方向を指定
 		/// </summary>
-		/// <param name="rotation"></param>
-		public void SetRotation(Quaternion rotation)
+		/// <param name="rotation">新しい方向</param>
+		/// <param name="interpolationSeconds">補間時間(秒)</param>
+		/// <param name="mode">補間モード</param>
+		public void SetNextRotation(Quaternion rotation, float interpolationSeconds = 0.2f, InterpolationMode mode = InterpolationMode.Curve)
 		{
 			newRotation = rotation;
+			InterpolationStart(interpolationSeconds, mode);
+		}
+
+		/// <summary>
+		/// 補間開始時の初期化
+		/// </summary>
+		/// <param name="interpolationSeconds">補間時間(秒)</param>
+		/// <param name="mode">補間モード</param>
+		private void InterpolationStart(float interpolationSeconds = 0.2f, InterpolationMode mode = InterpolationMode.Curve)
+		{
+			oldRotation = transform.rotation;
+			if (interpolationSeconds > 0.0f)
+			{
+				isInterpolation = true;
+			}
+			currentInterpolationSeconds = interpolationSeconds;
+			currentInterpolationCount = 0.0f;
+			currentInterpolationMode = mode;
 		}
 
 		/// <summary>
@@ -197,6 +268,11 @@ namespace Uxtuno
 			if (target != null)
 			{
 			}
+		}
+
+		public void ResetTarget()
+		{
+			target = defaultTarget;
 		}
 
 		/// <summary>
