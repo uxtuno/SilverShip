@@ -11,31 +11,43 @@ namespace Kuvo
 	{
 		[Tooltip("生成するエネミーのプレハブ"), SerializeField]
 		private GameObject monsterPrefab = null;
-		private float fieldDepth = 100.0f; // フィールドの奥行
-		private float fieldWidth = 100.0f; // フィールドの幅
-		[SerializeField]
-		private int generateNumber = 50; // 生成数
+			private float fieldDepth = 100.0f; // フィールドの奥行
+			private float fieldWidth = 100.0f; // フィールドの幅
+			[SerializeField]
+			private int generateNumber = 50; // 生成数
 
-		// Use this for initialization
-		void Start()
+		public void Start()
 		{
-			GameObject enemyFolder = new GameObject("Enemies");
-			for (int i = 0; i < generateNumber; ++i)
+			for (int i = 0; i < generateNumber; i++)
 			{
-				float z = (Random.value * fieldDepth) - fieldDepth / 2.0f;
-				float x = (Random.value * fieldWidth) - fieldWidth / 2.0f;
-
-				Quaternion q = Quaternion.identity;
-				float r = Random.Range(0.0f, 360.0f);
-				q.eulerAngles = new Vector3(0.0f, r, 0.0f);
-				GameObject monster = (GameObject)Instantiate(monsterPrefab, new Vector3(x, 2.0f, z), q);
-				monster.transform.parent = enemyFolder.transform;
+				Quaternion rotate = new Quaternion();
+				rotate.eulerAngles = new Vector3(0, Random.Range(0, 359));
+				GameObject monster = Instantiate(monsterPrefab, new Vector3(Random.Range(-(fieldWidth / 2), fieldWidth / 2), 2f, Random.Range(-(fieldDepth / 2), fieldDepth / 2)), rotate) as GameObject;
 			}
 		}
 
-		// Update is called once per frame
-		void Update()
-		{
-		}
+		//	// Use this for initialization
+		//	void Start()
+		//	{
+		//		GameObject enemyFolder = new GameObject("Enemies");
+		//		for (int i = 0; i < generateNumber; ++i)
+		//		{
+		//			float z = (Random.value * fieldDepth) - fieldDepth / 2.0f;
+		//			float x = (Random.value * fieldWidth) - fieldWidth / 2.0f;
+
+		//			Quaternion q = Quaternion.identity;
+		//			float r = Random.Range(0.0f, 360.0f);
+		//			q.eulerAngles = new Vector3(0.0f, r, 0.0f);
+		//			GameObject monster = (GameObject)Instantiate(monsterPrefab, new Vector3(x, 2.0f, z), q);
+		//			monster.transform.parent = enemyFolder.transform;
+		//		}
+		//	}
+
+		//	// Update is called once per frame
+		//	void Update()
+		//	{
+		//	}
+
+
 	}
 }

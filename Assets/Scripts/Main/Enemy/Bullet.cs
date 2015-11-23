@@ -9,10 +9,10 @@ using System.Collections;
 public class Bullet : MonoBehaviour
 {
 	[SerializeField]
-	float speed = 3.0f;
+	private float speed = 3.0f;
+	public Transform target { get; set; }
 	void Start()
 	{
-		Transform target = GameManager.instance.player.lockOnPoint;
 		transform.LookAt(target);
 	}
 

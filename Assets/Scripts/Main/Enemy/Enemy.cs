@@ -11,18 +11,39 @@ namespace Kuvo
 	{
 		public enum ActionState
 		{
-			None,
+			Idle,
 			Bone,
 			Move,
 			Attack,
-			Death,
+			Stagger,
+            Death,
 		}
 
 		[SerializeField]
 		protected float viewAngle = 120;                    // 視野角
 		[SerializeField]
 		protected float viewRange = 10;                     // 視認距離
-		private CameraController cameraController;
+		[SerializeField]
+		protected float pointBlankRange = 3f;				// プレイヤーを必ず検知出来る距離
+        private CameraController cameraController;
+
+		private Animation _animation;	// animationプロパティの実体
+
+		/// <summary>
+		/// 自身のAnimationを取得する
+		/// </summary>
+		protected new Animation animation
+		{
+			get
+			{
+				if(!_animation)
+				{
+					_animation = GetComponent<Animation>();
+				}
+
+				return _animation;
+			}
+		}
 
 		private Player _player;     // playerプロパティの実体
 
@@ -174,21 +195,25 @@ namespace Kuvo
 		/// </summary>
 		protected bool PlayerSearch()
 		{
-			// プレイヤーが視認距離にいない場合
-			if (viewRange < Vector3.Distance(player.transform.position, transform.position))
+			float distance = Vector3.Distance(player.transform.position, transform.position);
+			// プレイヤーが2メートル以内の場合必ず見つける
+			if (3f > distance)
 			{
-				//Debug.Log("視認距離にいないよ!");
+				return true;
+			}
+
+			// プレイヤーが視認距離にいない場合
+			if (viewRange < distance)
+			{
 				return false;
 			}
 
 			// プレイヤーが視野角にいない場合
 			if (viewAngle / 2 < Vector3.Angle(player.transform.position - transform.position, transform.forward))
 			{
-				//Debug.Log("視野角にいないよ!");
 				return false;
 			}
-
-			//Debug.Log("視界にはいった!");
+			
 			return true;
 		}
 

@@ -19,7 +19,7 @@ namespace Kuvo
 		/// </summary>
 		protected override void Move()
 		{
-			if(enemy.currentState == Enemy.ActionState.Bone)
+			if (enemy.currentState == Enemy.ActionState.Bone || enemy.currentState == Enemy.ActionState.Idle)
 			{
 				enemy.currentState = Enemy.ActionState.Move;
 			}
@@ -31,12 +31,22 @@ namespace Kuvo
 					Attack();
 				}
 
-				Vector3 playerPosition = player.transform.position;
+				Vector3 playerPosition = player.lockOnPoint.position;
 				playerPosition.y = transform.position.y;
 
 				// プレイヤーの方向へ向きを変える
 				transform.LookAt(playerPosition);
-				transform.Translate(Vector3.forward * speed * Time.deltaTime);
+				if (Mathf.Abs(transform.position.x - playerPosition.x) > 0.5f || Mathf.Abs(transform.position.z - playerPosition.z) > 0.5f)
+				{
+					transform.Translate(Vector3.forward * speed * Time.deltaTime);
+				}
+				else
+				{
+					if (enemy.currentState != Enemy.ActionState.Attack)
+					{
+						enemy.currentState = Enemy.ActionState.Idle;
+					}
+				}
 			}
 			else
 			{

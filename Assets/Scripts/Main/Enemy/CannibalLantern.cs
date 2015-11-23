@@ -48,7 +48,37 @@ namespace Kuvo
 			counter += Time.deltaTime;
 			if (Input.GetKeyDown(KeyCode.B))
 			{
-				Damage(10, 1);
+				StartCoroutine(LongRangeAttack());
+			}
+
+			switch (currentState)
+			{
+				case ActionState.Idle:
+					animation.Play("idle");
+					break;
+
+				case ActionState.Bone:
+					animation.Play("idle");
+					break;
+
+				case ActionState.Move:
+					animation.Play("walk");
+					break;
+
+				case ActionState.Attack:
+					animation.Play("attack");
+					break;
+
+				case ActionState.Stagger:
+					animation.Play("fall");
+					break;
+
+				case ActionState.Death:
+					BaseEnemyAI aI = GetComponent<BaseEnemyAI>();
+					aI.StopAllCoroutines();
+					aI.enabled = false;
+					animation.Play("die");
+					break;
 			}
 		}
 
@@ -57,15 +87,18 @@ namespace Kuvo
 		/// </summary>
 		protected override IEnumerator AirStagger()
 		{
+			ActionState oldState = currentState;
+			currentState = ActionState.Stagger;
 			print("ぐはっ！");
-			GameObject primitiveCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-			primitiveCube.transform.position = lockOnPoint.position;
-			primitiveCube.transform.rotation = lockOnPoint.rotation;
-			primitiveCube.transform.SetParent(transform);
+			//GameObject primitiveCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+			//primitiveCube.transform.position = lockOnPoint.position;
+			//primitiveCube.transform.rotation = lockOnPoint.rotation;
+			//primitiveCube.transform.SetParent(transform);
 
 			yield return new WaitForSeconds(1);
 
-			Destroy(primitiveCube);
+			//Destroy(primitiveCube);
+			currentState = oldState;
 		}
 
 		/// <summary>
@@ -121,36 +154,26 @@ namespace Kuvo
 				yield break;
 			}
 
+			ActionState oldState = currentState;
 			currentState = ActionState.Attack;
 
-			// ここに予備動作
-			float counter = 0;
-			transform.localScale *= 2.5f;
-			while (true)
-			{
-				counter += Time.deltaTime;
-				if (counter > 0.5)
-				{
-					transform.localScale = Vector3.one;
-					break;
-				}
-				yield return new WaitForEndOfFrame();
-			}
+			yield return new WaitForSeconds(0.5f);
 
 			GameObject bullet = Instantiate(bulletPrafab, transform.position, transform.rotation) as GameObject;
 			if (!bullet)
 			{
 				Destroy(bullet);
-				currentState = ActionState.Move;
+				currentState = oldState;
 				yield break;
 			}
 			else
 			{
+				bullet.GetSafeComponent<Bullet>().target = player.lockOnPoint;
 				bullet.GetSafeComponent<AttackArea>().Set(attack, 1.0f);
 				bullet.transform.SetParent(bulletCollecter.transform);
 			}
 
-			currentState = ActionState.Move;
+			currentState = oldState;
 		}
 
 		private IEnumerator Flying(float deflectionHeight)
