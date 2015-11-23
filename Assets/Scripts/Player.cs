@@ -252,7 +252,7 @@ namespace Uxtuno
 					}
 					else if (cameraRotateY != 0.0f)
 					{
-						cameraController.CameraMove(cameraRotateY, 0.0f, 0.1f);
+						cameraController.CameraMove(cameraRotateY * 0.5f, 0.0f, 0.1f);
 					}
 				}
 				else if (!cameraController.isInterpolation)
@@ -268,43 +268,42 @@ namespace Uxtuno
 				Vector3 cameraToLockOnEnemy = (lockOnTarget.lockOnPoint.position - cameraController.cameraTransform.position).normalized;
 				Vector2 v3 = new Vector2(cameraToPlayer.x, cameraToPlayer.z).normalized;
 				Vector2 v2 = new Vector2(cameraToLockOnEnemy.x, cameraToLockOnEnemy.z).normalized;
-				float rotateY = Mathf.Acos(Vector2.Dot(v1, v2)) * Mathf.Rad2Deg;
+				float rotateY = Mathf.Acos(Vector2.Dot(v1, v2)) * Mathf.Rad2Deg - 30.0f;
 				bool isLookEnemy = false;
 				bool isLookPlayer = false;
-				if (rotateY > 30.0f)
+				if (rotateY > 0.0f)
 				{
 					isLookEnemy = true;
 					if ((v1.x * v2.y - v1.y * v2.x > 0.0f))
 					{
 						//cameraController.CameraActualMove(-(rotateY), 0.0f);
-						cameraController.CameraActualMove(-(rotateY - 30.0f) * 0.5f, 0.0f);
+						cameraController.CameraActualMove(-(rotateY), 0.0f);
 					}
 					else
 					{
-						cameraController.CameraActualMove((rotateY - 30.0f) * 0.5f, 0.0f);
+						cameraController.CameraActualMove((rotateY), 0.0f);
 					}
 				}
 				else
 				{
 					v1 = new Vector2(cameraController.cameraTransform.forward.x, cameraController.cameraTransform.forward.z).normalized;
-					rotateY = Mathf.Acos(Vector2.Dot(v1, v3)) * Mathf.Rad2Deg - 25.0f;
+					rotateY = Mathf.Acos(Vector2.Dot(v1, v3)) * Mathf.Rad2Deg - 30.0f;
 					if (rotateY > 0.0f)
 					{
+						print(rotateY);
 						isLookPlayer = true;
 						if ((v1.x * v3.y - v1.y * v3.x > 0.0f))
 						{
 							//cameraController.CameraActualMove(-(rotateY * 0.5f), 0.0f);
-							cameraController.CameraActualMove((rotateY * 0.1f), 0.0f);
+							cameraController.CameraMove((rotateY), 0.0f);
 						}
 						else
 						{
-							cameraController.CameraActualMove(-(rotateY * 0.1f), 0.0f);
+							cameraController.CameraMove(-(rotateY), 0.0f);
 						}
 					}
 				}
-				lookPoint.position = (lockOnPoint.position + (cameraController.cameraTransform.rotation * cameraFront) * 2.0f);
-				lookPoint.position = (lockOnPoint.position + (cameraController.cameraTransform.rotation * cameraFront) * 2.0f);
-				cameraController.SetDistance(5.0f);
+				lookPoint.position = (cameraController.transform.position);
 				if (isLookPlayer || isLookEnemy)
 				{
 				}
@@ -331,9 +330,8 @@ namespace Uxtuno
 						Destroy(autoLockOnIcon.gameObject);
 					}
 					print("ロックオンを解除しました");
-					cameraController.SetTarget(lockOnPoint);
+					cameraController.ResetTarget();
 					cameraController.SetDistance(3.0f);
-					cameraController.transform.parent = transform;
 					isManualLockOn = false;
 					return;
 				}
@@ -592,7 +590,6 @@ namespace Uxtuno
 				go.transform.position = (lockOnPoint.position + lockOnTarget.lockOnPoint.position) / 2.0f;
 				lookPoint = go.transform;
 				cameraController.SetTarget(lookPoint);
-				cameraController.transform.parent = null;
 				Quaternion q = Quaternion.LookRotation(lockOnEnemy.GetComponent<Actor>().lockOnPoint.position - cameraController.transform.position);
 				cameraController.SetNextRotation(q);
 			}

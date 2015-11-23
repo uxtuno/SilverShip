@@ -56,9 +56,9 @@ namespace Uxtuno
 			get { return _newRotation; }
 			set
 			{
-					_newRotation = value;
+				_newRotation = value;
 			}
-		} 
+		}
 		private Quaternion oldRotation;                     // 補間開始時のカメラ角度
 		private float _distance;                            // ターゲットまでの距離
 		private float currentInterpolationSeconds = 0.2f;   // 補間時間
@@ -93,18 +93,29 @@ namespace Uxtuno
 		private IList<Transform> overlappedObjects = new List<Transform>(); // カメラが接触したもの
 		private float radius; // 障害物と一定距離を置くために使用
 
+		private Vector3 oldPosition;
+		private float currentPositionInterpolationSeconds = 0.5f;   // 補間時間
+		private float currentPositionInterpolationCount;            // 補間カウント
+
+		/// <summary>
+		/// 座標補間中かどうか
+		/// </summary>
+		public bool isPositionInterpolation { get; private set; }
+
 		void Start()
 		{
 			radius = GetComponentInChildren<SphereCollider>().radius;
 			defaultDistance = (target.position - cameraTransform.position).magnitude;
 			targetToDistance = defaultDistance;
 			isInterpolation = false;
-			
+
 			cameraTransform.LookAt(target);
 			cameraTransform.parent = target;
 			oldRotation = target.rotation;
 			newRotation = oldRotation;
 			defaultTarget = target; // デフォルトのターゲット
+
+			oldPosition = cameraTransform.position;
 		}
 
 		void LateUpdate()
@@ -125,7 +136,7 @@ namespace Uxtuno
 					currentInterpolationPosition = Mathf.Sin((Mathf.PI * 0.5f) * currentInterpolationCount);
 				}
 
-				target.rotation = Quaternion.Slerp(oldRotation, newRotation, currentInterpolationPosition);
+				target.rotation = Quaternion.Lerp(oldRotation, newRotation, currentInterpolationPosition);
 
 				// 補間終了
 				if (currentInterpolationCount >= 1.0f)
@@ -154,8 +165,16 @@ namespace Uxtuno
 					}
 				}
 			}
-			Vector3 newPosition = target.position - cameraTransform.forward * targetToDistance;
-			cameraTransform.position = Vector3.Lerp(cameraTransform.position, newPosition, 0.4f); // TODO
+
+			currentPositionInterpolationCount += Time.deltaTime * (1 / currentInterpolationSeconds);
+			if (currentPositionInterpolationCount > 1.0f)
+			{
+				oldPosition = cameraTransform.position;
+				currentPositionInterpolationCount = 1.0f;
+				isPositionInterpolation = false;
+			}
+
+			CameraPositionUpdate();
 		}
 
 		/// <summary>
@@ -259,12 +278,35 @@ namespace Uxtuno
 		}
 
 		/// <summary>
+		/// 座標補間開始時の初期化
+		/// </summary>
+		/// <param name="interpolationSeconds">補間時間(秒)</param>
+		/// <param name="mode">補間モード</param>
+		private void PositionInterpolationStart(float interpolationSeconds = 0.2f, InterpolationMode mode = InterpolationMode.Curve)
+		{
+			oldRotation = transform.rotation;
+			if (interpolationSeconds > 0.0f)
+			{
+				isPositionInterpolation = true;
+			}
+			currentPositionInterpolationSeconds = interpolationSeconds;
+			currentPositionInterpolationCount = 0.0f;
+			oldPosition = cameraTransform.position;
+		}
+
+		/// <summary>
 		/// 新しい追尾対象を設定
 		/// </summary>
 		/// <param name="target"></param>
 		public void SetTarget(Transform target)
 		{
+			oldRotation = this.target.rotation;
 			this.target = target;
+			PositionInterpolationStart(1.0f);
+			cameraTransform.LookAt(target);
+			target.forward = cameraTransform.forward;
+			cameraTransform.parent = target;
+			SetNextRotation(target.rotation, 0.2f);
 			if (target != null)
 			{
 			}
@@ -272,7 +314,7 @@ namespace Uxtuno
 
 		public void ResetTarget()
 		{
-			target = defaultTarget;
+			SetTarget(defaultTarget);
 		}
 
 		/// <summary>
@@ -282,6 +324,16 @@ namespace Uxtuno
 		public void SetDistance(float distance)
 		{
 			defaultDistance = distance;
+		}
+
+		/// <summary>
+		/// カメラ座標更新
+		/// </summary>
+		public void CameraPositionUpdate()
+		{
+			Vector3 newPosition = target.position - cameraTransform.forward * targetToDistance;
+			//cameraTransform.position = Vector3.Lerp(oldPosition, newPosition, currentPositionInterpolationCount); // TODO
+			cameraTransform.position = newPosition;
 		}
 	}
 }
