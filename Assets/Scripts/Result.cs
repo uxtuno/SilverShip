@@ -7,19 +7,18 @@ namespace Kuvo
 	public class Result : MonoBehaviour
 	{
 		[SerializeField]
-		private GameObject nextButton = null;
+		private GameObject nextButton = null;   // "次へ"のGameObject
 		[SerializeField]
-		private Text timeField = null;
-
-		private IEnumerator showResult = null;
-
-		int clearSeconds = 120;
-		int h, m, s = 0;
+		private Text timeField = null;          // 時間の表示枠
+		private IEnumerator showResult = null;  // ShowResult()のコルーチン
+		private int h, m, s = 0;                // 時,分,秒
+		private int clearSeconds = 120;         // クリアタイム(秒)
 
 		void Start()
 		{
 			nextButton.SetActive(false);
 
+			// クリアタイムを時,分,秒に換算
 			s = clearSeconds % 60;
 			clearSeconds -= s;
 			clearSeconds /= 60;
@@ -30,9 +29,10 @@ namespace Kuvo
 
 			StartCoroutine(showResult = ShowResult(Resources.Load<GameObject>("Prefabs/Result/Complete") as GameObject, Vector3.zero));
 		}
-		int score = 0;
+
 		void Update()
 		{
+			// いずれかのキー入力を検知
 			if (Input.anyKeyDown)
 			{
 				if (nextButton.activeInHierarchy)
@@ -47,6 +47,12 @@ namespace Kuvo
 			}
 		}
 
+		/// <summary>
+		/// 結果を表示する
+		/// </summary>
+		/// <param name="result"> 評価</param>
+		/// <param name="position"> 評価の表示位置</param>
+		/// <param name="waitTime"> 待機時間</param>
 		private IEnumerator ShowResult(GameObject result, Vector3 position, float waitTime = 1f)
 		{
 			yield return new WaitForSeconds(waitTime);
@@ -72,6 +78,10 @@ namespace Kuvo
 			nextButton.SetActive(true);
 		}
 
+		/// <summary>
+		/// 一定間隔でゲームオブジェクトを点滅させる
+		/// </summary>
+		/// <returns></returns>
 		private IEnumerator Flashing()
 		{
 			if (!nextButton)
@@ -80,7 +90,6 @@ namespace Kuvo
 				yield break;
 			}
 
-			// 一定間隔でゲームオブジェクトを点滅させる
 			while (true)
 			{
 				nextButton.SetActive(!nextButton.activeInHierarchy);

@@ -1,19 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Kuvo;
-
+using System;
 
 public class TempEnemy : Enemy {
-	protected override float sight
-	{
-		get
-		{
-			return 2.0f;
-		}
-		set
-		{
+	protected override float sight { get; set; }
 
-		}
+	protected override void Start()
+	{
+		base.Start();
+		sight = 2f;
+		hp = 1;
 	}
 
 	protected override IEnumerator AirStagger()
@@ -27,6 +24,11 @@ public class TempEnemy : Enemy {
 	}
 
 	public override IEnumerator ShortRangeAttack()
+	{
+		yield break;
+	}
+
+	public override IEnumerator LongRangeAttack()
 	{
 		yield break;
 	}

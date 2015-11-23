@@ -11,8 +11,8 @@ GameObject:
   - 111: {fileID: 11100000}
   - 143: {fileID: 14300000}
   - 82: {fileID: 8200000}
-  - 114: {fileID: 11465272}
   - 114: {fileID: 11409568}
+  - 114: {fileID: 11458164}
   m_Layer: 2
   m_Name: monsterprefab
   m_TagString: Enemy
@@ -2460,8 +2460,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91ae1b1cacae2c348bd68b912bee05aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  viewAngle: 120
+  viewRange: 10
   bulletPrafab: {fileID: 142162, guid: edde6246251768746845b5a030dfa576, type: 2}
---- !u!114 &11465272
+--- !u!114 &11458164
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -2469,9 +2471,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 100000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a59b8be1197dcd84da1e0cdd2f7ddec7, type: 3}
+  m_Script: {fileID: 11500000, guid: ac2a3c90cd2cfd14abcccfbaaecaa118, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  aILevel: 2
+  wait: 3
+  speed: 1
+  attackStateRange: 5
 --- !u!135 &13546380
 SphereCollider:
   m_ObjectHideFlags: 1

@@ -18,20 +18,29 @@ namespace Kuvo
 			Death,
 		}
 
-		public ActionState currentState { get; protected set; }
-
-		/// <summary>
-		/// 地面の上に立っているかどうか
-		/// </summary>
-		public bool haveGround { get; protected set; }
-
+		[SerializeField]
+		protected float viewAngle = 120;                    // 視野角
+		[SerializeField]
+		protected float viewRange = 10;                     // 視認距離
 		private CameraController cameraController;
 
+		private Player _player;     // playerプロパティの実体
+
 		/// <summary>
-		/// エネミーを目視することができる最も近い距離
-		/// (エネミーの大きさに応じて変更する必要がある)
+		/// プレイヤーの参照を取得する
 		/// </summary>
-		abstract protected float sight { get; set; }
+		protected Player player
+		{
+			get
+			{
+				if (!_player)
+				{
+					_player = GameManager.instance.player;
+				}
+
+				return _player;
+			}
+		}
 
 		private GameObject _shortRangeAttackAreaObject;   // shortRangeAttackAreaObjectプロパティの実体
 
@@ -64,6 +73,27 @@ namespace Kuvo
 			}
 		}
 
+		/// <summary>
+		/// 現在の状態
+		/// </summary>
+		public ActionState currentState { get; set; }
+
+		/// <summary>
+		/// 地面の上に立っているかどうか
+		/// </summary>
+		public bool haveGround { get; protected set; }
+
+		/// <summary>
+		/// プレイヤーを発見しているかどうか
+		/// </summary>
+		public bool isPlayerLocate { get; private set; }
+
+		/// <summary>
+		/// エネミーを目視することができる最も近い距離
+		/// (エネミーの大きさに応じて変更する必要がある)
+		/// </summary>
+		abstract protected float sight { get; set; }
+
 		protected virtual void Awake()
 		{
 			currentState = ActionState.Bone;
@@ -91,6 +121,11 @@ namespace Kuvo
 			else
 			{
 				isShow = true;
+			}
+
+			if (currentState == ActionState.Move)
+			{
+				isPlayerLocate = PlayerSearch();
 			}
 
 		}
@@ -135,6 +170,29 @@ namespace Kuvo
 		}
 
 		/// <summary>
+		/// 視野内でプレイヤーを探す
+		/// </summary>
+		protected bool PlayerSearch()
+		{
+			// プレイヤーが視認距離にいない場合
+			if (viewRange < Vector3.Distance(player.transform.position, transform.position))
+			{
+				//Debug.Log("視認距離にいないよ!");
+				return false;
+			}
+
+			// プレイヤーが視野角にいない場合
+			if (viewAngle / 2 < Vector3.Angle(player.transform.position - transform.position, transform.forward))
+			{
+				//Debug.Log("視野角にいないよ!");
+				return false;
+			}
+
+			//Debug.Log("視界にはいった!");
+			return true;
+		}
+
+		/// <summary>
 		/// 指定秒をかけて死亡する
 		/// </summary>
 		/// <param name="second"> インスタンスが消滅するまでの時間</param>
@@ -166,5 +224,10 @@ namespace Kuvo
 		/// 近接攻撃
 		/// </summary>
 		abstract public IEnumerator ShortRangeAttack();
+
+		/// <summary>
+		/// 遠距離攻撃
+		/// </summary>
+		abstract public IEnumerator LongRangeAttack();
 	}
 }

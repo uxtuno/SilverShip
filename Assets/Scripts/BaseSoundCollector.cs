@@ -5,7 +5,7 @@ using UnityEngine;
 /// シーンごとに使用する音楽を管理するクラスは
 /// このクラスを継承する
 /// </summary>
-public class BaseSoundCollector<T> : MonoBehaviour
+abstract public class BaseSoundCollector<T> : MonoBehaviour
 {
     // 派生クラス側で定義
     //public enum SoundName

@@ -108,13 +108,13 @@ namespace Kuvo
 			yield return new WaitForSeconds(1.0f);
 
 			shortRangeAttackAreaObject.SetActive(false);
-			currentState = ActionState.None;
+			currentState = ActionState.Move;
 		}
 
 		/// <summary>
 		/// 遠距離攻撃
 		/// </summary>
-		public IEnumerator LongRangeAttack()
+		public override IEnumerator LongRangeAttack()
 		{
 			if (currentState == ActionState.Attack)
 			{
@@ -141,7 +141,7 @@ namespace Kuvo
 			if (!bullet)
 			{
 				Destroy(bullet);
-				currentState = ActionState.None;
+				currentState = ActionState.Move;
 				yield break;
 			}
 			else
@@ -150,7 +150,7 @@ namespace Kuvo
 				bullet.transform.SetParent(bulletCollecter.transform);
 			}
 
-			currentState = ActionState.None;
+			currentState = ActionState.Move;
 		}
 
 		private IEnumerator Flying(float deflectionHeight)

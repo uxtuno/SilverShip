@@ -4,10 +4,10 @@ using Uxtuno;
 
 namespace Kuvo
 {
-	[RequireComponent(typeof(Enemy))]
 	public class AerialEnemyAI : BaseEnemyAI
 	{
-		private static readonly int limitAngle = 50;
+		[SerializeField]
+		private float attackStateRange = 5f;    // 攻撃状態に移行する範囲(半径)
 
 		protected override void Start()
 		{
@@ -19,13 +19,24 @@ namespace Kuvo
 		/// </summary>
 		protected override void Move()
 		{
-			if (PlayerSearch())
+			if(enemy.currentState == Enemy.ActionState.Bone)
 			{
+				enemy.currentState = Enemy.ActionState.Move;
+			}
+
+			if (enemy.isPlayerLocate)
+			{
+				if (CheckDistance(player.lockOnPoint.position, attackStateRange))
+				{
+					Attack();
+				}
+
 				Vector3 playerPosition = player.transform.position;
-				playerPosition.y = 0;
+				playerPosition.y = transform.position.y;
 
 				// プレイヤーの方向へ向きを変える
 				transform.LookAt(playerPosition);
+				transform.Translate(Vector3.forward * speed * Time.deltaTime);
 			}
 			else
 			{
@@ -33,11 +44,22 @@ namespace Kuvo
 			}
 		}
 
-		void LookFront(float value)
+		private void Attack()
 		{
-			Vector3 eulerAngles = transform.eulerAngles;
-			eulerAngles.x = value;
-			transform.eulerAngles = eulerAngles;
+			switch (aILevel)
+			{
+				case AILevel.None:
+					break;
+
+				case AILevel.Fool:
+					break;
+
+				case AILevel.Nomal:
+					break;
+
+				case AILevel.Smart:
+					break;
+			}
 		}
 	}
 }
