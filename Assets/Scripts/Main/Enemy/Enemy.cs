@@ -16,7 +16,7 @@ namespace Kuvo
 			Move,
 			Attack,
 			Stagger,
-            Death,
+			Death,
 		}
 
 		[SerializeField]
@@ -24,10 +24,10 @@ namespace Kuvo
 		[SerializeField]
 		protected float viewRange = 10;                     // 視認距離
 		[SerializeField]
-		protected float pointBlankRange = 3f;				// プレイヤーを必ず検知出来る距離
-        private CameraController cameraController;
+		protected Transform muzzle = null;                  // 遠距離攻撃の弾の発射位置
+		private CameraController cameraController;
 
-		private Animation _animation;	// animationプロパティの実体
+		private Animation _animation;   // animationプロパティの実体
 
 		/// <summary>
 		/// 自身のAnimationを取得する
@@ -36,7 +36,7 @@ namespace Kuvo
 		{
 			get
 			{
-				if(!_animation)
+				if (!_animation)
 				{
 					_animation = GetComponent<Animation>();
 				}
@@ -195,12 +195,7 @@ namespace Kuvo
 		/// </summary>
 		protected bool PlayerSearch()
 		{
-			float distance = Vector3.Distance(player.transform.position, transform.position);
-			// プレイヤーが2メートル以内の場合必ず見つける
-			if (3f > distance)
-			{
-				return true;
-			}
+			float distance = Vector3.Distance(player.lockOnPoint.position, transform.position);
 
 			// プレイヤーが視認距離にいない場合
 			if (viewRange < distance)
@@ -208,12 +203,18 @@ namespace Kuvo
 				return false;
 			}
 
+			Vector3 adjustmentAmount = new Vector3(0, 0.7f, -0.1f);
+			float angle = Vector3.Angle(player.lockOnPoint.position - (transform.position + adjustmentAmount), transform.forward);
 			// プレイヤーが視野角にいない場合
-			if (viewAngle / 2 < Vector3.Angle(player.transform.position - transform.position, transform.forward))
+			if (viewAngle / 2 < angle)
 			{
-				return false;
+				if (90 < angle || 2f < distance)
+				{
+					return false;
+				}
 			}
-			
+
+			Debug.DrawRay((transform.position + adjustmentAmount), player.lockOnPoint.position - (transform.position + adjustmentAmount), Color.red);
 			return true;
 		}
 

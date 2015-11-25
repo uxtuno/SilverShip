@@ -159,7 +159,11 @@ namespace Kuvo
 
 			yield return new WaitForSeconds(0.5f);
 
-			GameObject bullet = Instantiate(bulletPrafab, transform.position, transform.rotation) as GameObject;
+			// 弾の発射位置・角度を登録
+			Transform t = (muzzle != null) ? muzzle : transform;
+
+			// 弾を生成
+			GameObject bullet = Instantiate(bulletPrafab, t.position, t.rotation) as GameObject;
 			if (!bullet)
 			{
 				Destroy(bullet);
