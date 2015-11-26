@@ -104,6 +104,8 @@ namespace Uxtuno
 
 		void Start()
 		{
+			this.GetSafeComponent<Enemy>();
+
 			// 指定の高さまで飛ぶための初速を計算
 			jumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * gravityForce * jumpHeight);
 			highJumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * gravityForce * highJumpHeight);
