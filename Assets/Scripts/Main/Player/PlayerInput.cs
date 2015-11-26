@@ -67,6 +67,11 @@ public class PlayerInput
 	public bool cameraToFront { get; private set; }
 
 	/// <summary>
+	/// ロックオン
+	/// </summary>
+	public bool lockOn { get; private set; }
+
+	/// <summary>
 	/// プレイヤー入力情報更新
 	/// GameManagerが毎フレーム呼ぶこと
 	/// </summary>
@@ -110,5 +115,6 @@ public class PlayerInput
 		itemGet = Input.GetButtonDown(InputName.ItemGet);
 
 		cameraToFront = Input.GetButtonDown(InputName.CameraToFront);
+		lockOn = Input.GetButtonDown(InputName.LockOn);
 	}
 }
