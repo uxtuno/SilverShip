@@ -116,6 +116,7 @@ namespace Uxtuno
 			defaultTarget = target; // デフォルトのターゲット
 
 			oldPosition = cameraTransform.position;
+			SetTarget(target);
 		}
 
 		void LateUpdate()

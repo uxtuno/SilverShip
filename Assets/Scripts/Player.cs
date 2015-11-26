@@ -95,6 +95,8 @@ namespace Uxtuno
 		private Transform lookPoint; // カメラの中止点
 		private bool isCameraInvalidControll = false; // カメラ操作不能状態
 
+		private PlayerTrampled playerTrampled; // 踏みつけジャンプ動作
+
 		void Awake()
 		{
 			cameraController = GetComponentInChildren<CameraController>();
@@ -127,6 +129,8 @@ namespace Uxtuno
 			// プレイヤーの入力を管理するクラス
 			playerInput = PlayerInput.instance;
 			ChangeState(State.Normal);
+
+			playerTrampled = GetComponentInChildren<PlayerTrampled>();
 		}
 
 		void Update()
@@ -230,21 +234,13 @@ namespace Uxtuno
 			{
 				if ((lockOnTarget.lockOnPoint.position - transform.position).sqrMagnitude > limitDistance)
 				{
-					lockOnTarget = null;
-					if (autoLockOnIcon != null)
-					{
-						Destroy(autoLockOnIcon.gameObject);
-					}
-					print("ロックオンを解除しました");
-					cameraController.ResetTarget();
-					cameraController.SetDistance(3.0f);
-					isManualLockOn = false;
+					ManualLockOnRelease();
 				}
 			}
 
 			if (!isManualLockOn)
 			{
-				if(!isCameraInvalidControll)
+				if (!isCameraInvalidControll)
 				{
 					if (cameraMove != Vector2.zero)
 					{
@@ -277,11 +273,11 @@ namespace Uxtuno
 					if ((v1.x * v2.y - v1.y * v2.x > 0.0f))
 					{
 						//cameraController.CameraActualMove(-(rotateY), 0.0f);
-						cameraController.CameraActualMove(-(rotateY), 0.0f);
+						cameraController.CameraActualMove(-(rotateY) * Time.deltaTime * 30.0f, 0.0f);
 					}
 					else
 					{
-						cameraController.CameraActualMove((rotateY), 0.0f);
+						cameraController.CameraActualMove((rotateY) * Time.deltaTime * 30.0f, 0.0f);
 					}
 				}
 				else
@@ -290,7 +286,6 @@ namespace Uxtuno
 					rotateY = Mathf.Acos(Vector2.Dot(v1, v3)) * Mathf.Rad2Deg - 30.0f;
 					if (rotateY > 0.0f)
 					{
-						print(rotateY);
 						isLookPlayer = true;
 						if ((v1.x * v3.y - v1.y * v3.x > 0.0f))
 						{
@@ -323,17 +318,7 @@ namespace Uxtuno
 				}
 				else
 				{
-					// Todo :
-					lockOnTarget = null;
-					if (autoLockOnIcon != null)
-					{
-						Destroy(autoLockOnIcon.gameObject);
-					}
-					print("ロックオンを解除しました");
-					cameraController.ResetTarget();
-					cameraController.SetDistance(3.0f);
-					isManualLockOn = false;
-					return;
+					ManualLockOnRelease();
 				}
 			}
 
@@ -506,6 +491,14 @@ namespace Uxtuno
 				moveVector += direction * speed;
 			}
 
+			// 踏みつけジャンプ
+			if(playerInput.jump)
+			{
+				playerTrampled.Trampled(10, 1.0f);
+				ChangeState(State.Depression);
+				return;
+			}
+
 			Gravity();
 			if (characterController.isGrounded)
 			{
@@ -592,6 +585,47 @@ namespace Uxtuno
 				cameraController.SetTarget(lookPoint);
 				Quaternion q = Quaternion.LookRotation(lockOnEnemy.GetComponent<Actor>().lockOnPoint.position - cameraController.transform.position);
 				cameraController.SetNextRotation(q);
+				ManualLockOn();
+
+			}
+		}
+
+		/// <summary>
+		/// マニュアルロックオン
+		/// </summary>
+		private void ManualLockOn()
+		{
+			if (manualLockOnIcon == null)
+			{
+				manualLockOnIcon = Instantiate(manualLockOnIconPrefab).transform;
+				manualLockOnIcon.position = lockOnTarget.lockOnPoint.position;
+				manualLockOnIcon.GetSafeComponent<LockOnIcon>().lockOnPoint = lockOnTarget.lockOnPoint;
+			}
+			if (autoLockOnIcon != null)
+			{
+				Destroy(autoLockOnIcon.gameObject);
+			}
+		}
+
+		/// <summary>
+		/// マニュアルロックオン解除
+		/// </summary>
+		private void ManualLockOnRelease()
+		{
+			// Todo :
+			lockOnTarget = null;
+			if (autoLockOnIcon != null)
+			{
+				Destroy(autoLockOnIcon.gameObject);
+			}
+			print("ロックオンを解除しました");
+			cameraController.ResetTarget();
+			cameraController.SetDistance(3.0f);
+			isManualLockOn = false;
+
+			if (manualLockOnIcon != null)
+			{
+				Destroy(manualLockOnIcon.gameObject);
 			}
 		}
 
