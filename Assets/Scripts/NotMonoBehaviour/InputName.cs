@@ -100,6 +100,7 @@ public class InputName
 	/// <para>20. "CameraToFront"</para>
 	/// <para>21. "CameraToFront"</para>
 	/// <para>22. "LockOn"</para>
+	/// <para>23. "LockOn"</para>
 	/// </summary>
-	public static readonly string[] names = new string[]{"Horizontal","Vertical","Atack","Barrier","ItemGet","Jump","Mouse X","Mouse Y","Mouse ScrollWheel","Horizontal","Vertical","Atack","Barrier","ItemGet","Jump","Submit","Submit","Cancel","CameraX","CameraY","CameraToFront","CameraToFront","LockOn"};
+	public static readonly string[] names = new string[]{"Horizontal","Vertical","Atack","Barrier","ItemGet","Jump","Mouse X","Mouse Y","Mouse ScrollWheel","Horizontal","Vertical","Atack","Barrier","ItemGet","Jump","Submit","Submit","Cancel","CameraX","CameraY","CameraToFront","CameraToFront","LockOn","LockOn"};
 }

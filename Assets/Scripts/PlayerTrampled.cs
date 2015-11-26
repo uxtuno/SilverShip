@@ -28,5 +28,14 @@ namespace Uxtuno
 				enemy.GetComponent<Kuvo.Enemy>().Damage(attackPower, magnification);
 			}
 		}
+
+		/// <summary>
+		/// 踏みつけられるターゲットが存在するか
+		/// </summary>
+		/// <returns></returns>
+		public bool hasTarget()
+		{
+			return trampledEnemies.GetContainedObjects().Count > 0;
+		}
     }
 }

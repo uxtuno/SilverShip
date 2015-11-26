@@ -179,7 +179,6 @@ namespace Uxtuno
 			Vector2 cameraMove = Vector3.zero;
 			cameraMove.x = playerInput.cameraHorizontal;
 			cameraMove.y = playerInput.cameraVertical;
-
 			float cameraRotateY = 0.0f; // プレイヤーが移動したときのカメラ回転量
 			_moveVector.y = jumpVY;
 			if (moveVector != Vector3.zero)
