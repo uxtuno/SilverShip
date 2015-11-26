@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using Uxtuno;
 
 // 利便性のためnamespaceはつけない

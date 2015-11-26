@@ -72,6 +72,11 @@ public class InputName
 	public const string @CameraToFront = "CameraToFront";
 
 	/// <summary>
+	/// return "LockOn"
+ 	/// </summary>
+	public const string @LockOn = "LockOn";
+
+	/// <summary>
 	/// <para>0. "Horizontal"</para>
 	/// <para>1. "Vertical"</para>
 	/// <para>2. "Atack"</para>
@@ -94,6 +99,7 @@ public class InputName
 	/// <para>19. "CameraY"</para>
 	/// <para>20. "CameraToFront"</para>
 	/// <para>21. "CameraToFront"</para>
+	/// <para>22. "LockOn"</para>
 	/// </summary>
-	public static readonly string[] names = new string[]{"Horizontal","Vertical","Atack","Barrier","ItemGet","Jump","Mouse X","Mouse Y","Mouse ScrollWheel","Horizontal","Vertical","Atack","Barrier","ItemGet","Jump","Submit","Submit","Cancel","CameraX","CameraY","CameraToFront","CameraToFront"};
+	public static readonly string[] names = new string[]{"Horizontal","Vertical","Atack","Barrier","ItemGet","Jump","Mouse X","Mouse Y","Mouse ScrollWheel","Horizontal","Vertical","Atack","Barrier","ItemGet","Jump","Submit","Submit","Cancel","CameraX","CameraY","CameraToFront","CameraToFront","LockOn"};
 }
