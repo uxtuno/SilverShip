@@ -21,6 +21,7 @@ namespace Kuvo
 		[SerializeField]
 		private GameObject bulletPrafab = null;
 		private GameObject bulletCollecter = null;
+		private ActionState oldState = ActionState.None;
 
 		protected override void Awake()
 		{
@@ -28,7 +29,6 @@ namespace Kuvo
 			attack = 1;
 			defence = 2;
 			sight = 1.5f;
-			shortRangeAttackAreaObject.GetComponent<AttackArea>().Set(attack, 1.0f);
 		}
 
 		protected override void Start()
@@ -41,44 +41,49 @@ namespace Kuvo
 			//StartCoroutine(Flying(0.5f));
 		}
 
-		float counter = 0;
 		protected override void Update()
 		{
 			base.Update();
-			counter += Time.deltaTime;
+
 			if (Input.GetKeyDown(KeyCode.B))
 			{
+				//Damage(int.MaxValue, 1);
 				StartCoroutine(LongRangeAttack());
 			}
 
-			switch (currentState)
+			if (currentState != oldState)
 			{
-				case ActionState.Idle:
-					animation.Play("idle");
-					break;
+				switch (currentState)
+				{
+					case ActionState.Idle:
+//						animation.Play("idle");
+						break;
 
-				case ActionState.Bone:
-					animation.Play("idle");
-					break;
+					case ActionState.Bone:
+//						animation.Play("idle");
+						break;
 
-				case ActionState.Move:
-					animation.Play("walk");
-					break;
+					case ActionState.Move:
+//						animation.Play("run");
+						break;
 
-				case ActionState.Attack:
-					animation.Play("attack");
-					break;
+					case ActionState.Attack:
+//						animation.Play("attack");
+						break;
 
-				case ActionState.Stagger:
-					animation.Play("fall");
-					break;
+					case ActionState.Stagger:
+//						animation.Play("fall");
+						break;
 
-				case ActionState.Death:
-					BaseEnemyAI aI = GetComponent<BaseEnemyAI>();
-					aI.StopAllCoroutines();
-					aI.enabled = false;
-					animation.Play("die");
-					break;
+					case ActionState.Death:
+						BaseEnemyAI aI = GetComponent<BaseEnemyAI>();
+						aI.StopAllCoroutines();
+						aI.enabled = false;
+//						animation.Play("die");
+						break;
+				}
+
+				oldState = currentState;
 			}
 		}
 
@@ -90,14 +95,9 @@ namespace Kuvo
 			ActionState oldState = currentState;
 			currentState = ActionState.Stagger;
 			print("ぐはっ！");
-			//GameObject primitiveCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-			//primitiveCube.transform.position = lockOnPoint.position;
-			//primitiveCube.transform.rotation = lockOnPoint.rotation;
-			//primitiveCube.transform.SetParent(transform);
 
 			yield return new WaitForSeconds(1);
 
-			//Destroy(primitiveCube);
 			currentState = oldState;
 		}
 

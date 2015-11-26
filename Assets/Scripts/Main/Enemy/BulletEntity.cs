@@ -9,12 +9,18 @@ namespace Kuvo
 	/// </summary>
 	public class BulletEntity : MonoBehaviour
 	{
-		float delta = 50;
+		float delta = 10;
 		IEnumerator Start()
 		{
+			float n = 0.0f;
+			Vector3 v = Vector3.zero;
 			while (true)
 			{
-				transform.Rotate(new Vector3(0, delta, 0));
+				n += Time.deltaTime;
+				//transform.Rotate(new Vector3(0, theta, 0));
+				v.x = Mathf.Cos(n) * 360.0f;
+				v.y = Mathf.Sin(n) * 360.0f;
+				transform.eulerAngles = v;
 				yield return new WaitForFixedUpdate();
 			}
 		}

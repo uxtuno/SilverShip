@@ -11,6 +11,7 @@ namespace Kuvo
 	{
 		public enum ActionState
 		{
+			None,
 			Idle,
 			Bone,
 			Move,
@@ -25,6 +26,7 @@ namespace Kuvo
 		protected float viewRange = 10;                     // 視認距離
 		[SerializeField]
 		protected Transform muzzle = null;                  // 遠距離攻撃の弾の発射位置
+		protected ContainedObjects contained;
 		private CameraController cameraController;
 
 		private Animation _animation;   // animationプロパティの実体
@@ -129,6 +131,7 @@ namespace Kuvo
 			}
 
 			cameraController = GameObject.FindGameObjectWithTag(TagName.CameraController).GetComponent<CameraController>();
+			contained = GetComponentInChildren<ContainedObjects>();
 		}
 
 		protected virtual void Update()
@@ -144,11 +147,7 @@ namespace Kuvo
 				isShow = true;
 			}
 
-			if (currentState == ActionState.Move)
-			{
-				isPlayerLocate = PlayerSearch();
-			}
-
+			isPlayerLocate = PlayerSearch();
 		}
 
 		protected virtual void LateUpdate()
@@ -159,6 +158,15 @@ namespace Kuvo
 				StopAllCoroutines();
 				StartCoroutine(OnDie(2));
 			}
+
+			Debug.Log(contained);
+			Vector3 aveVec = Vector3.zero;
+			foreach (Transform t in contained)
+			{
+				aveVec += t.position;
+			}
+			aveVec /= contained.GetContainedObjects().Count;
+			transform.position -= (aveVec - transform.position).normalized * Time.deltaTime;
 		}
 
 		protected virtual void OnCollisionExit(Collision collision)
@@ -169,7 +177,7 @@ namespace Kuvo
 			}
 		}
 
-		public void OnCollisionEnter(Collision collision)
+		protected virtual void OnCollisionEnter(Collision collision)
 		{
 			if (collision.transform.tag == TagName.Scaffold)
 			{
