@@ -207,7 +207,7 @@ namespace Uxtuno
 				}
 
 				// ロックオン対象が決定したので正式にロックオン
-				if (tempLockOnTarget != null && lockOnTarget != tempLockOnTarget.GetComponent<Actor>())
+				if (!isManualLockOn && tempLockOnTarget != null && lockOnTarget != tempLockOnTarget.GetComponent<Actor>())
 				{
 					lockOnTarget = tempLockOnTarget.GetComponent<Actor>();
 					if (autoLockOnIcon == null)
@@ -564,12 +564,19 @@ namespace Uxtuno
 			// 敵のリストを取得
 			Transform[] enemies = GameObject.FindGameObjectsWithTag(TagName.Enemy).Select((obj) => obj.transform).ToArray();
 			float playerAngle = cameraController.cameraTransform.eulerAngles.y;
+			float minDistance = 9999.0f;
 			foreach (Transform enemy in enemies)
 			{
 				// カメラの前方の円弧上の範囲をロックオン可能範囲とする
 				if (Utility.hitTestArcPoint(cameraController.cameraTransform.position.z, cameraController.cameraTransform.position.x, LockOnDistance, playerAngle - LockOnAngleHulfRange, playerAngle + LockOnAngleHulfRange, enemy.position.z, enemy.position.x))
 				{
-					lockOnEnemy = enemy;
+					float distance = (enemy.position - transform.position).sqrMagnitude;
+					// 最も近い対象をロックオン
+					if(distance < minDistance)
+					{
+						minDistance = distance;
+						lockOnEnemy = enemy;
+					}
 				}
 			}
 
@@ -618,8 +625,8 @@ namespace Uxtuno
 				Destroy(autoLockOnIcon.gameObject);
 			}
 			print("ロックオンを解除しました");
-			cameraController.ResetTarget();
 			cameraController.SetDistance(3.0f);
+			cameraController.ResetTarget();
 			isManualLockOn = false;
 
 			if (manualLockOnIcon != null)
