@@ -9,6 +9,7 @@ TagManager:
   - AttackArea
   - Fire
   - LockOnPoint
+  - Scaffold
   layers:
   - Default
   - TransparentFX

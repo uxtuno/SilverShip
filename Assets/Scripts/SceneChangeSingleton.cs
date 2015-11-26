@@ -44,7 +44,7 @@ namespace Kuvo
 			FadeOut,
 		}
 
-		private static readonly int FOREGROUND = 30000;
+		private static readonly int forGround = 30000;
 
 		private string sceneName { get; set; }
 		private float fadeTime { get; set; }
@@ -93,16 +93,22 @@ namespace Kuvo
 			this.sceneName = sceneName;
 			this.fadeTime = fadeTime;
 
+			// Canvasを生成
 			Canvas canvas;
 			canvasObject = new GameObject();
 			canvasObject.name = "FadeMaskCanvas";
 			canvas = canvasObject.AddComponent<Canvas>();
-			canvas.sortingOrder = FOREGROUND;
+			canvas.pixelPerfect = true;
+			canvas.renderMode = RenderMode.ScreenSpaceCamera;
+			canvas.sortingOrder = forGround;
 			canvas.gameObject.AddComponent<CanvasScaler>();
 
+			// 最前面に表示するマスクを生成
 			GameObject imageObject = new GameObject();
 			imageObject.name = "MaskImage";
 			imageObject.transform.SetParent(canvas.transform);
+			imageObject.GetSafeComponent<RectTransform>().anchoredPosition3D = Vector3.zero;
+			imageObject.GetComponent<RectTransform>().sizeDelta = new Vector2(Screen.width, Screen.height);
 			maskImage = imageObject.AddComponent<Image>();
 			maskImage.sprite = Resources.Load<Sprite>("Sprites/FadeFilter");
 			maskImage.color = new Color(0.0f, 0.0f, 0.0f, 0.0f);
