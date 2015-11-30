@@ -308,14 +308,18 @@ namespace Uxtuno
 			target.forward = cameraTransform.forward;
 			cameraTransform.parent = target;
 			SetNextRotation(target.rotation, 0.2f);
-			if (target != null)
-			{
-			}
 		}
 
 		public void ResetTarget()
 		{
-			SetTarget(defaultTarget);
+			oldRotation = this.target.rotation;
+			this.target = defaultTarget;
+			cameraTransform.parent = null;
+			PositionInterpolationStart(1.0f);
+			cameraTransform.LookAt(target);
+			target.forward = cameraTransform.forward;
+			cameraTransform.parent = target;
+			SetNextRotation(target.rotation, 0.2f);
 		}
 
 		/// <summary>

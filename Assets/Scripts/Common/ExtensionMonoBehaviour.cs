@@ -48,6 +48,10 @@ public static class ExtensionMonoBehaviour{
 		if (component == null)
 		{
 			component = self.gameObject.AddComponent<T>();
+			if(component == null)
+			{
+				Debug.LogError( typeof(T) + "コンポーネントの追加に失敗しました(" + self.name + ")");
+			}
 			//Debug.LogWarning(typeof(T) + "を追加しました(実行時のみ)");
 		}
 
@@ -67,6 +71,10 @@ public static class ExtensionMonoBehaviour{
 		if (component == null)
 		{
 			component = self.gameObject.AddComponent<T>();
+			if (component == null)
+			{
+				Debug.LogError(typeof(T) + "コンポーネントの追加に失敗しました(" + self.name + ")");
+			}
 			//Debug.LogWarning(typeof(T) + "を追加しました(実行時のみ)");
 		}
 
