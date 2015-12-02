@@ -9,7 +9,7 @@ namespace Kuvo
 	/// </summary>
 	public class BulletEntity : MonoBehaviour
 	{
-		float delta = 10;
+		//float delta = 10;
 		IEnumerator Start()
 		{
 			float n = 0.0f;

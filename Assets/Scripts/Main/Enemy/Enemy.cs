@@ -9,17 +9,21 @@ namespace Kuvo
 	/// </summary>
 	abstract public class Enemy : Actor
 	{
-		public enum ActionState
+		public enum EnemyState
 		{
 			None,
 			Idle,
 			Bone,
-			Move,
-			Attack,
+			Search,
+            Move,
+			SAttack,
+			LAttack,
 			Stagger,
 			Death,
 		}
 
+		[Tooltip("移動速度"), SerializeField]
+		protected float speed = 1;                      // 移動速度
 		[SerializeField]
 		protected float viewAngle = 120;                    // 視野角
 		[SerializeField]
@@ -99,7 +103,7 @@ namespace Kuvo
 		/// <summary>
 		/// 現在の状態
 		/// </summary>
-		public ActionState currentState { get; set; }
+		public EnemyState currentState { get; set; }
 
 		/// <summary>
 		/// 地面の上に立っているかどうか
@@ -112,6 +116,11 @@ namespace Kuvo
 		public bool isPlayerLocate { get; private set; }
 
 		/// <summary>
+		/// 攻撃中かどうか
+		/// </summary>
+		public bool isAttack { get; protected set; }
+
+		/// <summary>
 		/// エネミーを目視することができる最も近い距離
 		/// (エネミーの大きさに応じて変更する必要がある)
 		/// </summary>
@@ -119,15 +128,16 @@ namespace Kuvo
 
 		protected virtual void Awake()
 		{
-			currentState = ActionState.Bone;
+			currentState = EnemyState.Bone;
 			haveGround = false;
+			isAttack = false;
 		}
 
 		protected virtual void Start()
 		{
-			if (currentState != ActionState.Bone)
+			if (currentState != EnemyState.Bone)
 			{
-				currentState = ActionState.Bone;
+				currentState = EnemyState.Bone;
 			}
 
 			cameraController = GameObject.FindGameObjectWithTag(TagName.CameraController).GetComponent<CameraController>();
@@ -136,6 +146,11 @@ namespace Kuvo
 
 		protected virtual void Update()
 		{
+			if (currentState == EnemyState.Bone)
+			{
+				currentState = EnemyState.Idle;
+			}
+
 			// カメラとの距離に応じて描画状態を切り替える
 			Vector3 cameraToVector = cameraController.cameraTransform.position - transform.position;
 			if (cameraToVector.magnitude < sight)
@@ -152,14 +167,13 @@ namespace Kuvo
 
 		protected virtual void LateUpdate()
 		{
-			if (hp <= 0 && currentState != ActionState.Death)
+			if (hp <= 0 && currentState != EnemyState.Death)
 			{
-				currentState = ActionState.Death;
+				currentState = EnemyState.Death;
 				StopAllCoroutines();
 				StartCoroutine(OnDie(2));
 			}
-
-			Debug.Log(contained);
+			
 			Vector3 aveVec = Vector3.zero;
 			foreach (Transform t in contained)
 			{
@@ -223,6 +237,22 @@ namespace Kuvo
 			}
 
 			Debug.DrawRay((transform.position + adjustmentAmount), player.lockOnPoint.position - (transform.position + adjustmentAmount), Color.red);
+			return true;
+		}
+
+		/// <summary>
+		/// 対象との距離が指定された範囲内かを調べる
+		/// </summary>
+		/// <param name="targetPosition"> 対象の座標</param>
+		/// <param name="range"> 範囲</param>
+		/// <returns> 範囲内であればtrue 範囲外であればfalse</returns>
+		public bool CheckDistance(Vector3 targetPosition, float range)
+		{
+			if (range < Vector3.Distance(lockOnPoint.position, targetPosition))
+			{
+				return false;
+			}
+
 			return true;
 		}
 
