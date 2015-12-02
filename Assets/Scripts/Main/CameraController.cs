@@ -91,10 +91,10 @@ namespace Uxtuno
 		}
 
 		private IList<Transform> overlappedObjects = new List<Transform>(); // カメラが接触したもの
-		private float radius; // 障害物と一定距離を置くために使用
+		//private float radius; // 障害物と一定距離を置くために使用
 
-		private Vector3 oldPosition;
-		private float currentPositionInterpolationSeconds = 0.5f;   // 補間時間
+		//private Vector3 oldPosition;
+		//private float currentPositionInterpolationSeconds = 0.5f;   // 補間時間
 		private float currentPositionInterpolationCount;            // 補間カウント
 
 		/// <summary>
@@ -104,7 +104,7 @@ namespace Uxtuno
 
 		void Start()
 		{
-			radius = GetComponentInChildren<SphereCollider>().radius;
+			//radius = GetComponentInChildren<SphereCollider>().radius;
 			defaultDistance = (target.position - cameraTransform.position).magnitude;
 			targetToDistance = defaultDistance;
 			isInterpolation = false;
@@ -115,7 +115,7 @@ namespace Uxtuno
 			newRotation = oldRotation;
 			defaultTarget = target; // デフォルトのターゲット
 
-			oldPosition = cameraTransform.position;
+			//oldPosition = cameraTransform.position;
 			SetTarget(target);
 		}
 
@@ -170,7 +170,7 @@ namespace Uxtuno
 			currentPositionInterpolationCount += Time.deltaTime * (1 / currentInterpolationSeconds);
 			if (currentPositionInterpolationCount > 1.0f)
 			{
-				oldPosition = cameraTransform.position;
+				//oldPosition = cameraTransform.position;
 				currentPositionInterpolationCount = 1.0f;
 				isPositionInterpolation = false;
 			}
@@ -290,9 +290,9 @@ namespace Uxtuno
 			{
 				isPositionInterpolation = true;
 			}
-			currentPositionInterpolationSeconds = interpolationSeconds;
+			//currentPositionInterpolationSeconds = interpolationSeconds;
 			currentPositionInterpolationCount = 0.0f;
-			oldPosition = cameraTransform.position;
+			//oldPosition = cameraTransform.position;
 		}
 
 		/// <summary>

@@ -4,7 +4,7 @@ using System.Collections;
 public class Recode : MonoBehaviour
 {
 	//A boolean that flags whether there's a connected microphone  
-	private bool micConnected = false;
+	//private bool micConnected = false;
 
 	//The maximum and minimum available recording frequencies  
 	private int minFreq;
@@ -25,7 +25,7 @@ public class Recode : MonoBehaviour
 		else //At least one microphone is present  
 		{
 			//Set 'micConnected' to true  
-			micConnected = true;
+			//micConnected = true;
 
 			//Get the default microphone recording capabilities  
 			Microphone.GetDeviceCaps(null, out minFreq, out maxFreq);

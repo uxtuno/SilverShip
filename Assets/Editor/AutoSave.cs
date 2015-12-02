@@ -3,6 +3,10 @@ using UnityEditor;
 using UnityEngine;
 using System.IO;
 
+
+/// <summary>
+/// 引用元 : テラシュールブログ
+/// </summary>
 [InitializeOnLoad]
 public class AutoSave
 {
