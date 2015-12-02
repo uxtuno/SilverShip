@@ -15,6 +15,8 @@ namespace Kuvo
 		protected override void Start()
 		{
 			base.Start();
+
+			actionTime = Random.Range(1f, 3f);
 		}
 
 		/// <summary>
@@ -22,42 +24,138 @@ namespace Kuvo
 		/// </summary>
 		protected override void Move()
 		{
-			if (enemy.currentState == Enemy.ActionState.Bone || enemy.currentState == Enemy.ActionState.Idle)
+			Action();
+		}
+
+		private void Action()
+		{
+			// 攻撃動作中なら何もしない
+			if (enemy.isAttack)
 			{
-				enemy.currentState = Enemy.ActionState.Move;
+				return;
 			}
 
 			if (enemy.isPlayerLocate)
 			{
-				if (CheckDistance(player.lockOnPoint.position, attackStateRange))
+				#region - プレイヤーを発見しているときの3態
+				switch (currentState)
 				{
-					Attack();
-				}
+					case ActionState.Waiting:
+						if(enemy.currentState != Enemy.EnemyState.Idle)
+						{
+							enemy.currentState = Enemy.EnemyState.Idle;
+						}
+						break;
 
-				Vector3 playerPosition = player.lockOnPoint.position;
-				playerPosition.y = transform.position.y;
+					case ActionState.Moving:
+						Vector3 playerPosition = player.lockOnPoint.position;
+						playerPosition.y = transform.position.y;
 
-				// プレイヤーの方向へ向きを変える
-				transform.LookAt(playerPosition);
-				if (Mathf.Abs(transform.position.x - playerPosition.x) > 0.5f || Mathf.Abs(transform.position.z - playerPosition.z) > 0.5f)
-				{
-					transform.Translate(Vector3.forward * speed * Time.deltaTime);
+						// プレイヤーの方向へ向きを変える
+						transform.LookAt(playerPosition);
+
+						// プレイヤーに重ならない程度にエネミーを動かす
+						if (Mathf.Abs(transform.position.x - playerPosition.x) > 0.8f || Mathf.Abs(transform.position.z - playerPosition.z) > 1f)
+						{
+							if (enemy.currentState != Enemy.EnemyState.Move)
+							{
+								enemy.currentState = Enemy.EnemyState.Move;
+							}
+						}
+						else
+						{
+							if (enemy.currentState != Enemy.EnemyState.Idle)
+							{
+								enemy.currentState = Enemy.EnemyState.Idle;
+							}
+						}
+						break;
+
+					case ActionState.Attacking:
+						if(enemy.currentState != Enemy.EnemyState.SAttack)
+						{
+							enemy.currentState = Enemy.EnemyState.SAttack;
+						}
+						break;
 				}
-				else
+				#endregion
+			}
+			else
+			{
+				#region - プレイヤーを探しているときの3態
+				switch (currentState)
 				{
-					if (enemy.currentState != Enemy.ActionState.Attack)
-					{
-						enemy.currentState = Enemy.ActionState.Idle;
-					}
+					case ActionState.Waiting:
+						if (enemy.currentState != Enemy.EnemyState.Idle)
+						{
+							enemy.currentState = Enemy.EnemyState.Idle;
+						}
+						break;
+					case ActionState.Moving:
+						if(enemy.currentState != Enemy.EnemyState.Move)
+						{
+							enemy.currentState = Enemy.EnemyState.Move;
+						}
+						break;
+					case ActionState.Attacking:
+						break;
+				}
+				#endregion
+			}
+
+			// 行動時間を終えたとき
+			if (actionTime <= 0)
+			{
+				ChangeState();
+				actionTime = Random.Range(1f, 3f);
+			}
+
+			actionTime -= Time.deltaTime;
+		}
+
+		/// <summary>
+		/// 次の状態に変更する
+		/// </summary>
+		private void ChangeState()
+		{
+			if (enemy.isPlayerLocate)
+			{
+				switch (currentState)
+				{
+					case ActionState.Waiting:
+						currentState = ActionState.Moving;
+						break;
+
+					case ActionState.Moving:
+						// 攻撃可能範囲に入っている場合変更
+						if (enemy.CheckDistance(player.lockOnPoint.position, attackStateRange))
+						{
+							currentState = ActionState.Attacking;
+						}
+						break;
+
+					case ActionState.Attacking:
+						// 攻撃可能範囲から外れた場合変更
+						if (!enemy.CheckDistance(player.lockOnPoint.position, attackStateRange))
+						{
+							currentState = ActionState.Moving;
+						}
+						break;
 				}
 			}
 			else
 			{
-				// 見つからなかったときの処理
-					if (enemy.currentState != Enemy.ActionState.Attack)
-					{
-						enemy.currentState = Enemy.ActionState.Idle;
-					}
+				switch (currentState)
+				{
+					case ActionState.Waiting:
+						currentState = ActionState.Moving;
+						break;
+					case ActionState.Moving:
+						currentState = ActionState.Waiting;
+						break;
+					case ActionState.Attacking:
+						break;
+				}
 			}
 		}
 
