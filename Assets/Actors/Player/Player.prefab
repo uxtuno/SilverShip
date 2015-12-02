@@ -58,7 +58,7 @@ GameObject:
   - 4: {fileID: 451632}
   - 143: {fileID: 14376398}
   - 136: {fileID: 13680718}
-  - 114: {fileID: 11471312}
+  - 114: {fileID: 11413070}
   m_Layer: 2
   m_Name: Player
   m_TagString: Player
@@ -5680,6 +5680,27 @@ MonoBehaviour:
   colliders: []
   debug: 1
   threshold: .00999999978
+--- !u!114 &11413070
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 101344}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffcc1de64d0226f4fa2288de76e04138, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxSpeed: 6
+  jumpHeight: 5
+  highJumpHeight: 10
+  horizontalRotationSpeed: 120
+  verticaltalRotationSpeed: 50
+  autoLockOnIconPrefab: {fileID: 178232, guid: 5472ecbd9faeb7b469a481afbf81a34a, type: 2}
+  manualLockOnIconPrefab: {fileID: 130692, guid: e75ab60926afa1740a30bd6bec98549f,
+    type: 2}
+  playerAttackEffectPrefab: {fileID: 120926, guid: 087b282d2a64a524a9c2fccbeeb8ec2b,
+    type: 2}
 --- !u!114 &11413996
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -6313,27 +6334,6 @@ MonoBehaviour:
   - {fileID: 11424566}
   debug: 1
   threshold: .00999999978
---- !u!114 &11471312
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 101344}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ffcc1de64d0226f4fa2288de76e04138, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxSpeed: 6
-  jumpHeight: 5
-  highJumpHeight: 10
-  horizontalRotationSpeed: 120
-  verticaltalRotationSpeed: 50
-  autoLockOnIconPrefab: {fileID: 178232, guid: 5472ecbd9faeb7b469a481afbf81a34a, type: 2}
-  manualLockOnIconPrefab: {fileID: 130692, guid: e75ab60926afa1740a30bd6bec98549f,
-    type: 2}
-  playerAttackEffectPrefab: {fileID: 120926, guid: 087b282d2a64a524a9c2fccbeeb8ec2b,
-    type: 2}
 --- !u!114 &11471680
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -6716,7 +6716,7 @@ CapsuleCollider:
   m_GameObject: {fileID: 101344}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   m_Radius: .400000006
   m_Height: 2
   m_Direction: 1
@@ -7934,7 +7934,7 @@ CharacterController:
   m_Enabled: 1
   serializedVersion: 2
   m_Height: 2
-  m_Radius: .400000006
+  m_Radius: .200000003
   m_SlopeLimit: 45
   m_StepOffset: .400000006
   m_SkinWidth: .0799999982

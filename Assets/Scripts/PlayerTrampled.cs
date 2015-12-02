@@ -9,7 +9,7 @@ namespace Uxtuno
 	public class PlayerTrampled : MyMonoBehaviour
 	{
 		private ContainedObjects trampledEnemies; // 踏みつけ対象エネミー
-		private PlayerInput input = PlayerInput.instance;
+		//private PlayerInput input = PlayerInput.instance;
 
 		void Start()
 		{
