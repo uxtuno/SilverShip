@@ -1,83 +1,313 @@
 ﻿using UnityEngine;
 using System.Linq;
+using System.Collections.Generic;
 using Kuvo;
 
 //[RequireComponent(typeof(CharacterController))]
 
 namespace Uxtuno
 {
-	// 状態遷移プログラミングにより、各状態の処理はすべて状態メソッドの中に記述している
-
-	/// <summary>
-	/// プレイヤーの動作全般
-	/// </summary>
 	public class Player : Actor
 	{
 		[Tooltip("歩く速さ(単位:m/s)"), SerializeField]
 		private float maxSpeed = 5.0f; // 移動速度
-									   //[Tooltip("走る速さ(単位:m/s)"), SerializeField]
-									   //private float minSpeed = 1.0f; // 移動速度(ダッシュ時)
 		[Tooltip("ジャンプの高さ(単位:m)"), SerializeField]
-		private float jumpHeight = 2.0f;
+		private float jumpHeight = 5.0f;
 		[Tooltip("ハイジャンプの高さ(単位:m)"), SerializeField]
 		private float highJumpHeight = 10.0f;
 		[Tooltip("水平方向のカメラ移動速度"), SerializeField]
 		private float horizontalRotationSpeed = 120.0f; // 水平方向へのカメラ移動速度
 		[Tooltip("垂直方向のカメラ移動速度"), SerializeField]
 		private float verticaltalRotationSpeed = 40.0f; // 垂直方向へのカメラ移動速度
-		private const float near = 0.5f; // カメラに映る最小距離
-		private const float maxCameraRotateY = 5.0f; // プレイヤーが移動したときの最大カメラ回転量
-		private float gravityForce = 1.5f;
+		private static readonly float near = 0.5f; // カメラに映る最小距離
+		private static readonly float maxCameraRotateY = 5.0f; // プレイヤーが移動したときの最大カメラ回転量
 
-		private float jumpVY = 0.0f;
-		private float jumpPower;
-		private float highJumpPower;
-
-		private CharacterController characterController;
-		private CameraController cameraController;
-		private ContainedObjects containedObjects;
-
-		private Animator animator;
-		private Transform playerMesh;
-		private int speedId;
-		private int isJumpId;
-
-		private PlayerInput playerInput;
-		private Vector3 _moveVector = Vector3.zero;
-		private bool isGrounded; // 地面に着いているか
-
-		private static readonly Vector3 cameraFront = new Vector3(0.0f, -0.1f, 1.0f);
+		private PlayerInput playerInput = PlayerInput.instance;
+		private CharacterController characterController; // キャラクターコントローラー
+		private CameraController cameraController; // キャラクターコントローラー
+		private Transform meshRoot; // プレイヤーメッシュのルート
+		private Animator animator; // アニメーションのコントロール用
 
 		/// <summary>
-		/// 直前の移動ベクトル
+		/// ジャンプ状態
 		/// </summary>
-		public Vector3 moveVector
+		public enum JumpState
 		{
-			get { return _moveVector; }
-			private set { _moveVector = value; }
+			None, // ジャンプ中ではない
+			Jumping, // ジャンプ状態
+			HighJumping, // ハイジャンプ状態
 		}
 
-		// プレイヤーの状態
-		private enum State
+		private JumpState currentJumpState = JumpState.None; // 現在のジャンプ状態
+		private float jumpPower; // ジャンプの初速
+		private float highJumpPower; // ハイジャンプの初速
+		private float jumpVY = 0.0f; // ジャンプ中のY軸方向の移動量
+
+		private abstract class BaseState
 		{
-			None,
-			Normal, // 待機、移動
-			Depression, // 踏み込み中
-			Jumping, // ジャンプ中
-			HighJumping, // ハイジャンプ中
-			Fall, // 落下中
-			Attack, // 攻撃状態
-			TwoJump, // 二段ジャンプ
+			protected PlayerInput playerInput = PlayerInput.instance;
+			protected Player player;
+			public BaseState(Player player)
+			{
+				this.player = player;
+			}
+
+			/// <summary>
+			/// 状態ごとの動作
+			/// </summary>
+			public abstract void Move();
 		}
 
-		private State currentState; // 現在の状態
-		private State oldState; // 前のフレームでの状態
-		private float count; // 各状態で使う共通のカウンタ
+		private BaseState currentState; // 現在の状態
 
-		private float twoJumpForce;
-		private float twoJumpAttenuation = 0.5f;
-		private Vector3 twoJumpDirection;
+		#region - 各状態ごとの動作クラス
 
+		/// <summary>
+		/// 通常時(地上)
+		/// </summary>
+		private class NormalState : BaseState
+		{
+			private enum HighJumpInput
+			{
+				None,
+				Jump,
+				Attack,
+				HighJump = Jump | Attack,
+			}
+
+			private HighJumpInput highJumpInput; // ハイジャンプ入力受付用
+			private static readonly float highJumpInputSeconds = 0.1f; // ハイジャンプ入力同時押し猶予時間
+			private float highJumpInputCount; // ハイジャンプ入力受付カウンタ
+
+			public NormalState(Player player)
+				: base(player)
+			{
+				// 接地しているのでジャンプ状態を解除
+				player.currentJumpState = JumpState.None;
+				player.jumpVY = 0.0f;
+			}
+
+			public override void Move()
+			{
+				if (!player.isGrounded && highJumpInput == HighJumpInput.None)
+				{
+					player.currentState = new AirState(player);
+					return;
+				}
+
+				Vector3 moveDirection = player.calclateMoveDirection();
+				float speed = player.maxSpeed;
+
+				if (highJumpInput != HighJumpInput.None)
+				{
+					highJumpInputCount += Time.deltaTime;
+					if (highJumpInputCount >= highJumpInputSeconds)
+					{
+						// 同時押しではなかったので通常の動作
+						if (highJumpInput == HighJumpInput.Jump)
+						{
+							player.jumpVY = player.jumpPower;
+							player.currentJumpState = JumpState.Jumping;
+							player.currentState = new DepressionState(player);
+							return;
+						}
+
+						highJumpInputCount = 0.0f;
+						highJumpInput = HighJumpInput.None;
+					}
+				}
+
+				if (player.playerInput.jump)
+				{
+					highJumpInput |= HighJumpInput.Jump;
+				}
+
+				if (player.playerInput.attack)
+				{
+					highJumpInput |= HighJumpInput.Attack;
+				}
+
+				// ハイジャンプ入力
+				if (highJumpInput == HighJumpInput.HighJump)
+				{
+					player.jumpVY = player.highJumpPower;
+					player.currentJumpState = JumpState.HighJumping;
+					highJumpInput = HighJumpInput.None;
+					player.currentState = new DepressionState(player);
+					return;
+				}
+				else if (highJumpInput != HighJumpInput.None)
+				{
+					return;
+				}
+
+				// 地上にいるので重力による落下量は0から計算
+				player.jumpVY = 0.0f;
+				player.Gravity();
+				Vector3 moveVector = moveDirection * speed;
+				moveVector.y = player.jumpVY;
+
+				player.characterController.Move(moveVector * Time.deltaTime);
+				if (moveDirection != Vector3.zero)
+				{
+					Vector3 newAngles = Vector3.zero;
+					newAngles.y = Mathf.Atan2(moveVector.x, moveVector.z) * Mathf.Rad2Deg;
+					player.meshRoot.eulerAngles = newAngles;
+				}
+			}
+		}
+
+		/// <summary>
+		/// 空中
+		/// </summary>
+		private class AirState : BaseState
+		{
+			private static readonly float movementRestriction = 0.5f; // この値を掛けることで移動速度を制限
+			private static readonly float airDashPossibleSeconds = 0.4f; // 空中ダッシュが可能になる時間
+			private static readonly float airDashDisableSeconds = 1.4f; // 空中ダッシュが可能になる時間
+			private float airDashPossibleCount; // 空中ダッシュが可能になる時間のカウンタ
+			public AirState(Player player)
+				: base(player)
+			{
+			}
+
+			public override void Move()
+			{
+				airDashPossibleCount += Time.deltaTime;
+
+				// 接地しているので通常状態に
+				if (player.isGrounded && player.jumpVY <= 0.0f)
+				{
+					player.currentState = new NormalState(player);
+					return;
+				}
+
+				Vector3 moveDirection = player.calclateMoveDirection();
+				float speed = player.maxSpeed * movementRestriction;
+
+				if (player.isGrounded && player.jumpVY <= 0.0f)
+				{
+					player.currentState = new NormalState(player);
+				}
+
+				player.Gravity();
+				Vector3 moveVector = moveDirection * speed;
+				moveVector.y = player.jumpVY;
+
+				player.characterController.Move(moveVector * Time.deltaTime);
+				if (moveDirection != Vector3.zero)
+				{
+					Vector3 newAngles = Vector3.zero;
+					newAngles.y = Mathf.Atan2(moveVector.x, moveVector.z) * Mathf.Rad2Deg;
+					player.meshRoot.eulerAngles = newAngles;
+				}
+
+				if (playerInput.jump && player.currentJumpState == JumpState.Jumping)
+				{
+					// 一定期間内なら空中ダッシュ
+					if (airDashPossibleCount > airDashPossibleSeconds && airDashPossibleCount < airDashDisableSeconds)
+					{
+						player.currentState = new AirDashState(player);
+					}
+					return;
+				}
+			}
+		}
+
+		/// <summary>
+		/// 空中ダッシュ
+		/// </summary>
+		private class AirDashState : BaseState
+		{
+			private static readonly float initialVelocity = 22.0f; // 初速
+			private static readonly float fallStartSpeed = 18.0f; // 落下開始速度
+			private static readonly float transitionSpeed = 12.0f; // 次の状態へ遷移する速度
+			private static readonly float fallDeceleration = 0.4f; // 落下中の減速量
+			private static readonly float deceleration = 0.2f; // 減速量
+			private float speed; // 速度
+			private static readonly float controllSpeed = 2.5f; // 入力による速度
+
+			public AirDashState(Player player)
+				: base(player)
+			{
+				speed = initialVelocity;
+				player.jumpVY = 0.0f;
+			}
+
+			public override void Move()
+			{
+				Vector3 moveVector = player.GetDirectionXZ();
+				moveVector *= speed;
+
+				moveVector += player.calclateMoveDirection() * controllSpeed;
+				if (speed <= fallStartSpeed)
+				{
+					player.Gravity();
+					moveVector.y = player.jumpVY;
+
+					if (speed <= transitionSpeed)
+					{
+						player.currentState = new AirState(player);
+						return;
+					}
+					speed -= fallDeceleration;
+
+					if (!Input.GetButton(InputName.Jump))
+					{
+						player.currentState = new AirState(player);
+						return;
+					}
+				}
+				else
+				{
+					speed -= deceleration;
+				}
+
+				player.characterController.Move(moveVector * Time.deltaTime);
+			}
+		}
+
+		/// <summary>
+		/// 踏み込み状態
+		/// </summary>
+		private class DepressionState : BaseState
+		{
+			private float transitionCount; // 次の状態へ遷移するまでの時間をカウント
+			private static readonly float transitionSeconds = 0.1f; // 次の状態へ遷移するまでの時間
+			public DepressionState(Player player)
+				: base(player)
+			{
+			}
+
+			public override void Move()
+			{
+				transitionCount += Time.deltaTime;
+				if (transitionCount > transitionSeconds)
+				{
+					player.currentState = new AirState(player);
+				}
+			}
+		}
+
+		/// <summary>
+		/// 対象へダッシュ(ロックオン対象など)
+		/// </summary>
+		private class DashToTargetState : BaseState
+		{
+			public DashToTargetState(Player player)
+				: base(player)
+			{
+			}
+
+			public override void Move()
+			{
+			}
+		}
+
+		#endregion
+
+		#region - フィールド
+		private ContainedObjects containedObjects;
 		private Actor lockOnTarget; // ロックオン対象エネミー
 		[SerializeField]
 		private GameObject autoLockOnIconPrefab = null;
@@ -89,139 +319,113 @@ namespace Uxtuno
 		private Transform manualLockOnIcon = null;
 
 		[SerializeField]
-		private GameObject playerAttackEffectPrefab = null;
+		//private GameObject playerAttackEffectPrefab = null;
 		private GameObject playerAttackEffect;
 
 		private Transform lookPoint; // カメラの中止点
 		private bool isCameraInvalidControll = false; // カメラ操作不能状態
 
 		private PlayerTrampled playerTrampled; // 踏みつけジャンプ動作
-
-		void Awake()
-		{
-			cameraController = GetComponentInChildren<CameraController>();
-		}
+		#endregion
 
 		void Start()
 		{
-			//this.GetSafeComponent<Enemy>();
-
-			// 指定の高さまで飛ぶための初速を計算
-			jumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * gravityForce * jumpHeight);
-			highJumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * gravityForce * highJumpHeight);
 			characterController = GetComponent<CharacterController>();
-			characterController.detectCollisions = false;
-			if (cameraController == null)
-			{
-				Debug.LogError("プレイヤーにカメラがありません");
-			}
-			containedObjects = GetComponentInChildren<ContainedObjects>();
-
+			cameraController = this.GetComponentInChildren<CameraController>();
 			animator = GetComponentInChildren<Animator>(); // アニメーションをコントロールするためのAnimatorを子から取得
-			playerMesh = animator.transform; // Animatorがアタッチされているのがメッシュのはずだから
+			meshRoot = animator.transform; // Animatorがアタッチされているのがメッシュのはずだから
 
-			// ハッシュIDを取得しておく
-			speedId = Animator.StringToHash("Speed");
-			isJumpId = Animator.StringToHash("IsJump");
+			// 初期状態へ
+			currentState = new NormalState(this);
 
-			currentState = State.Normal;
-			oldState = currentState;
-			animator.SetFloat(speedId, maxSpeed);
+			// ジャンプできる高さから初速を計算(√2gh)
+			jumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * jumpHeight);
+			highJumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * highJumpHeight);
 
-			// プレイヤーの入力を管理するクラス
-			playerInput = PlayerInput.instance;
-			ChangeState(State.Normal);
-
-			playerTrampled = GetComponentInChildren<PlayerTrampled>();
+			containedObjects = GetComponentInChildren<ContainedObjects>();
+			if (containedObjects == null)
+			{
+				Debug.Log(typeof(ContainedObjects) + " が見つかりません");
+			}
 		}
+
+		Vector3 cameraFront = new Vector3(0.0f, -0.2f, 1.0f);
 
 		void Update()
 		{
-			// カメラに近すぎると非表示に
-			if (cameraController.targetToDistance < near)
+			if(near > cameraController.targetToDistance)
 			{
 				isShow = false;
 			}
-			else if (!isShow)
+			else
 			{
 				isShow = true;
 			}
 
-			//Move(); // プレイヤーの移動など
-			moveVector = Vector3.zero;
-
-			do
+			if (playerInput.lockOn)
 			{
-				oldState = currentState;
-				switch (currentState)
+				if (!isManualLockOn)
 				{
-					case State.Normal:
-						Normal();
-						break;
-					case State.Depression:
-						Depression();
-						break;
-					case State.Jumping:
-					case State.HighJumping:
-						Jumping();
-						break;
-					case State.Fall:
-						Fall();
-						break;
-					case State.Attack:
-						Attack();
-						break;
-					case State.TwoJump:
-						TwoJump();
-						break;
+					LockOn();
 				}
-			} while (oldState != currentState);
+				else
+				{
+					ManualLockOnRelease();
+				}
+			}
+
+			if (playerInput.cameraToFront)
+			{
+				cameraController.SetNextRotation(Quaternion.LookRotation(meshRoot.rotation * cameraFront), 0.3f, CameraController.InterpolationMode.Curve);
+				isCameraInvalidControll = true;
+			}
+			checkGrounded();
+
+			BaseState oldState;
 
 			// カメラの回転入力
 			Vector2 cameraMove = Vector3.zero;
 			cameraMove.x = playerInput.cameraHorizontal;
 			cameraMove.y = playerInput.cameraVertical;
 			float cameraRotateY = 0.0f; // プレイヤーが移動したときのカメラ回転量
-			_moveVector.y = jumpVY;
-			if (moveVector != Vector3.zero)
+			Vector3 oldCameraPosition = cameraController.cameraTransform.position;
+			Vector3 old = transform.position - oldCameraPosition;
+			do
 			{
-				Vector3 oldCameraPosition = cameraController.cameraTransform.position;
-				// プレイヤー移動前
-				Vector3 old = transform.position - oldCameraPosition;
-				characterController.Move(moveVector * Time.deltaTime);
-				// プレイヤー移動後
-				Vector3 now = transform.position - oldCameraPosition;
+				oldState = currentState;
+				// 現在の状態の動作を実行
+				currentState.Move();
+			} while (currentState != oldState);
+			Vector3 now = transform.position - oldCameraPosition;
+			// プレイヤーが移動した時のY軸カメラ回転量を計算
+			cameraRotateY = Mathf.Atan2(now.x * old.z - now.z * old.x, now.x * old.x + now.z * old.z) * Mathf.Rad2Deg;
+			cameraRotateY = Mathf.Clamp(cameraRotateY, -maxCameraRotateY, maxCameraRotateY);
 
-				// プレイヤーが移動した時のY軸カメラ回転量を計算
-				cameraRotateY = Mathf.Atan2(now.x * old.z - now.z * old.x, now.x * old.x + now.z * old.z) * Mathf.Rad2Deg;
-				cameraRotateY = Mathf.Clamp(cameraRotateY, -maxCameraRotateY, maxCameraRotateY);
-
-				float minDistance2 = 999.0f;
-				Transform tempLockOnTarget = null; // ロックオン対象候補を入れる
-				foreach (Transform enemy in containedObjects)
+			float minDistance2 = 999.0f;
+			Transform tempLockOnTarget = null; // ロックオン対象候補を入れる
+			foreach (Transform enemy in containedObjects)
+			{
+				float distance2 = (transform.position - enemy.position).sqrMagnitude;
+				if (minDistance2 > distance2)
 				{
-					float distance2 = (transform.position - enemy.position).sqrMagnitude;
-					if (minDistance2 > distance2)
-					{
-						minDistance2 = distance2;
-						tempLockOnTarget = enemy;
-					}
+					minDistance2 = distance2;
+					tempLockOnTarget = enemy;
 				}
+			}
 
-				// ロックオン対象が決定したので正式にロックオン
-				if (!isManualLockOn && tempLockOnTarget != null && lockOnTarget != tempLockOnTarget.GetComponent<Actor>())
+			// ロックオン対象が決定したので正式にロックオン
+			if (!isManualLockOn && tempLockOnTarget != null && lockOnTarget != tempLockOnTarget.GetComponent<Actor>())
+			{
+				lockOnTarget = tempLockOnTarget.GetComponent<Actor>();
+				if (autoLockOnIcon == null)
 				{
-					lockOnTarget = tempLockOnTarget.GetComponent<Actor>();
-					if (autoLockOnIcon == null)
-					{
-						autoLockOnIcon = Instantiate(autoLockOnIconPrefab).transform;
-					}
-					autoLockOnIcon.parent = lockOnTarget.transform;
-					print(lockOnTarget.ToString() + "をロックオンしました");
-					//Camera.main.WorldToViewportPoint(lockOnTarget.lockOnPoint.position);
-					autoLockOnIcon.position = lockOnTarget.lockOnPoint.position;
-					autoLockOnIcon.GetSafeComponent<LockOnIcon>().lockOnPoint = lockOnTarget.lockOnPoint;
+					autoLockOnIcon = Instantiate(autoLockOnIconPrefab).transform;
 				}
+				autoLockOnIcon.parent = lockOnTarget.transform;
+				print(lockOnTarget.ToString() + "をロックオンしました");
+				//Camera.main.WorldToViewportPoint(lockOnTarget.lockOnPoint.position);
+				autoLockOnIcon.position = lockOnTarget.lockOnPoint.position;
+				autoLockOnIcon.GetSafeComponent<LockOnIcon>().lockOnPoint = lockOnTarget.lockOnPoint;
 			}
 
 			float limitDistance = 6.0f;
@@ -306,253 +510,6 @@ namespace Uxtuno
 			}
 		}
 
-		private void Normal()
-		{
-			Gravity();
-			Vector3 direction = Vector3.zero;
-
-			if (playerInput.lockOn)
-			{
-				if (!isManualLockOn)
-				{
-					LockOn();
-				}
-				else
-				{
-					ManualLockOnRelease();
-				}
-			}
-
-			if (playerInput.cameraToFront)
-			{
-				cameraController.SetNextRotation(Quaternion.LookRotation(playerMesh.rotation * cameraFront), 0.3f, CameraController.InterpolationMode.Curve);
-				isCameraInvalidControll = true;
-			}
-
-			if (lockOnTarget != null)
-			{
-				if (playerInput.attack)
-				{
-					Vector3 rotateAngles = Vector3.zero;
-					direction = lockOnTarget.lockOnPoint.position - transform.position;
-					// xz平面の進行方向から、Y軸回転角を得る
-					rotateAngles.y = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
-					playerMesh.eulerAngles = rotateAngles;
-					ChangeState(State.Attack);
-					return;
-				}
-			}
-
-			// 数フレームは地面に着いているものとし、ジャンプ入力を有効にする
-			if (isGrounded)
-			{
-				if (!characterController.isGrounded)
-				{
-					if (count > 0.1f)
-					{
-						isGrounded = false;
-						// 落下状態へ移行
-						ChangeState(State.Fall);
-						return;
-					}
-					else
-					{
-						count += Time.deltaTime;
-					}
-				}
-				else
-				{
-					jumpVY = 0.0f;
-					count = 0;
-				}
-			}
-			else
-			{
-				if (characterController.isGrounded)
-				{
-					jumpVY = 0.0f;
-					isGrounded = true;
-				}
-			}
-
-			direction = calclateMoveDirection();
-			float speed = maxSpeed;
-			if (direction != Vector3.zero)
-			{
-				Vector3 rotateAngles = Vector3.zero;
-
-				// xz平面の進行方向から、Y軸回転角を得る
-				rotateAngles.y = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
-				playerMesh.eulerAngles = rotateAngles;
-				moveVector = playerMesh.forward * speed;
-				animator.SetFloat(speedId, speed);
-			}
-			else
-			{
-				animator.SetFloat(speedId, 0.0f); // 待機アニメーション
-			}
-
-			if (isGrounded)
-			{
-				// ジャンプさせる
-				if (playerInput.jump)
-				{
-					ChangeState(State.Depression);
-				}
-			}
-		}
-
-		/// <summary>
-		/// 踏み込み中
-		/// </summary>
-		private void Depression()
-		{
-			if (count < 0.3f)
-			{
-				count += Time.deltaTime;
-				if (playerInput.attack)
-				{
-					jumpVY = highJumpPower;
-					ChangeState(State.HighJumping);
-				}
-			}
-			else
-			{
-				jumpVY = jumpPower;
-				ChangeState(State.Jumping);
-			}
-		}
-
-		/// <summary>
-		/// ジャンプ中
-		/// </summary>
-		private void Jumping()
-		{
-			Vector3 direction = calclateMoveDirection();
-			if (direction != Vector3.zero)
-			{
-				//// xz平面の進行方向から、Y軸回転角を得る
-				Vector3 angles = playerMesh.eulerAngles;
-				angles.y = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
-				playerMesh.eulerAngles = angles;
-			}
-
-			if (playerInput.jump && currentState == State.Jumping && count > 0.3f)
-			{
-				twoJumpDirection = playerMesh.forward;
-				twoJumpForce = 15.0f;
-				ChangeState(State.TwoJump);
-				jumpVY = 0.0f;
-				return;
-			}
-
-			float speed = 3.0f;
-			if (direction != Vector3.zero)
-			{
-				moveVector = direction * speed;
-			}
-
-			// ジャンプしてからの経過時間
-			count += Time.deltaTime;
-			Gravity();
-
-			if (characterController.isGrounded && count > 1.0f)
-			{
-				ChangeState(State.Normal);
-				return;
-			}
-
-			if (jumpVY < -3.0f)
-			{
-				// 落下状態へ移行
-				currentState = State.Fall;
-			}
-		}
-
-		private void Fall()
-		{
-			Vector3 direction = Vector3.zero;
-			// directionは進行方向を表すので上下入力はzに格納
-			direction.x = Input.GetAxisRaw(InputName.Horizontal);
-			direction.z = Input.GetAxisRaw(InputName.Vertical);
-			direction.Normalize();
-
-			float speed = 3.0f;
-			moveVector = twoJumpDirection * twoJumpForce;
-			twoJumpForce -= twoJumpAttenuation * 6.0f;
-			if (twoJumpForce < 0.0f)
-			{
-				twoJumpForce = 0.0f;
-			}
-
-			if (direction != Vector3.zero)
-			{
-				// カメラの方向を加味して進行方向を計算
-				direction = cameraController.cameraTransform.rotation * direction;
-				moveVector += direction * speed;
-			}
-
-			// 踏みつけジャンプ
-			if(playerInput.jump)
-			{
-				playerTrampled.Trampled(10, 1.0f);
-				ChangeState(State.Depression);
-				return;
-			}
-
-			Gravity();
-			if (characterController.isGrounded)
-			{
-				ChangeState(State.Normal);
-				jumpVY = 0.0f;
-			}
-		}
-
-		private void TwoJump()
-		{
-			moveVector = twoJumpDirection * twoJumpForce;
-			twoJumpForce -= twoJumpAttenuation * Time.deltaTime;
-			if (twoJumpForce < 13.0f || !Input.GetButton(InputName.Jump))
-			{
-				jumpVY = 0.0f;
-				ChangeState(State.Fall);
-			}
-		}
-
-		private void Attack()
-		{
-			count += Time.deltaTime;
-			if (count > 1.0f)
-			{
-				Destroy(playerAttackEffect);
-				ChangeState(State.Normal);
-			}
-		}
-
-		/// <summary>
-		/// 入力方向とカメラの向きから進行方向ベクトルを計算
-		/// </summary>
-		/// <returns>進行方向</returns>
-		private Vector3 calclateMoveDirection()
-		{
-			Vector3 direction = Vector3.zero;
-			// directionは進行方向を表すので上下入力はzに格納
-			direction.x = playerInput.horizontal;
-			direction.z = playerInput.vertical;
-			direction.Normalize();
-
-			// カメラの方向を加味して進行方向を計算
-			return cameraController.cameraTransform.rotation * direction;
-		}
-
-		/// <summary>
-		/// 重力による加速度の計算をする
-		/// </summary>
-		private void Gravity()
-		{
-			jumpVY += Physics.gravity.y * gravityForce * Time.deltaTime;
-		}
-
 		private const float LockOnAngleHulfRange = 45.0f; // ロックオン可能角度の半分
 		private const float LockOnDistance = 20.0f; // ロックオン可能距離
 
@@ -574,7 +531,7 @@ namespace Uxtuno
 				{
 					float distance = (enemy.position - transform.position).sqrMagnitude;
 					// 最も近い対象をロックオン
-					if(distance < minDistance)
+					if (distance < minDistance)
 					{
 						minDistance = distance;
 						lockOnEnemy = enemy;
@@ -637,39 +594,68 @@ namespace Uxtuno
 			}
 		}
 
+
+		private const float unGroundedSeconds = 0.08f; // 地面から離れたとみなす時間
+		private float ungroundedCount = 0.0f; // characterController.isGroundedがfalseを返してからの時間
+		private bool isGrounded; // 実際に地面に接触しているか
+
 		/// <summary>
-		/// 状態を変更
-		/// 変更した瞬間の処理はここに書く
+		/// 実際に地面に接触しているかを調べる
+		/// CharacterControllerのisGroundedが信用ならないので、数フレーム分のisGroundedを見る
 		/// </summary>
-		/// <param name="newState"></param>
-		private void ChangeState(State newState)
+		private void checkGrounded()
 		{
-			count = 0;
-			switch (newState)
+			if (!characterController.isGrounded)
 			{
-				case State.Normal:
-					animator.SetBool(isJumpId, false);
-					twoJumpForce = 0.0f;
-					break;
-				case State.Depression:
-					animator.SetBool(isJumpId, true);
-					break;
-				case State.Jumping:
-					break;
-				case State.TwoJump:
-					break;
-				case State.Fall:
-					break;
-				case State.Attack:
-					playerAttackEffect = (GameObject)Instantiate(playerAttackEffectPrefab, transform.position, playerMesh.rotation);
-					Vector3 position = cameraController.transform.position;
-					//position.y = cameraController.cameraTransform.position.y; // 高さは現在のカメラの高さを参照
-
-					//cameraController.SetRotation(Quaternion.LookRotation(lockOnTarget.lockOnPoint.position - position));
-					break;
+				ungroundedCount += Time.deltaTime;
+				if (ungroundedCount > unGroundedSeconds)
+				{
+					// 地面から離れた
+					isGrounded = false;
+				}
 			}
+			else
+			{
+				// 接地
+				isGrounded = true;
+				ungroundedCount = 0.0f;
+			}
+		}
 
-			currentState = newState;
+		/// <summary>
+		/// 重力計算
+		/// </summary>
+		private void Gravity()
+		{
+			jumpVY += Physics.gravity.y * Time.deltaTime;
+		}
+
+		/// <summary>
+		/// XZ平面上で現在向いている方向を返す
+		/// </summary>
+		/// <returns></returns>
+		public Vector3 GetDirectionXZ()
+		{
+			Vector3 forward = meshRoot.forward;
+			forward.y = 0.0f;
+			return forward.normalized;
+		}
+
+		/// <summary>
+		/// 入力方向とカメラの向きから進行方向ベクトルを計算
+		/// </summary>
+		/// <returns>進行方向</returns>
+		private Vector3 calclateMoveDirection()
+		{
+			Vector3 input = Vector3.zero;
+			// directionは進行方向を表すので上下入力はzに格納
+			input.x = playerInput.horizontal;
+			input.z = playerInput.vertical;
+			input.Normalize();
+			Vector3 direction = cameraController.cameraTransform.rotation * input;
+			direction.y = 0.0f;
+			// カメラの方向を加味して進行方向を計算
+			return direction;
 		}
 	}
 }
