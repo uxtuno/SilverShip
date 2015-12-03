@@ -50,8 +50,6 @@ namespace Kuvo
 				StartCoroutine(LongRangeAttack());
 			}
 
-			print(currentState);
-
 			if (currentState != oldState)
 			{
 				switch (currentState)

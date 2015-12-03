@@ -28,6 +28,9 @@ namespace Uxtuno
 		private Transform meshRoot; // プレイヤーメッシュのルート
 		private Animator animator; // アニメーションのコントロール用
 
+		private int speedID;
+		private int isJumpID;
+
 		/// <summary>
 		/// ジャンプ状態
 		/// </summary>
@@ -85,6 +88,7 @@ namespace Uxtuno
 				// 接地しているのでジャンプ状態を解除
 				player.currentJumpState = JumpState.None;
 				player.jumpVY = 0.0f;
+				player.animator.SetBool(player.isJumpID, false);
 			}
 
 			public override void Move()
@@ -153,6 +157,11 @@ namespace Uxtuno
 					Vector3 newAngles = Vector3.zero;
 					newAngles.y = Mathf.Atan2(moveVector.x, moveVector.z) * Mathf.Rad2Deg;
 					player.meshRoot.eulerAngles = newAngles;
+					player.animator.SetFloat(player.speedID, speed);
+				}
+				else
+				{
+					player.animator.SetFloat(player.speedID, 0.0f);
 				}
 			}
 		}
@@ -277,6 +286,7 @@ namespace Uxtuno
 			public DepressionState(Player player)
 				: base(player)
 			{
+				player.animator.SetBool(player.isJumpID, true);
 			}
 
 			public override void Move()
@@ -335,9 +345,6 @@ namespace Uxtuno
 			animator = GetComponentInChildren<Animator>(); // アニメーションをコントロールするためのAnimatorを子から取得
 			meshRoot = animator.transform; // Animatorがアタッチされているのがメッシュのはずだから
 
-			// 初期状態へ
-			currentState = new NormalState(this);
-
 			// ジャンプできる高さから初速を計算(√2gh)
 			jumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * jumpHeight);
 			highJumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * highJumpHeight);
@@ -347,6 +354,12 @@ namespace Uxtuno
 			{
 				Debug.Log(typeof(ContainedObjects) + " が見つかりません");
 			}
+
+			speedID = Animator.StringToHash("Speed");
+			isJumpID = Animator.StringToHash("IsJump");
+
+			// 初期状態へ
+			currentState = new NormalState(this);
 		}
 
 		Vector3 cameraFront = new Vector3(0.0f, -0.2f, 1.0f);
