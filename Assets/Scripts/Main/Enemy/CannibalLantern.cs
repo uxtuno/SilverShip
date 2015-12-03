@@ -21,6 +21,7 @@ namespace Kuvo
 		[SerializeField]
 		private GameObject bulletPrafab = null;
 		private GameObject bulletCollecter = null;
+		private EnemyState oldState = EnemyState.None;
 
 		protected override void Awake()
 		{
@@ -28,7 +29,6 @@ namespace Kuvo
 			attack = 1;
 			defence = 2;
 			sight = 1.5f;
-			shortRangeAttackAreaObject.GetComponent<AttackArea>().Set(attack, 1.0f);
 		}
 
 		protected override void Start()
@@ -41,44 +41,63 @@ namespace Kuvo
 			//StartCoroutine(Flying(0.5f));
 		}
 
-		float counter = 0;
 		protected override void Update()
 		{
 			base.Update();
-			counter += Time.deltaTime;
+
 			if (Input.GetKeyDown(KeyCode.B))
 			{
 				StartCoroutine(LongRangeAttack());
 			}
 
-			switch (currentState)
+			print(currentState);
+
+			if (currentState != oldState)
 			{
-				case ActionState.Idle:
-					animation.Play("idle");
-					break;
+				switch (currentState)
+				{
+					case EnemyState.None:
+						break;
 
-				case ActionState.Bone:
-					animation.Play("idle");
-					break;
+					case EnemyState.Idle:
+						break;
 
-				case ActionState.Move:
-					animation.Play("walk");
-					break;
+					case EnemyState.Bone:
+						break;
 
-				case ActionState.Attack:
-					animation.Play("attack");
-					break;
+					case EnemyState.Search:
+						break;
 
-				case ActionState.Stagger:
-					animation.Play("fall");
-					break;
+					case EnemyState.SAttack:
+						if (!isAttack)
+						{
+							StartCoroutine(ShortRangeAttack());
+						}
+						break;
 
-				case ActionState.Death:
-					BaseEnemyAI aI = GetComponent<BaseEnemyAI>();
-					aI.StopAllCoroutines();
-					aI.enabled = false;
-					animation.Play("die");
-					break;
+					case EnemyState.LAttack:
+						if (!isAttack)
+						{
+							StartCoroutine(LongRangeAttack());
+						}
+						break;
+
+					case EnemyState.Stagger:
+						break;
+
+					case EnemyState.Death:
+						BaseEnemyAI aI = GetComponent<BaseEnemyAI>();
+						aI.StopAllCoroutines();
+						aI.enabled = false;
+						break;
+				}
+
+				oldState = currentState;
+			}
+
+			if(currentState == EnemyState.Move)
+			{
+				transform.Translate(Vector3.forward * speed * Time.deltaTime);
 			}
 		}
 
@@ -87,17 +106,12 @@ namespace Kuvo
 		/// </summary>
 		protected override IEnumerator AirStagger()
 		{
-			ActionState oldState = currentState;
-			currentState = ActionState.Stagger;
+			EnemyState oldState = currentState;
+			currentState = EnemyState.Stagger;
 			print("ぐはっ！");
-			//GameObject primitiveCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-			//primitiveCube.transform.position = lockOnPoint.position;
-			//primitiveCube.transform.rotation = lockOnPoint.rotation;
-			//primitiveCube.transform.SetParent(transform);
 
 			yield return new WaitForSeconds(1);
 
-			//Destroy(primitiveCube);
 			currentState = oldState;
 		}
 
@@ -115,22 +129,15 @@ namespace Kuvo
 		/// </summary>
 		public override IEnumerator ShortRangeAttack()
 		{
-			if (currentState == ActionState.Attack)
-			{
-				yield break;
-			}
-
-			currentState = ActionState.Attack;
+			isAttack = true;
 
 			// ここに予備動作
 			float counter = 0;
 			while (true)
 			{
 				counter += Time.deltaTime;
-				transform.localScale *= 0.2f;
 				if (counter > 5)
 				{
-					transform.localScale = Vector3.one;
 					break;
 				}
 				yield return new WaitForEndOfFrame();
@@ -141,7 +148,8 @@ namespace Kuvo
 			yield return new WaitForSeconds(1.0f);
 
 			shortRangeAttackAreaObject.SetActive(false);
-			currentState = ActionState.Move;
+			currentState = EnemyState.None;
+			isAttack = false;
 		}
 
 		/// <summary>
@@ -149,13 +157,7 @@ namespace Kuvo
 		/// </summary>
 		public override IEnumerator LongRangeAttack()
 		{
-			if (currentState == ActionState.Attack)
-			{
-				yield break;
-			}
-
-			ActionState oldState = currentState;
-			currentState = ActionState.Attack;
+			isAttack = true;
 
 			yield return new WaitForSeconds(0.5f);
 
@@ -167,7 +169,6 @@ namespace Kuvo
 			if (!bullet)
 			{
 				Destroy(bullet);
-				currentState = oldState;
 				yield break;
 			}
 			else
@@ -177,7 +178,8 @@ namespace Kuvo
 				bullet.transform.SetParent(bulletCollecter.transform);
 			}
 
-			currentState = oldState;
+			currentState = EnemyState.None;
+			isAttack = false;
 		}
 
 		private IEnumerator Flying(float deflectionHeight)

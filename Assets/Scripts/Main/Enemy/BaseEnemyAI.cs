@@ -8,30 +8,19 @@ namespace Kuvo
 	/// エネミーのAIとしての共通動作を規定した抽象クラス
 	/// </summary>
 	[RequireComponent(typeof(Enemy))]
-	abstract public class BaseEnemyAI : MonoBehaviour
+	abstract public class BaseEnemyAI : BaseAI
 	{
-		/// <summary>
-		/// AIレベル一覧
-		/// </summary>
-		protected enum AILevel
+		protected enum ActionState
 		{
 			None,
-			Fool,
-			Nomal,
-			Smart,
+			Waiting,
+			Moving,
+			Attacking,
 		}
-
-		[SerializeField]
-		protected AILevel aILevel = AILevel.None;       // AIのレベル
-		[SerializeField]
-		protected float wait = 3;                       // 開始時の待機時間
-		[SerializeField]
-		protected float speed = 1;                      // 移動速度
-
-		/// <summary>
-		/// プレイヤーの参照を格納する
-		/// </summary>
-		protected Player player { get; private set; }
+		
+		[Tooltip("出現直後の待機時間"), SerializeField]
+		protected float wait = 3;                       // 出現直後の待機時間
+		protected ActionState currentState = ActionState.Waiting;
 
 		/// <summary>
 		/// 自身のEnemyクラスを格納する
@@ -39,25 +28,27 @@ namespace Kuvo
 		protected Enemy enemy { get; private set; }
 
 		/// <summary>
+		/// 行動時間を格納する
+		/// </summary>
+		protected float actionTime { get; set; }
+
+		/// <summary>
 		/// 開始時の時間を格納する
 		/// </summary>
 		private float startTime { get; set; }
 
-		protected virtual void Start()
+		protected override void Start()
 		{
-			player = GameManager.instance.player;
+			base.Start();
+
 			enemy = GetComponent<Enemy>();
 
 			startTime = Time.time;
 		}
 
-		protected virtual void Update()
+		protected override void Update()
 		{
-			// レベルが設定されていない場合何もしない
-			if (aILevel == AILevel.None)
-			{
-				return;
-			}
+			base.Update();
 
 			// 一定時間待機する
 			if (Time.time - startTime < wait)
@@ -66,22 +57,6 @@ namespace Kuvo
 			}
 
 			Move();
-		}
-
-		/// <summary>
-		/// 対象との距離が指定された範囲内かを調べる
-		/// </summary>
-		/// <param name="targetPosition"> 対象の座標</param>
-		/// <param name="range"> 範囲</param>
-		/// <returns> 範囲内であればtrue 範囲外であればfalse</returns>
-		protected bool CheckDistance(Vector3 targetPosition, float range)
-		{
-			if (range < Vector3.Distance(enemy.lockOnPoint.position, targetPosition))
-			{
-				return false;
-			}
-
-			return true;
 		}
 
 		/// <summary>

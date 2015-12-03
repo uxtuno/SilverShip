@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 using System.Collections;
 using Uxtuno;
 
@@ -11,18 +12,26 @@ namespace Kuvo
 	{
 		[Tooltip("生成するエネミーのプレハブ"), SerializeField]
 		private GameObject monsterPrefab = null;
-			private float fieldDepth = 100.0f; // フィールドの奥行
-			private float fieldWidth = 100.0f; // フィールドの幅
-			[SerializeField]
-			private int generateNumber = 50; // 生成数
+		private float fieldDepth = 10.0f; // フィールドの奥行
+		private float fieldWidth = 10.0f; // フィールドの幅
+		[SerializeField]
+		private int generateNumber = 50; // 生成数
+
+		public ICollection<Enemy> enemies { get; private set; }
 
 		public void Start()
 		{
+			GameObject enemyFolder = new GameObject("Enemies");
+			enemies = new List<Enemy>();
+
 			for (int i = 0; i < generateNumber; i++)
 			{
 				Quaternion rotate = new Quaternion();
 				rotate.eulerAngles = new Vector3(0, Random.Range(0, 359));
-				GameObject monster = Instantiate(monsterPrefab, new Vector3(Random.Range(-(fieldWidth / 2), fieldWidth / 2), 2f, Random.Range(-(fieldDepth / 2), fieldDepth / 2)), rotate) as GameObject;
+				GameObject enemy = Instantiate(monsterPrefab, new Vector3(Random.Range(-(fieldWidth / 2), fieldWidth / 2), 2f, Random.Range(-(fieldDepth / 2), fieldDepth / 2)), rotate) as GameObject;
+
+				enemy.transform.SetParent(enemyFolder.transform);
+				enemies.Add(enemy.GetComponent<Enemy>());
 			}
 		}
 
