@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -148,6 +149,20 @@ namespace Kuvo
 
 			oldSelectedGameObject = EventSystem.current.currentSelectedGameObject;
 			EventSystem.current.SetSelectedGameObject(nextGameObject);
+
+			// ↓これでマウス位置のあたり判定が取れる（らしい）
+			//PointerEventData ped = new PointerEventData(EventSystem.current);
+			//ped.position = Input.mousePosition;
+			//List<RaycastResult> results = new List<RaycastResult>();
+			//EventSystem.current.RaycastAll(ped, results);
+			//foreach(RaycastResult rr in results)
+			//{
+			//	if(rr.gameObject != null)
+			//	{
+			//		Debug.Log(rr.gameObject.name);
+			//	}
+
+			//}
 		}
 
 		public void OnSEPlay(Object obj)

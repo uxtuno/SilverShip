@@ -29,6 +29,15 @@ namespace Kuvo
 
 		private void Action()
 		{
+			actionTime -= Time.deltaTime;
+
+			// 行動時間を終えたとき
+			if (actionTime <= 0)
+			{
+				ChangeState();
+				actionTime = Random.Range(1f, 3f);
+			}
+
 			// 攻撃動作中なら何もしない
 			if (enemy.isAttack)
 			{
@@ -55,7 +64,7 @@ namespace Kuvo
 						transform.LookAt(playerPosition);
 
 						// プレイヤーに重ならない程度にエネミーを動かす
-						if (Mathf.Abs(transform.position.x - playerPosition.x) > 0.8f || Mathf.Abs(transform.position.z - playerPosition.z) > 1f)
+						if (Mathf.Abs(transform.position.x - playerPosition.x) > 0.5f || Mathf.Abs(transform.position.z - playerPosition.z) > 1f)
 						{
 							if (enemy.currentState != Enemy.EnemyState.Move)
 							{
@@ -72,6 +81,7 @@ namespace Kuvo
 						break;
 
 					case ActionState.Attacking:
+
 						if(enemy.currentState != Enemy.EnemyState.SAttack)
 						{
 							enemy.currentState = Enemy.EnemyState.SAttack;
@@ -90,6 +100,7 @@ namespace Kuvo
 						{
 							enemy.currentState = Enemy.EnemyState.Idle;
 						}
+						// 見つけたら尾張
 						break;
 					case ActionState.Moving:
 						if(enemy.currentState != Enemy.EnemyState.Move)
@@ -98,19 +109,11 @@ namespace Kuvo
 						}
 						break;
 					case ActionState.Attacking:
+						actionTime = 0;
 						break;
 				}
 				#endregion
 			}
-
-			// 行動時間を終えたとき
-			if (actionTime <= 0)
-			{
-				ChangeState();
-				actionTime = Random.Range(1f, 3f);
-			}
-
-			actionTime -= Time.deltaTime;
 		}
 
 		/// <summary>
@@ -148,12 +151,15 @@ namespace Kuvo
 				switch (currentState)
 				{
 					case ActionState.Waiting:
+						enemy.transform.eulerAngles += new Vector3(0, Random.Range(0f, 359f), 0);
 						currentState = ActionState.Moving;
 						break;
 					case ActionState.Moving:
 						currentState = ActionState.Waiting;
 						break;
 					case ActionState.Attacking:
+						enemy.transform.eulerAngles += new Vector3(0, Random.Range(0f, 359f), 0);
+						currentState = ActionState.Moving;
 						break;
 				}
 			}
