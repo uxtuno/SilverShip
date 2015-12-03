@@ -14,14 +14,15 @@ namespace Kuvo
 			Down,
 		}
 
-		/// <summary>
-		/// 人食い提灯を目視することができる最も近い距離
-		/// </summary>
-		protected override float sight { get; set; }
 		[SerializeField]
 		private GameObject bulletPrafab = null;
 		private GameObject bulletCollecter = null;
 		private EnemyState oldState = EnemyState.None;
+
+		/// <summary>
+		/// 人食い提灯を目視することができる最も近い距離
+		/// </summary>
+		protected override float sight { get; set; }
 
 		protected override void Awake()
 		{
@@ -36,7 +37,11 @@ namespace Kuvo
 			base.Start();
 
 			shortRangeAttackAreaObject.GetComponent<AttackArea>().Set(attack, 1.0f);
-			bulletCollecter = GameObject.Find("BulletCollecter");
+			if (!(bulletCollecter = GameObject.Find("BulletCollecter")))
+			{
+				bulletCollecter = new GameObject("BulletCollecter");
+			}
+
 
 			//StartCoroutine(Flying(0.5f));
 		}
@@ -93,7 +98,7 @@ namespace Kuvo
 				oldState = currentState;
 			}
 
-			if(currentState == EnemyState.Move)
+			if (currentState == EnemyState.Move)
 			{
 				transform.Translate(Vector3.forward * speed * Time.deltaTime);
 			}

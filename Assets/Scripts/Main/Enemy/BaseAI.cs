@@ -8,7 +8,7 @@ namespace Kuvo
 	/// AIとしての共通動作を規定した抽象クラス
 	/// </summary>
 	[RequireComponent(typeof(Enemy))]
-	abstract public class BaseAI : MonoBehaviour
+	abstract public class BaseAI : MyMonoBehaviour
 	{
 		/// <summary>
 		/// AIレベル一覧
@@ -24,14 +24,22 @@ namespace Kuvo
 		[Tooltip("AIのレベル"), SerializeField]
 		protected AILevel aILevel = AILevel.None;       // AIのレベル
 
+		private Player _player;		// playerプロパティの実体
+
 		/// <summary>
 		/// プレイヤーの参照を格納する
 		/// </summary>
-		protected Player player { get; private set; }
-
-		protected virtual void Start()
+		protected Player player
 		{
-			player = GameManager.instance.player;
+			get
+			{
+				if(!_player)
+				{
+					_player = GameManager.instance.player;
+				}
+
+				return _player;
+			}
 		}
 
 		protected virtual void Update()
