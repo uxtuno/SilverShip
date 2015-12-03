@@ -17,15 +17,13 @@ namespace Kuvo
 			Moving,
 			Attacking,
 		}
-		
+
+		// actionTimeの初期値一覧
+		private readonly float[] actionTimeCollection = { 1f, 1.5f, 2f, 2.5f, 3f };
+
 		[Tooltip("出現直後の待機時間"), SerializeField]
 		protected float wait = 3;                       // 出現直後の待機時間
-		protected ActionState currentState = ActionState.Waiting;
-
-		/// <summary>
-		/// 自身のEnemyクラスを格納する
-		/// </summary>
-		protected Enemy enemy { get; private set; }
+		protected ActionState currentState = ActionState.None;
 
 		/// <summary>
 		/// 行動時間を格納する
@@ -37,12 +35,41 @@ namespace Kuvo
 		/// </summary>
 		private float startTime { get; set; }
 
-		protected override void Start()
+		private Enemy _enemy;		// enemyプロパティの実体
+
+		/// <summary>
+		/// 自身のEnemyクラスを格納する
+		/// </summary>
+		protected Enemy enemy
 		{
-			base.Start();
+			get
+			{
+				if (!_enemy)
+				{
+					_enemy = this.GetComponent<Enemy>();
+				}
+				return _enemy;
+			}
+		}
 
-			enemy = GetComponent<Enemy>();
+		/// <summary>
+		/// actionTimeの初期化に使用する値
+		/// </summary>
+		protected float initActionTime
+		{
+			get
+			{
+				int random = Random.Range(0, actionTimeCollection.Length);
+				return actionTimeCollection[random];
+			}
+		}
 
+		protected virtual void Start()
+		{
+			if (!enemy)
+			{
+				Debug.LogError("enemyの取得に失敗しました");
+			}
 			startTime = Time.time;
 		}
 

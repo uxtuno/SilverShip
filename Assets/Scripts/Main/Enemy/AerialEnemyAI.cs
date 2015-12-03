@@ -12,11 +12,14 @@ namespace Kuvo
 		[Tooltip("攻撃状態に移行する範囲(半径)"), SerializeField]
 		private float attackStateRange = 5f;    // 攻撃状態に移行する範囲(半径)
 
+
 		protected override void Start()
 		{
 			base.Start();
 
-			actionTime = Random.Range(1f, 3f);
+			currentState = ActionState.Waiting;
+
+			actionTime = initActionTime;
 		}
 
 		/// <summary>
@@ -24,9 +27,16 @@ namespace Kuvo
 		/// </summary>
 		protected override void Move()
 		{
+			if(enemy.isPlayerLocate && !this.HasComponent<TeamAI>())
+			{
+				gameObject.AddComponent<TeamAI>();
+			}
 			Action();
 		}
 
+		/// <summary>
+		/// 各状態の行動
+		/// </summary>
 		private void Action()
 		{
 			actionTime -= Time.deltaTime;
@@ -35,7 +45,7 @@ namespace Kuvo
 			if (actionTime <= 0)
 			{
 				ChangeState();
-				actionTime = Random.Range(1f, 3f);
+				actionTime = initActionTime;
 			}
 
 			// 攻撃動作中なら何もしない
@@ -50,10 +60,7 @@ namespace Kuvo
 				switch (currentState)
 				{
 					case ActionState.Waiting:
-						if(enemy.currentState != Enemy.EnemyState.Idle)
-						{
-							enemy.currentState = Enemy.EnemyState.Idle;
-						}
+						actionTime = 0;
 						break;
 
 					case ActionState.Moving:
@@ -82,7 +89,7 @@ namespace Kuvo
 
 					case ActionState.Attacking:
 
-						if(enemy.currentState != Enemy.EnemyState.SAttack)
+						if (enemy.currentState != Enemy.EnemyState.SAttack)
 						{
 							enemy.currentState = Enemy.EnemyState.SAttack;
 						}
@@ -100,10 +107,9 @@ namespace Kuvo
 						{
 							enemy.currentState = Enemy.EnemyState.Idle;
 						}
-						// 見つけたら尾張
 						break;
 					case ActionState.Moving:
-						if(enemy.currentState != Enemy.EnemyState.Move)
+						if (enemy.currentState != Enemy.EnemyState.Move)
 						{
 							enemy.currentState = Enemy.EnemyState.Move;
 						}
@@ -162,24 +168,6 @@ namespace Kuvo
 						currentState = ActionState.Moving;
 						break;
 				}
-			}
-		}
-
-		private void Attack()
-		{
-			switch (aILevel)
-			{
-				case AILevel.None:
-					break;
-
-				case AILevel.Fool:
-					break;
-
-				case AILevel.Nomal:
-					break;
-
-				case AILevel.Smart:
-					break;
 			}
 		}
 	}

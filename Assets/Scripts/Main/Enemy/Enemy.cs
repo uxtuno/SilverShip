@@ -15,7 +15,7 @@ namespace Kuvo
 			Idle,
 			Bone,
 			Search,
-            Move,
+			Move,
 			SAttack,
 			LAttack,
 			Stagger,
@@ -23,12 +23,12 @@ namespace Kuvo
 		}
 
 		[Tooltip("移動速度"), SerializeField]
-		protected float speed = 1;                      // 移動速度
-		[SerializeField]
+		protected float speed = 1;							// 移動速度
+		[Tooltip("視野角"), SerializeField]
 		protected float viewAngle = 120;                    // 視野角
-		[SerializeField]
+		[Tooltip("視認距離"), SerializeField]
 		protected float viewRange = 10;                     // 視認距離
-		[SerializeField]
+		[Tooltip("遠距離攻撃の弾の発射位置"), SerializeField]
 		protected Transform muzzle = null;                  // 遠距離攻撃の弾の発射位置
 		protected ContainedObjects contained;
 		private CameraController cameraController;
@@ -141,7 +141,7 @@ namespace Kuvo
 			}
 
 			cameraController = GameObject.FindGameObjectWithTag(TagName.CameraController).GetComponent<CameraController>();
-			contained = GetComponentInChildren<ContainedObjects>();
+			contained = GetComponentInChildren<ContainedObjects>() as ContainedObjects;
 		}
 
 		protected virtual void Update()
@@ -173,14 +173,17 @@ namespace Kuvo
 				StopAllCoroutines();
 				StartCoroutine(OnDie(2));
 			}
-			
-			Vector3 aveVec = Vector3.zero;
-			foreach (Transform t in contained)
+
+			if (contained)
 			{
-				aveVec += t.position;
+				Vector3 aveVec = Vector3.zero;
+				foreach (Transform t in contained)
+				{
+					aveVec += t.position;
+				}
+				aveVec /= contained.GetContainedObjects().Count;
+				transform.position -= (aveVec - transform.position).normalized * Time.deltaTime;
 			}
-			aveVec /= contained.GetContainedObjects().Count;
-			transform.position -= (aveVec - transform.position).normalized * Time.deltaTime;
 		}
 
 		protected virtual void OnCollisionExit(Collision collision)
