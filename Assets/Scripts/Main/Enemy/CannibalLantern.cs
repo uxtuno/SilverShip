@@ -14,8 +14,8 @@ namespace Kuvo
 			Down,
 		}
 
-		[SerializeField]
-		private GameObject bulletPrafab = null;
+		[Tooltip("弾のプレハブ"), SerializeField]
+		private GameObject bulletPrafab = null;		// 弾のプレハブ
 		private GameObject bulletCollecter = null;
 		private EnemyState oldState = EnemyState.None;
 
@@ -132,17 +132,43 @@ namespace Kuvo
 		/// </summary>
 		public override IEnumerator ShortRangeAttack()
 		{
+			if (isAttack)
+			{
+				yield break;
+			}
+
 			isAttack = true;
+			currentState = EnemyState.Move;
 
 			// ここに予備動作
 			float counter = 0;
+			Vector3 playerPosition = player.lockOnPoint.position;
+			playerPosition.y = transform.position.y;
 			while (true)
 			{
-				counter += Time.deltaTime;
-				if (counter > 5)
+				if (!CheckDistance(playerPosition, 1f))
 				{
+					// プレイヤーの方向へ向きを変える
+					transform.LookAt(playerPosition);
+				}
+				else
+				{
+					if (currentState != EnemyState.None)
+					{
+						currentState = EnemyState.None;
+					}
+				}
+
+				counter += Time.deltaTime;
+				if (counter > 1)
+				{
+					if (currentState != EnemyState.None)
+					{
+						currentState = EnemyState.None;
+					}
 					break;
 				}
+
 				yield return new WaitForEndOfFrame();
 			}
 
@@ -151,7 +177,6 @@ namespace Kuvo
 			yield return new WaitForSeconds(1.0f);
 
 			shortRangeAttackAreaObject.SetActive(false);
-			currentState = EnemyState.None;
 			isAttack = false;
 		}
 
@@ -160,9 +185,14 @@ namespace Kuvo
 		/// </summary>
 		public override IEnumerator LongRangeAttack()
 		{
+			if (isAttack)
+			{
+				yield break;
+			}
+
 			isAttack = true;
 
-			yield return new WaitForSeconds(0.5f);
+			yield return new WaitForSeconds(5f);
 
 			// 弾の発射位置・角度を登録
 			Transform t = (muzzle != null) ? muzzle : transform;

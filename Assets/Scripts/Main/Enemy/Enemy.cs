@@ -106,6 +106,11 @@ namespace Kuvo
 		public EnemyState currentState { get; set; }
 
 		/// <summary>
+		/// チームを組んでいるかどうか
+		/// </summary>
+		public bool isTeamUp { get; set; }
+
+		/// <summary>
 		/// 地面の上に立っているかどうか
 		/// </summary>
 		public bool haveGround { get; protected set; }
@@ -129,6 +134,7 @@ namespace Kuvo
 		protected virtual void Awake()
 		{
 			currentState = EnemyState.Bone;
+			isTeamUp = false;
 			haveGround = false;
 			isAttack = false;
 		}
@@ -162,7 +168,17 @@ namespace Kuvo
 				isShow = true;
 			}
 
-			isPlayerLocate = PlayerSearch();
+			if (!isTeamUp)
+			{
+				isPlayerLocate = PlayerSearch();
+			}
+			else
+			{
+				if(!isPlayerLocate)
+				{
+					isPlayerLocate = true;
+				}
+			}
 		}
 
 		protected virtual void LateUpdate()

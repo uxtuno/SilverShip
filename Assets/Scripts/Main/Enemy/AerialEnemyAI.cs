@@ -1,5 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Linq;
+using System.Collections.Generic;
+using UnityEngine;
 using Uxtuno;
 
 namespace Kuvo
@@ -9,9 +10,17 @@ namespace Kuvo
 	/// </summary>
 	public class AerialEnemyAI : BaseEnemyAI
 	{
-		[Tooltip("攻撃状態に移行する範囲(半径)"), SerializeField]
-		private float attackStateRange = 5f;    // 攻撃状態に移行する範囲(半径)
+		[System.Serializable]
+		private class AttackableRanges
+		{
+			[Tooltip("近接攻撃")]
+			public float shortRange = 5f;
+			[Tooltip("遠距離攻撃")]
+			public float longRange = 10f;
+		}
 
+		[Tooltip("攻撃可能範囲(半径)"), SerializeField]
+		private AttackableRanges attackableRanges;
 
 		protected override void Start()
 		{
@@ -27,10 +36,6 @@ namespace Kuvo
 		/// </summary>
 		protected override void Move()
 		{
-			if(enemy.isPlayerLocate && !this.HasComponent<TeamAI>())
-			{
-				gameObject.AddComponent<TeamAI>();
-			}
 			Action();
 		}
 
@@ -41,17 +46,17 @@ namespace Kuvo
 		{
 			actionTime -= Time.deltaTime;
 
+			// 攻撃動作中なら何もしない
+			if (enemy.isAttack)
+			{
+				return;
+			}
+
 			// 行動時間を終えたとき
 			if (actionTime <= 0)
 			{
 				ChangeState();
 				actionTime = initActionTime;
-			}
-
-			// 攻撃動作中なら何もしない
-			if (enemy.isAttack)
-			{
-				return;
 			}
 
 			if (enemy.isPlayerLocate)
@@ -88,11 +93,23 @@ namespace Kuvo
 						break;
 
 					case ActionState.Attacking:
+						float sRange = attackableRanges.shortRange;
 
-						if (enemy.currentState != Enemy.EnemyState.SAttack)
+						// 上司の場合、近距離攻撃可能範囲を部下の1/5とする
+						if (isCaptain)
+						{
+							sRange /= 5;
+						}
+
+						// 近接攻撃可能範囲内なら近接攻撃を実行
+						if (enemy.CheckDistance(player.transform.position, sRange))
 						{
 							enemy.currentState = Enemy.EnemyState.SAttack;
+							break;
 						}
+
+						// 遠距離攻撃を実行
+						enemy.currentState = Enemy.EnemyState.LAttack;
 						break;
 				}
 				#endregion
@@ -137,7 +154,7 @@ namespace Kuvo
 
 					case ActionState.Moving:
 						// 攻撃可能範囲に入っている場合変更
-						if (enemy.CheckDistance(player.lockOnPoint.position, attackStateRange))
+						if (enemy.CheckDistance(player.lockOnPoint.position, attackableRanges.longRange))
 						{
 							currentState = ActionState.Attacking;
 						}
@@ -145,7 +162,7 @@ namespace Kuvo
 
 					case ActionState.Attacking:
 						// 攻撃可能範囲から外れた場合変更
-						if (!enemy.CheckDistance(player.lockOnPoint.position, attackStateRange))
+						if (!enemy.CheckDistance(player.lockOnPoint.position, attackableRanges.longRange))
 						{
 							currentState = ActionState.Moving;
 						}
