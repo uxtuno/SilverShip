@@ -39,6 +39,12 @@ public class GameManager : MyMonoBehaviour
 		}
 	}
 
+	private static readonly string followIconCanvas = "FollowIconCanvas";
+	void Start()
+	{
+
+	}
+
 	void Update()
 	{
 		if(Input.GetKeyDown(KeyCode.T))

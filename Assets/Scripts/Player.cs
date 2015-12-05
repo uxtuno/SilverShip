@@ -63,7 +63,7 @@ namespace Uxtuno
 
 		private BaseState currentState; // 現在の状態
 
-		#region - 各状態ごとの動作クラス
+		#region - 状態クラス
 
 		/// <summary>
 		/// 通常時(地上)
@@ -89,6 +89,7 @@ namespace Uxtuno
 				player.currentJumpState = JumpState.None;
 				player.jumpVY = 0.0f;
 				player.animator.SetBool(player.isJumpID, false);
+				player.isAirDashPossible = false;
 			}
 
 			public override void Move()
@@ -113,6 +114,7 @@ namespace Uxtuno
 							player.jumpVY = player.jumpPower;
 							player.currentJumpState = JumpState.Jumping;
 							player.currentState = new DepressionState(player);
+							player.isAirDashPossible = true;
 							return;
 						}
 
@@ -216,7 +218,11 @@ namespace Uxtuno
 					// 一定期間内なら空中ダッシュ
 					if (airDashPossibleCount > airDashPossibleSeconds && airDashPossibleCount < airDashDisableSeconds)
 					{
-						player.currentState = new AirDashState(player);
+						if (player.isAirDashPossible)
+						{
+							player.currentState = new AirDashState(player);
+							player.isAirDashPossible = false;
+						}
 					}
 					return;
 				}
@@ -336,6 +342,11 @@ namespace Uxtuno
 		private bool isCameraInvalidControll = false; // カメラ操作不能状態
 
 		private PlayerTrampled playerTrampled; // 踏みつけジャンプ動作
+
+		private bool isAirDashPossible = false; // 空中ダッシュができるか
+
+		private Transform lockOnIcon; // ロックオンアイコン
+
 		#endregion
 
 		void Start()
@@ -360,13 +371,19 @@ namespace Uxtuno
 
 			// 初期状態へ
 			currentState = new NormalState(this);
+
+			// ロックオンアイコン用のCanvas
+			UICanvasGenerator.FollowIconCanvasGenerate();
+			GameObject lockOnIconPrefab = Resources.Load<GameObject>("Prefabs/UI/LockOnIcon");
+			lockOnIcon = Instantiate(lockOnIconPrefab).transform;
+			lockOnIcon.transform.SetParent(UICanvasGenerator.followIconCanvas.transform, false);
 		}
 
 		Vector3 cameraFront = new Vector3(0.0f, -0.2f, 1.0f);
 
 		void Update()
 		{
-			if(near > cameraController.targetToDistance)
+			if (near > cameraController.targetToDistance)
 			{
 				isShow = false;
 			}
@@ -439,6 +456,11 @@ namespace Uxtuno
 				//Camera.main.WorldToViewportPoint(lockOnTarget.lockOnPoint.position);
 				autoLockOnIcon.position = lockOnTarget.lockOnPoint.position;
 				autoLockOnIcon.GetSafeComponent<LockOnIcon>().lockOnPoint = lockOnTarget.lockOnPoint;
+			}
+
+			if(lockOnTarget !=null)
+			{
+				lockOnIcon.transform.position = Camera.main.WorldToScreenPoint(lockOnTarget.lockOnPoint.position);
 			}
 
 			float limitDistance = 6.0f;
