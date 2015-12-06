@@ -6,7 +6,7 @@ namespace Kuvo
 	/// <summary>
 	/// 人食い提灯クラス
 	/// </summary>
-	public class CannibalLantern : Enemy
+	public class CannibalLantern : BaseEnemy
 	{
 		private enum FlyState
 		{
@@ -15,7 +15,7 @@ namespace Kuvo
 		}
 
 		[Tooltip("弾のプレハブ"), SerializeField]
-		private GameObject bulletPrafab = null;		// 弾のプレハブ
+		private GameObject bulletPrafab = null;     // 弾のプレハブ
 		private GameObject bulletCollecter = null;
 		private EnemyState oldState = EnemyState.None;
 
@@ -52,7 +52,7 @@ namespace Kuvo
 
 			if (Input.GetKeyDown(KeyCode.B))
 			{
-				StartCoroutine(LongRangeAttack());
+				hp = 0;
 			}
 
 			if (currentState != oldState)
@@ -134,10 +134,13 @@ namespace Kuvo
 		{
 			if (isAttack)
 			{
+				currentState = EnemyState.None;
 				yield break;
 			}
 
 			isAttack = true;
+			IEnumerator costAddForSeconds = EnemyCreatorSingleton.instance.CostAddForSeconds(attackCosts.shortRange, 0);
+			EnemyCreatorSingleton.instance.StartCoroutine(costAddForSeconds);
 			currentState = EnemyState.Move;
 
 			// ここに予備動作
@@ -177,6 +180,8 @@ namespace Kuvo
 			yield return new WaitForSeconds(1.0f);
 
 			shortRangeAttackAreaObject.SetActive(false);
+			costAddForSeconds = EnemyCreatorSingleton.instance.CostAddForSeconds(-attackCosts.shortRange, 2);
+			EnemyCreatorSingleton.instance.StartCoroutine(costAddForSeconds);
 			isAttack = false;
 		}
 
@@ -187,10 +192,13 @@ namespace Kuvo
 		{
 			if (isAttack)
 			{
+				currentState = EnemyState.None;
 				yield break;
 			}
 
 			isAttack = true;
+			IEnumerator costAddForSeconds = EnemyCreatorSingleton.instance.CostAddForSeconds(attackCosts.longRange, 0);
+			EnemyCreatorSingleton.instance.StartCoroutine(costAddForSeconds);
 
 			yield return new WaitForSeconds(5f);
 
@@ -212,6 +220,8 @@ namespace Kuvo
 			}
 
 			currentState = EnemyState.None;
+			costAddForSeconds = EnemyCreatorSingleton.instance.CostAddForSeconds(-attackCosts.longRange, 2);
+			EnemyCreatorSingleton.instance.StartCoroutine(costAddForSeconds);
 			isAttack = false;
 		}
 

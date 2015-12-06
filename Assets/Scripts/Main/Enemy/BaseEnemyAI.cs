@@ -8,7 +8,7 @@ namespace Kuvo
 	/// <summary>
 	/// エネミーのAIとしての共通動作を規定した抽象クラス
 	/// </summary>
-	[RequireComponent(typeof(Enemy))]
+	[RequireComponent(typeof(BaseEnemy))]
 	abstract public class BaseEnemyAI : MyMonoBehaviour
 	{
 		protected enum ActionState
@@ -66,18 +66,18 @@ namespace Kuvo
 			}
 		}
 
-		private Enemy _enemy;       // enemyプロパティの実体
+		private BaseEnemy _enemy;       // enemyプロパティの実体
 
 		/// <summary>
-		/// 自身のEnemyクラスを格納する
+		/// 自身のBaseEnemyクラスを格納する
 		/// </summary>
-		public Enemy enemy
+		public BaseEnemy enemy
 		{
 			get
 			{
 				if (!_enemy)
 				{
-					_enemy = GetComponent<Enemy>();
+					_enemy = GetComponent<BaseEnemy>();
 				}
 				return _enemy;
 			}
@@ -147,7 +147,7 @@ namespace Kuvo
 			}
 
 			// enemyが倒されるとき
-			if (enemy.currentState == Enemy.EnemyState.Death)
+			if (enemy.currentState == BaseEnemy.EnemyState.Death)
 			{
 				if (isCaptain)  // 上司のとき
 				{
@@ -182,7 +182,7 @@ namespace Kuvo
 			// 上司及び部下が設定されていないとき
 			if (!captain && members.Count <= 0)
 			{
-				BaseEnemyAI captainAI = EnemyCreatorSingleton.Instance.captainAI;
+				BaseEnemyAI captainAI = EnemyCreatorSingleton.instance.captainAI;
 				if (!captainAI)     // 上司が存在しなければ
 				{
 					captain = this;     // 自身を上司に登録(これによりisCaptainがtrueになる)

@@ -19,7 +19,7 @@ namespace Kuvo
 		{
 		}
 
-		public static SoundPlayerSingleton Instance
+		public static SoundPlayerSingleton instance
 		{
 			get
 			{

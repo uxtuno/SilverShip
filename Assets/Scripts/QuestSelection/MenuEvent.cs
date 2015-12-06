@@ -62,7 +62,7 @@ namespace Kuvo
 		/// <param name="sceneName"> 遷移先のシーン名</param>
 		public void OnSceneChange(string sceneName)
 		{
-			SceneChangerSingleton.Instance.FadeChange(sceneName);
+			SceneChangerSingleton.instance.FadeChange(sceneName);
 		}
 
 		/// <summary>
@@ -175,7 +175,7 @@ namespace Kuvo
 				return;
 			}
 
-			SoundPlayerSingleton.Instance.PlaySE(gameObject, audioClip);
+			SoundPlayerSingleton.instance.PlaySE(gameObject, audioClip);
 		}
 	}
 }

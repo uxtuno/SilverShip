@@ -20,7 +20,7 @@ namespace Kuvo
 		{
 		}
 
-		public static SceneChangerSingleton Instance
+		public static SceneChangerSingleton instance
 		{
 			get
 			{

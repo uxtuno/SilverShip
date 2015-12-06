@@ -650,7 +650,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 112374}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: .5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 494338}
@@ -1195,6 +1195,9 @@ MonoBehaviour:
   viewAngle: 120
   viewRange: 10
   muzzle: {fileID: 490490}
+  attackCosts:
+    shortRange: 1
+    longRange: 2
   bulletPrafab: {fileID: 172264, guid: 50cc16a0b3bb7084ea8e729b5a113b35, type: 2}
 --- !u!135 &13535592
 SphereCollider:

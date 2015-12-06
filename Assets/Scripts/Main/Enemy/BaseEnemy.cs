@@ -7,8 +7,25 @@ namespace Kuvo
 	/// <summary>
 	/// 敵の共通動作を規定した抽象クラス
 	/// </summary>
-	abstract public class Enemy : Actor
+	abstract public class BaseEnemy : Actor
 	{
+		[System.Serializable]
+		public class AttackCosts
+		{
+			[Tooltip("近接攻撃")]
+			public int shortRange = 1;
+			[Tooltip("遠距離攻撃")]
+			public int longRange = 2;
+
+			/// <summary>
+			/// コストの大きい方を取得する
+			/// </summary>
+			public int largeCost
+			{
+				get { return (longRange > shortRange) ? longRange : shortRange; }
+			}
+		}
+
 		public enum EnemyState
 		{
 			None,
@@ -23,13 +40,15 @@ namespace Kuvo
 		}
 
 		[Tooltip("移動速度"), SerializeField]
-		protected float speed = 1;							// 移動速度
+		protected float speed = 1;                          // 移動速度
 		[Tooltip("視野角"), SerializeField]
 		protected float viewAngle = 120;                    // 視野角
 		[Tooltip("視認距離"), SerializeField]
 		protected float viewRange = 10;                     // 視認距離
 		[Tooltip("遠距離攻撃の弾の発射位置"), SerializeField]
 		protected Transform muzzle = null;                  // 遠距離攻撃の弾の発射位置
+		[Tooltip("攻撃コスト")]
+		public AttackCosts attackCosts;
 		protected ContainedObjects contained;
 		private CameraController cameraController;
 
@@ -174,7 +193,7 @@ namespace Kuvo
 			}
 			else
 			{
-				if(!isPlayerLocate)
+				if (!isPlayerLocate)
 				{
 					isPlayerLocate = true;
 				}
@@ -183,7 +202,7 @@ namespace Kuvo
 
 		protected virtual void LateUpdate()
 		{
-			if (hp <= 0 && currentState != EnemyState.Death)
+			if (hp <= 0 && currentState != EnemyState.Death && !isAttack)
 			{
 				currentState = EnemyState.Death;
 				StopAllCoroutines();

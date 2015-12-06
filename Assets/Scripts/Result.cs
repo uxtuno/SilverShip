@@ -37,7 +37,7 @@ namespace Kuvo
 			{
 				if (nextButton.activeInHierarchy)
 				{
-					SceneChangerSingleton.Instance.FadeChange(SceneName.title);
+					SceneChangerSingleton.instance.FadeChange(SceneName.title);
 				}
 				else
 				{
