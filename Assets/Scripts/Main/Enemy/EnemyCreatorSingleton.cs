@@ -1,7 +1,7 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Uxtuno;
 
 namespace Kuvo
@@ -23,12 +23,13 @@ namespace Kuvo
 		{
 			get
 			{
-				_instance = FindObjectOfType<EnemyCreatorSingleton>();
-
-				if (_instance == null)
+				if (!_instance)
 				{
-					GameObject go = new GameObject("EnemyCreatorSingleton");
-					_instance = go.AddComponent<EnemyCreatorSingleton>();
+					if (!(_instance = FindObjectOfType<EnemyCreatorSingleton>()))
+					{
+						GameObject go = new GameObject("EnemyCreatorSingleton");
+						_instance = go.AddComponent<EnemyCreatorSingleton>();
+					}
 				}
 
 				return _instance;
@@ -42,8 +43,27 @@ namespace Kuvo
 		private float fieldWidth = 10.0f; // フィールドの幅
 		[Tooltip("生成数"), SerializeField]
 		private int generateNumber = 50; // 生成数
+
+		/// <summary>
+		/// 現在使用している攻撃コストを格納する
+		/// </summary>
 		public int currentAttackCostCount { get; private set; }
-		public readonly int maxAttackCost = 3;
+
+		/// <summary>
+		/// 攻撃コストの最大値を格納する
+		/// </summary>
+		public int maxAttackCost
+		{
+			get { return 3; }
+		}
+
+		/// <summary>
+		/// 使用可能コストを超えているかどうか
+		/// </summary>
+		public bool isCostOver
+		{
+			get { return maxAttackCost < currentAttackCostCount; }
+		}
 
 		/// <summary>
 		/// enemyのリストを格納する
@@ -81,6 +101,15 @@ namespace Kuvo
 				}
 
 				return null;
+			}
+		}
+
+		public void Awake()
+		{
+			// 複数生成の禁止
+			if (this != instance)
+			{
+				Destroy(gameObject);
 			}
 		}
 

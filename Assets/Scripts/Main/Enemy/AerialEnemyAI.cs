@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using System.Collections.Generic;
-using UnityEngine;
-using Uxtuno;
+﻿using UnityEngine;
 
 namespace Kuvo
 {
@@ -20,7 +17,7 @@ namespace Kuvo
 		}
 
 		[Tooltip("攻撃可能範囲(半径)"), SerializeField]
-		private AttackableRanges attackableRanges;
+		private AttackableRanges attackableRanges = new AttackableRanges();
 
 		protected override void Start()
 		{
@@ -70,6 +67,12 @@ namespace Kuvo
 
 						// プレイヤーの方向へ向きを変える
 						transform.LookAt(playerPosition);
+
+						if (enemy.currentState != BaseEnemy.EnemyState.Idle)
+						{
+							enemy.currentState = BaseEnemy.EnemyState.Idle;
+						}
+
 						break;
 
 					case ActionState.Moving:
@@ -80,7 +83,7 @@ namespace Kuvo
 						transform.LookAt(playerPosition);
 
 						// プレイヤーに重ならない程度にエネミーを動かす
-						if (Mathf.Abs(transform.position.x - playerPosition.x) > 0.5f || Mathf.Abs(transform.position.z - playerPosition.z) > 1f)
+						if (Mathf.Abs(transform.position.x - playerPosition.x) > 3f || Mathf.Abs(transform.position.z - playerPosition.z) > 3f)
 						{
 							if (enemy.currentState != BaseEnemy.EnemyState.Move)
 							{
@@ -97,6 +100,12 @@ namespace Kuvo
 						break;
 
 					case ActionState.Attacking:
+						if (EnemyCreatorSingleton.instance.isCostOver)
+						{
+							actionTime = 0;
+							break;
+						}
+
 						float shortRange = attackableRanges.shortRange;
 
 						// 上司の場合、近距離攻撃可能範囲を部下の1/5とする
@@ -162,7 +171,7 @@ namespace Kuvo
 						// 攻撃可能範囲に入っている場合変更
 						if (enemy.CheckDistance(player.lockOnPoint.position, attackableRanges.longRange))
 						{
-							bool isAttackable = (EnemyCreatorSingleton.instance.maxAttackCost - EnemyCreatorSingleton.instance.currentAttackCostCount) > enemy.attackCosts.largeCost;
+							bool isAttackable = (EnemyCreatorSingleton.instance.maxAttackCost - EnemyCreatorSingleton.instance.currentAttackCostCount) >= enemy.attackCosts.largeCost;
 							if (isAttackable)
 							{
 								currentState = ActionState.Attacking;

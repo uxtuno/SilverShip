@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
 namespace Kuvo
 {
@@ -24,12 +23,13 @@ namespace Kuvo
 		{
 			get
 			{
-				_instance = FindObjectOfType<SceneChangerSingleton>();
-
-				if (_instance == null)
+				if (!_instance)
 				{
-					GameObject go = new GameObject("SceneChangerSingleton");
-					_instance = go.AddComponent<SceneChangerSingleton>();
+					if (!(_instance = FindObjectOfType<SceneChangerSingleton>()))
+					{
+						GameObject go = new GameObject("SceneChangerSingleton");
+						_instance = go.AddComponent<SceneChangerSingleton>();
+					}
 				}
 
 				return _instance;
@@ -54,6 +54,12 @@ namespace Kuvo
 
 		private void Awake()
 		{
+			// 複数生成の禁止
+			if (this != instance)
+			{
+				Destroy(gameObject);
+			}
+
 			DontDestroyOnLoad(this);
 			sceneName = string.Empty;
 			fadeTime = float.NaN;
@@ -68,7 +74,7 @@ namespace Kuvo
 				return;
 			}
 
-			if(fadeTime == float.NaN)
+			if (fadeTime == float.NaN)
 			{
 				Debug.LogWarning("fadeTimeの値が正常に与えられていません\n初期値の1.0fを使用します");
 				fadeTime = 1.0f;

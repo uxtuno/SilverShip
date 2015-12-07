@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Kuvo
 {
@@ -23,12 +23,13 @@ namespace Kuvo
 		{
 			get
 			{
-				_instance = FindObjectOfType<SoundPlayerSingleton>();
-
-				if (_instance == null)
+				if (!_instance)
 				{
-					GameObject go = new GameObject("SoundPlayerSingleton");
-					_instance = go.AddComponent<SoundPlayerSingleton>();
+					if (!(_instance = FindObjectOfType<SoundPlayerSingleton>()))
+					{
+						GameObject go = new GameObject("SoundPlayerSingleton");
+						_instance = go.AddComponent<SoundPlayerSingleton>();
+					}
 				}
 
 				return _instance;
@@ -49,6 +50,12 @@ namespace Kuvo
 
 		public void Awake()
 		{
+			// 複数生成の禁止
+			if (this != instance)
+			{
+				Destroy(gameObject);
+			}
+
 			fadeSource = null;
 			bgmSource = null;
 			seSources = new List<AudioSource>();

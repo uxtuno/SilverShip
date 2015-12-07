@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
 using Uxtuno;
 
 namespace Kuvo
@@ -120,14 +120,22 @@ namespace Kuvo
 		}
 
 		/// <summary>
+		/// チームを組んでいるかどうか
+		/// </summary>
+		public bool isTeamUp
+		{
+			get
+			{
+				BaseEnemyAI aI = GetComponent<BaseEnemyAI>() as BaseEnemyAI;
+				return aI ? aI.captain : false;
+			}
+		}
+
+		/// <summary>
 		/// 現在の状態
 		/// </summary>
 		public EnemyState currentState { get; set; }
 
-		/// <summary>
-		/// チームを組んでいるかどうか
-		/// </summary>
-		public bool isTeamUp { get; set; }
 
 		/// <summary>
 		/// 地面の上に立っているかどうか
@@ -153,7 +161,6 @@ namespace Kuvo
 		protected virtual void Awake()
 		{
 			currentState = EnemyState.Bone;
-			isTeamUp = false;
 			haveGround = false;
 			isAttack = false;
 		}
@@ -279,7 +286,7 @@ namespace Kuvo
 		}
 
 		/// <summary>
-		/// 対象との距離が指定された範囲内かを調べる
+		/// 対象との距離が指定された範囲内かを調べる(自身のLockOnPointから計測)
 		/// </summary>
 		/// <param name="targetPosition"> 対象の座標</param>
 		/// <param name="range"> 範囲</param>

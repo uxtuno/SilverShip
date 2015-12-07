@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
 
 namespace Kuvo
 {
@@ -72,14 +72,14 @@ namespace Kuvo
 						break;
 
 					case EnemyState.SAttack:
-						if (!isAttack)
+						if (!isAttack && !EnemyCreatorSingleton.instance.isCostOver)
 						{
 							StartCoroutine(ShortRangeAttack());
 						}
 						break;
 
 					case EnemyState.LAttack:
-						if (!isAttack)
+						if (!isAttack && !EnemyCreatorSingleton.instance.isCostOver)
 						{
 							StartCoroutine(LongRangeAttack());
 						}
@@ -132,12 +132,6 @@ namespace Kuvo
 		/// </summary>
 		public override IEnumerator ShortRangeAttack()
 		{
-			if (isAttack)
-			{
-				currentState = EnemyState.None;
-				yield break;
-			}
-
 			isAttack = true;
 			IEnumerator costAddForSeconds = EnemyCreatorSingleton.instance.CostAddForSeconds(attackCosts.shortRange, 0);
 			EnemyCreatorSingleton.instance.StartCoroutine(costAddForSeconds);
@@ -159,6 +153,7 @@ namespace Kuvo
 					if (currentState != EnemyState.None)
 					{
 						currentState = EnemyState.None;
+						break;
 					}
 				}
 
@@ -190,17 +185,11 @@ namespace Kuvo
 		/// </summary>
 		public override IEnumerator LongRangeAttack()
 		{
-			if (isAttack)
-			{
-				currentState = EnemyState.None;
-				yield break;
-			}
-
 			isAttack = true;
 			IEnumerator costAddForSeconds = EnemyCreatorSingleton.instance.CostAddForSeconds(attackCosts.longRange, 0);
 			EnemyCreatorSingleton.instance.StartCoroutine(costAddForSeconds);
 
-			yield return new WaitForSeconds(5f);
+			yield return new WaitForSeconds(1f);
 
 			// 弾の発射位置・角度を登録
 			Transform t = (muzzle != null) ? muzzle : transform;

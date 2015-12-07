@@ -1,7 +1,7 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Uxtuno;
-using System.Collections.Generic;
 
 namespace Kuvo
 {
@@ -146,8 +146,8 @@ namespace Kuvo
 				}
 			}
 
-			// enemyが倒されるとき
-			if (enemy.currentState == BaseEnemy.EnemyState.Death)
+			// チームを組んでいるenemyが倒されるとき
+			if (enemy.currentState == BaseEnemy.EnemyState.Death && enemy.isTeamUp)
 			{
 				if (isCaptain)  // 上司のとき
 				{
@@ -169,7 +169,21 @@ namespace Kuvo
 				}
 			}
 
+			// 上司のteamRangeからプレイヤーが外れたとき
+			if (isCaptain && !enemy.CheckDistance(player.lockOnPoint.position, teamRange))
+			{
+				TeamDisbanded();
+			}
+
 			Move();
+		}
+
+		public void OnDrawGizmos()
+		{
+			if(isCaptain && Application.loadedLevelName == "enemytest")
+			{
+				Gizmos.DrawSphere(enemy.lockOnPoint.position, teamRange);
+			}
 		}
 
 		/// <summary>
@@ -177,15 +191,16 @@ namespace Kuvo
 		/// </summary>
 		private void TeamUp()
 		{
-			enemy.isTeamUp = true;
-
 			// 上司及び部下が設定されていないとき
 			if (!captain && members.Count <= 0)
 			{
+				// 上司をキャッシュ
 				BaseEnemyAI captainAI = EnemyCreatorSingleton.instance.captainAI;
+
 				if (!captainAI)     // 上司が存在しなければ
 				{
-					captain = this;     // 自身を上司に登録(これによりisCaptainがtrueになる)
+					// 自身を上司に登録(これによりisCaptainおよびenemy.isTeamUpがtrueになる)
+					captain = this;     
 
 					// teamRange内に存在する自分以外のBaseEnemyAIを取得
 					BaseEnemyAI[] enemies = Physics.OverlapSphere(transform.position, teamRange)
@@ -196,29 +211,43 @@ namespace Kuvo
 					BaseEnemyAI member1 = null;     // 部下1
 					BaseEnemyAI member2 = null;     // 部下2
 					float min = Mathf.Infinity;     // エネミー同士の最短距離
+					float oldMin = min;             // 前回のmin
 					foreach (BaseEnemyAI current in enemies)
 					{
+						// メンバーとの距離を計算
 						float distance = Vector3.Distance(enemy.lockOnPoint.position, current.enemy.lockOnPoint.position);
-						if (min > distance)
+
+
+						if (min > distance)     // 最短ならば
 						{
+							oldMin = min;
 							min = distance;
-							member2 = member1;
+
+							if (member1)
+							{
+								member2 = member1;
+							}
+
 							member1 = current;
+						}
+						else if (oldMin > distance)     // 2番目に短ければ
+						{
+							member2 = current;
 						}
 					}
 
 					if (member1)
 					{
 						member1.captain = this;
+						members.Add(member1);
 					}
 
 					if (member2)
 					{
 						member2.captain = this;
+						members.Add(member2);
 					}
 
-					members.Add(member1);
-					members.Add(member2);
 				}
 				else        // 上司が存在していれば
 				{
@@ -226,6 +255,26 @@ namespace Kuvo
 					captain.members.Add(this);
 				}
 			}
+		}
+
+		/// <summary>
+		/// チームを解散する
+		/// </summary>
+		private void TeamDisbanded()
+		{
+			// 自身が上司でない場合何もしない
+			if (!isCaptain)
+			{
+				return;
+			}
+
+			captain = null;
+
+			foreach (BaseEnemyAI current in members)
+			{
+				current.captain = null;
+			}
+			members.Clear();
 		}
 
 		/// <summary>
