@@ -26,6 +26,9 @@ namespace Kuvo
 			}
 		}
 
+		/// <summary>
+		/// 敵の状態(※AIの状態とは別で定義される)
+		/// </summary>
 		public enum EnemyState
 		{
 			None,
@@ -212,6 +215,12 @@ namespace Kuvo
 			if (hp <= 0 && currentState != EnemyState.Death && !isAttack)
 			{
 				currentState = EnemyState.Death;
+				BaseEnemyAI aI = GetComponent<BaseEnemyAI>();
+				if (aI)
+				{
+					aI.StopAllCoroutines();
+					aI.enabled = false;
+				}
 				StopAllCoroutines();
 				StartCoroutine(OnDie(2));
 			}

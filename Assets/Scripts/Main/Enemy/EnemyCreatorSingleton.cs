@@ -34,7 +34,7 @@ namespace Kuvo
 			{
 				if (!_instance)
 				{
-					if(!(_instance = FindObjectOfType<EnemyCreatorSingleton>()))
+					if (!(_instance = FindObjectOfType<EnemyCreatorSingleton>()))
 					{
 						Debug.LogError("EnemyCreatorSingletonが存在しませんでした\n規定値としてnullを使用します。");
 					}
@@ -85,6 +85,7 @@ namespace Kuvo
 		{
 			get
 			{
+				// Linqを使用しフィルタリング
 				BaseEnemyAI[] _enemyAIs = enemies
 					.Select((obj) => obj.GetComponent<BaseEnemyAI>())
 					.Where((obj) => obj != null)
@@ -139,7 +140,8 @@ namespace Kuvo
 
 		/// <summary>
 		/// 指定秒後に指定数のコストを加算する
-		/// (負の値を入れることで減算も可能)
+		/// (※負の値を入れることで減算も可能)
+		/// (※秒数は絶対値をとる)
 		/// </summary>
 		/// <param name="cost"> 加算するコスト</param>
 		/// <param name="second"> 待機時間(秒)</param>
@@ -154,7 +156,8 @@ namespace Kuvo
 		/// プライベート・コルーチン:CostAddForSecondsを実行する
 		/// --CostAddForSecondsの仕様-->
 		/// 指定秒後に指定数のコストを加算する
-		/// (負の値を入れることで減算も可能)
+		/// (※負の値を入れることで減算も可能)
+		/// (※秒数は絶対値をとる)
 		/// </summary>
 		/// <param name="cost"> 加算するコスト</param>
 		/// <param name="second"> 待機時間(秒)</param>

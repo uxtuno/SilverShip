@@ -8,12 +8,6 @@ namespace Kuvo
 	/// </summary>
 	public class CannibalLantern : BaseEnemy
 	{
-		private enum FlyState
-		{
-			Up,
-			Down,
-		}
-
 		[Tooltip("弾のプレハブ"), SerializeField]
 		private GameObject bulletPrafab = null;     // 弾のプレハブ
 		private GameObject bulletCollecter = null;
@@ -41,9 +35,6 @@ namespace Kuvo
 			{
 				bulletCollecter = new GameObject("BulletCollecter");
 			}
-
-
-			//StartCoroutine(Flying(0.5f));
 		}
 
 		protected override void Update()
@@ -89,9 +80,6 @@ namespace Kuvo
 						break;
 
 					case EnemyState.Death:
-						BaseEnemyAI aI = GetComponent<BaseEnemyAI>();
-						aI.StopAllCoroutines();
-						aI.enabled = false;
 						break;
 				}
 
@@ -200,6 +188,7 @@ namespace Kuvo
 			}
 			else
 			{
+				// 弾のプロパティ・必須コンポーネントを設定
 				bullet.GetSafeComponent<Bullet>().target = player.lockOnPoint;
 				bullet.GetSafeComponent<AttackArea>().Set(attack, 1.0f);
 				bullet.transform.SetParent(bulletCollecter.transform);
@@ -208,51 +197,6 @@ namespace Kuvo
 			currentState = EnemyState.None;
 			EnemyCreatorSingleton.instance.StartCostAddForSeconds(-attackCosts.longRange, 2);
 			isAttack = false;
-		}
-
-		private IEnumerator Flying(float deflectionHeight)
-		{
-			float y = transform.localPosition.y;
-			float max = deflectionHeight / 2 + y;
-			float min = -(deflectionHeight / 2) + y;
-			float speed = 0.5f;
-			FlyState flyState;
-
-			if ((y = Random.Range(min, max)) > transform.localPosition.y)
-			{
-				flyState = FlyState.Down;
-			}
-			else
-			{
-				flyState = FlyState.Up;
-			}
-
-			while (true)
-			{
-				switch (flyState)
-				{
-					case FlyState.Up:
-						y += speed * Time.deltaTime;
-						if (y > max)
-						{
-							y = max;
-							flyState = FlyState.Down;
-						}
-						break;
-
-					case FlyState.Down:
-						y -= speed * Time.deltaTime;
-						if (y < min)
-						{
-							y = min;
-							flyState = FlyState.Up;
-						}
-						break;
-				}
-
-				transform.localPosition = new Vector3(transform.localPosition.x, y, transform.localPosition.z);
-				yield return new WaitForEndOfFrame();
-			}
 		}
 	}
 }

@@ -11,6 +11,9 @@ namespace Kuvo
 	[RequireComponent(typeof(BaseEnemy))]
 	abstract public class BaseEnemyAI : MyMonoBehaviour
 	{
+		/// <summary>
+		/// 敵AIの行動状態(※敵の状態とは別で定義される)
+		/// </summary>
 		protected enum ActionState
 		{
 			None,
@@ -19,11 +22,11 @@ namespace Kuvo
 			Attacking,
 		}
 
-		// actionTimeの初期値一覧
+		// actionTimeの初期値一覧(※配列にはconst修飾子が使えない)
 		private readonly float[] actionTimeCollection = { 1f, 1.5f, 2f, 2.5f, 3f };
 
 		[Tooltip("出現直後の待機時間"), SerializeField]
-		protected float wait = 3;                   // 出現直後の待機時間
+		protected float wait = 3;                   // 出現直後の待機時間(秒)
 		[Tooltip("チームを組む範囲(半径)"), SerializeField]
 		protected float teamRange = 30.0f;          // チームを組む範囲(半径)
 		protected ActionState currentState = ActionState.None;
@@ -115,6 +118,7 @@ namespace Kuvo
 
 		protected virtual void Awake()
 		{
+			// 上司・部下の初期化
 			captain = null;
 			members = new List<BaseEnemyAI>();
 			members.Clear();
@@ -125,6 +129,12 @@ namespace Kuvo
 			if (!enemy)
 			{
 				Debug.LogError("enemyの取得に失敗しました");
+			}
+
+			// waitには負の値が入らないようにする
+			if (wait < 0)
+			{
+				wait = Mathf.Abs(wait);
 			}
 
 			startTime = Time.time;
@@ -180,7 +190,7 @@ namespace Kuvo
 
 		public void OnDrawGizmos()
 		{
-			if(isCaptain && Application.loadedLevelName == "enemytest")
+			if (isCaptain && Application.loadedLevelName == "enemytest")
 			{
 				Gizmos.DrawSphere(enemy.lockOnPoint.position, teamRange);
 			}
@@ -197,12 +207,13 @@ namespace Kuvo
 				// 上司をキャッシュ
 				BaseEnemyAI captainAI = EnemyCreatorSingleton.instance.captainAI;
 
-				if (!captainAI)     // 上司が存在しなければ
+				// 上司が存在しなければ
+				if (!captainAI)
 				{
 					// 自身を上司に登録(これによりisCaptainおよびenemy.isTeamUpがtrueになる)
-					captain = this;     
+					captain = this;
 
-					// teamRange内に存在する自分以外のBaseEnemyAIを取得
+					// Linqを使用してteamRange内に存在する自分以外のBaseEnemyAIを取得
 					BaseEnemyAI[] enemies = Physics.OverlapSphere(transform.position, teamRange)
 											.Select((obj) => obj.GetComponent<BaseEnemyAI>())
 											.Where((obj) => obj != null && transform != obj.transform)
@@ -217,8 +228,8 @@ namespace Kuvo
 						// メンバーとの距離を計算
 						float distance = Vector3.Distance(enemy.lockOnPoint.position, current.enemy.lockOnPoint.position);
 
-
-						if (min > distance)     // 最短ならば
+						// 最短ならば
+						if (min > distance)
 						{
 							oldMin = min;
 							min = distance;
@@ -230,7 +241,8 @@ namespace Kuvo
 
 							member1 = current;
 						}
-						else if (oldMin > distance)     // 2番目に短ければ
+						// 2番目に短ければ
+						else if (oldMin > distance)
 						{
 							member2 = current;
 						}
@@ -249,7 +261,8 @@ namespace Kuvo
 					}
 
 				}
-				else        // 上司が存在していれば
+				// 上司が存在していれば
+				else
 				{
 					captain = captainAI;
 					captain.members.Add(this);
@@ -268,12 +281,14 @@ namespace Kuvo
 				return;
 			}
 
+			// 全員の上司をnullに
 			captain = null;
-
 			foreach (BaseEnemyAI current in members)
 			{
 				current.captain = null;
 			}
+
+			// チーム解散
 			members.Clear();
 		}
 

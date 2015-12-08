@@ -24,7 +24,6 @@ namespace Kuvo
 			base.Start();
 
 			currentState = ActionState.Waiting;
-
 			actionTime = initActionTime;
 		}
 
