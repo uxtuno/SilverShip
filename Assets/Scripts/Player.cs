@@ -18,7 +18,7 @@ namespace Uxtuno
 		[Tooltip("水平方向のカメラ移動速度"), SerializeField]
 		private float horizontalRotationSpeed = 120.0f; // 水平方向へのカメラ移動速度
 		[Tooltip("垂直方向のカメラ移動速度"), SerializeField]
-		private float verticaltalRotationSpeed = 40.0f; // 垂直方向へのカメラ移動速度
+		private float verticalRotationSpeed = 40.0f; // 垂直方向へのカメラ移動速度
 		private static readonly float near = 0.5f; // カメラに映る最小距離
 		private static readonly float maxCameraRotateY = 5.0f; // プレイヤーが移動したときの最大カメラ回転量
 
@@ -27,6 +27,7 @@ namespace Uxtuno
 		private CameraController cameraController; // キャラクターコントローラー
 		private Transform meshRoot; // プレイヤーメッシュのルート
 		private Animator animator; // アニメーションのコントロール用
+		private PlayerCamera playerCamera; // カメラ動作を委譲
 
 		private int speedID;
 		private int isJumpID;
@@ -153,7 +154,7 @@ namespace Uxtuno
 				Vector3 moveVector = moveDirection * speed;
 				moveVector.y = player.jumpVY;
 
-				player.characterController.Move(moveVector * Time.deltaTime);
+				player.Move(moveVector * Time.deltaTime);
 				if (moveDirection != Vector3.zero)
 				{
 					Vector3 newAngles = Vector3.zero;
@@ -205,7 +206,7 @@ namespace Uxtuno
 				Vector3 moveVector = moveDirection * speed;
 				moveVector.y = player.jumpVY;
 
-				player.characterController.Move(moveVector * Time.deltaTime);
+				player.Move(moveVector * Time.deltaTime);
 				if (moveDirection != Vector3.zero)
 				{
 					Vector3 newAngles = Vector3.zero;
@@ -278,7 +279,7 @@ namespace Uxtuno
 					speed -= deceleration;
 				}
 
-				player.characterController.Move(moveVector * Time.deltaTime);
+				player.Move(moveVector * Time.deltaTime);
 			}
 		}
 
@@ -324,7 +325,17 @@ namespace Uxtuno
 
 		#region - フィールド
 		private ContainedObjects containedObjects;
-		private Actor lockOnTarget; // ロックオン対象エネミー
+		private Actor _lockOnTarget; // ロックオン対象エネミー
+
+		/// <summary>
+		/// ロックオン対象
+		/// </summary>
+		public Actor lockOnTarget
+		{
+			get { return _lockOnTarget; }
+			private set { _lockOnTarget = value; }
+		}
+
 		[SerializeField]
 		private GameObject autoLockOnIconPrefab = null;
 		private Transform autoLockOnIcon;
@@ -345,14 +356,44 @@ namespace Uxtuno
 
 		private bool isAirDashPossible = false; // 空中ダッシュができるか
 
-		private Transform lockOnIcon; // ロックオンアイコン
+		/// <summary>
+		/// ロックオンの状態
+		/// </summary>
+		public enum LockOnState
+		{
+			None,
+			Auto,
+			Manual,
+		}
+		private FollowIcon lockOnIcon; // ロックオンアイコン
+		private LockOnState _lockOnState = LockOnState.None; // ロックオン状態
+
+		/// <summary>
+		/// ロックオン状態
+		/// </summary>
+		public LockOnState lockOnState {
+			get { return _lockOnState; }
+			private set { _lockOnState = value; }
+		}
+
+		// ロックオンアイコン画像
+		private Sprite autoLockOnIconSprite;
+		private Sprite manualLockOnIconSprite;
+
+		private static readonly float autoLockOnLimitDistance = 6.0f; // オートロックオン限界距離
+		private static readonly float manualLockOnLimitDistance = 30.0f; // マニュアルロックオン限界距離
 
 		#endregion
 
 		void Start()
 		{
+			// リソースロード
+			autoLockOnIconSprite = Resources.Load<Sprite>("Sprites/AutoLockOnIcon");
+			manualLockOnIconSprite = Resources.Load<Sprite>("Sprites/ManualRockOnIcon");
+
 			characterController = GetComponent<CharacterController>();
 			cameraController = this.GetComponentInChildren<CameraController>();
+			playerCamera = new PlayerCamera(cameraController, horizontalRotationSpeed, verticalRotationSpeed);
 			animator = GetComponentInChildren<Animator>(); // アニメーションをコントロールするためのAnimatorを子から取得
 			meshRoot = animator.transform; // Animatorがアタッチされているのがメッシュのはずだから
 
@@ -375,190 +416,118 @@ namespace Uxtuno
 			// ロックオンアイコン用のCanvas
 			UICanvasGenerator.FollowIconCanvasGenerate();
 			GameObject lockOnIconPrefab = Resources.Load<GameObject>("Prefabs/UI/LockOnIcon");
-			lockOnIcon = Instantiate(lockOnIconPrefab).transform;
-			lockOnIcon.transform.SetParent(UICanvasGenerator.followIconCanvas.transform, false);
+			lockOnIcon = Instantiate(lockOnIconPrefab).GetSafeComponent<FollowIcon>();
+			lockOnIcon.Hide();
 		}
 
 		Vector3 cameraFront = new Vector3(0.0f, -0.2f, 1.0f);
 
 		void Update()
 		{
-			if (near > cameraController.targetToDistance)
-			{
-				isShow = false;
-			}
-			else
-			{
-				isShow = true;
-			}
-
-			if (playerInput.lockOn)
-			{
-				if (!isManualLockOn)
-				{
-					LockOn();
-				}
-				else
-				{
-					ManualLockOnRelease();
-				}
-			}
-
 			if (playerInput.cameraToFront)
 			{
-				cameraController.SetNextRotation(Quaternion.LookRotation(meshRoot.rotation * cameraFront), 0.3f, CameraController.InterpolationMode.Curve);
+				cameraController.SetRotation(Quaternion.LookRotation(meshRoot.rotation * cameraFront), 0.3f, CameraController.InterpolationMode.Curve);
 				isCameraInvalidControll = true;
 			}
 			checkGrounded();
 
-			BaseState oldState;
-
-			// カメラの回転入力
-			Vector2 cameraMove = Vector3.zero;
-			cameraMove.x = playerInput.cameraHorizontal;
-			cameraMove.y = playerInput.cameraVertical;
-			float cameraRotateY = 0.0f; // プレイヤーが移動したときのカメラ回転量
+			// プレイヤーが移動する前の「カメラ→プレイヤー」ベクトルを保持
+			Vector3 oldCameraToPlayer = transform.position - cameraController.cameraTransform.position;
 			Vector3 oldCameraPosition = cameraController.cameraTransform.position;
-			Vector3 old = transform.position - oldCameraPosition;
+			Vector3 oldPosition = transform.position;
+			BaseState oldState;
 			do
 			{
 				oldState = currentState;
 				// 現在の状態の動作を実行
 				currentState.Move();
 			} while (currentState != oldState);
-			Vector3 now = transform.position - oldCameraPosition;
-			// プレイヤーが移動した時のY軸カメラ回転量を計算
-			cameraRotateY = Mathf.Atan2(now.x * old.z - now.z * old.x, now.x * old.x + now.z * old.z) * Mathf.Rad2Deg;
-			cameraRotateY = Mathf.Clamp(cameraRotateY, -maxCameraRotateY, maxCameraRotateY);
+			// 移動後の「カメラ→プレイヤー」ベクトル
+			Vector3 nowCameraToPlayer = transform.position - oldCameraPosition;
 
-			float minDistance2 = 999.0f;
-			Transform tempLockOnTarget = null; // ロックオン対象候補を入れる
-			foreach (Transform enemy in containedObjects)
-			{
-				float distance2 = (transform.position - enemy.position).sqrMagnitude;
-				if (minDistance2 > distance2)
-				{
-					minDistance2 = distance2;
-					tempLockOnTarget = enemy;
-				}
-			}
+			LockOn();
+		}
 
-			// ロックオン対象が決定したので正式にロックオン
-			if (!isManualLockOn && tempLockOnTarget != null && lockOnTarget != tempLockOnTarget.GetComponent<Actor>())
+		void LateUpdate()
+		{
+			if (lockOnState == LockOnState.Manual)
 			{
-				lockOnTarget = tempLockOnTarget.GetComponent<Actor>();
-				if (autoLockOnIcon == null)
-				{
-					autoLockOnIcon = Instantiate(autoLockOnIconPrefab).transform;
-				}
-				autoLockOnIcon.parent = lockOnTarget.transform;
-				print(lockOnTarget.ToString() + "をロックオンしました");
-				//Camera.main.WorldToViewportPoint(lockOnTarget.lockOnPoint.position);
-				autoLockOnIcon.position = lockOnTarget.lockOnPoint.position;
-				autoLockOnIcon.GetSafeComponent<LockOnIcon>().lockOnPoint = lockOnTarget.lockOnPoint;
-			}
-
-			if(lockOnTarget !=null)
-			{
-				lockOnIcon.transform.position = Camera.main.WorldToScreenPoint(lockOnTarget.lockOnPoint.position);
-			}
-
-			float limitDistance = 6.0f;
-			if (isManualLockOn)
-			{
-				limitDistance = 30.0f;
-			}
-			limitDistance *= limitDistance;
-			// ロックオン対象から離れすぎると解除
-			if (lockOnTarget != null)
-			{
-				if ((lockOnTarget.lockOnPoint.position - transform.position).sqrMagnitude > limitDistance)
-				{
-					ManualLockOnRelease();
-				}
-			}
-
-			if (!isManualLockOn)
-			{
-				if (!isCameraInvalidControll)
-				{
-					if (cameraMove != Vector2.zero)
-					{
-						cameraController.CameraMove(cameraMove.x * horizontalRotationSpeed * Time.deltaTime, cameraMove.y * verticaltalRotationSpeed * Time.deltaTime, 0.2f);
-					}
-					else if (cameraRotateY != 0.0f)
-					{
-						cameraController.CameraMove(cameraRotateY * 0.5f, 0.0f, 0.1f);
-					}
-				}
-				else if (!cameraController.isInterpolation)
-				{
-					isCameraInvalidControll = false;
-				}
+				playerCamera.LockOnCamera();
 			}
 			else
 			{
-				// Todo : 何度もアクセスするためcameraTransformをフィールドとして保持したい
-				Vector2 v1 = new Vector2(cameraController.cameraTransform.forward.x, cameraController.cameraTransform.forward.z).normalized;
-				Vector3 cameraToPlayer = (lockOnPoint.position - cameraController.cameraTransform.position).normalized;
-				Vector3 cameraToLockOnEnemy = (lockOnTarget.lockOnPoint.position - cameraController.cameraTransform.position).normalized;
-				Vector2 v3 = new Vector2(cameraToPlayer.x, cameraToPlayer.z).normalized;
-				Vector2 v2 = new Vector2(cameraToLockOnEnemy.x, cameraToLockOnEnemy.z).normalized;
-				float rotateY = Mathf.Acos(Vector2.Dot(v1, v2)) * Mathf.Rad2Deg - 30.0f;
-				bool isLookEnemy = false;
-				bool isLookPlayer = false;
-				if (rotateY > 0.0f)
-				{
-					isLookEnemy = true;
-					if ((v1.x * v2.y - v1.y * v2.x > 0.0f))
-					{
-						//cameraController.CameraActualMove(-(rotateY), 0.0f);
-						cameraController.CameraActualMove(-(rotateY) * Time.deltaTime * 30.0f, 0.0f);
-					}
-					else
-					{
-						cameraController.CameraActualMove((rotateY) * Time.deltaTime * 30.0f, 0.0f);
-					}
-				}
-				else
-				{
-					v1 = new Vector2(cameraController.cameraTransform.forward.x, cameraController.cameraTransform.forward.z).normalized;
-					rotateY = Mathf.Acos(Vector2.Dot(v1, v3)) * Mathf.Rad2Deg - 30.0f;
-					if (rotateY > 0.0f)
-					{
-						isLookPlayer = true;
-						if ((v1.x * v3.y - v1.y * v3.x > 0.0f))
-						{
-							//cameraController.CameraActualMove(-(rotateY * 0.5f), 0.0f);
-							cameraController.CameraMove((rotateY), 0.0f);
-						}
-						else
-						{
-							cameraController.CameraMove(-(rotateY), 0.0f);
-						}
-					}
-				}
-				lookPoint.position = (cameraController.transform.position);
-				if (isLookPlayer || isLookEnemy)
-				{
-				}
+				playerCamera.CameraInput();
 			}
+		}
+
+		/// <summary>
+		/// ロックオン状態のカメラ
+		/// </summary>
+		private void LockOnCamera()
+		{
+			
 		}
 
 		private const float LockOnAngleHulfRange = 45.0f; // ロックオン可能角度の半分
 		private const float LockOnDistance = 20.0f; // ロックオン可能距離
 
 		/// <summary>
-		/// ロックオン動作
+		/// ロックオン関係処理
 		/// </summary>
 		private void LockOn()
+		{
+			// マニュアルロックオン
+			if (playerInput.lockOn)
+			{
+				if (lockOnState != LockOnState.Manual)
+				{
+					ManualLockOn();
+				}
+				else
+				{
+					LockOnRelease();
+				}
+			}
+			//　オートロックオン
+			if (lockOnState != LockOnState.Manual)
+			{
+				AutoLockOn();
+			}
+
+			// それぞれのロックオン状態での限界距離
+			float limitDistance = 0.0f;
+			if (lockOnState == LockOnState.Auto)
+			{
+				limitDistance = autoLockOnLimitDistance;
+			}
+			else if (lockOnState == LockOnState.Manual)
+			{
+				limitDistance = manualLockOnLimitDistance;
+			}
+
+			// ロックオン対象から離れすぎると解除
+			if (lockOnTarget != null)
+			{
+				if ((lockOnTarget.lockOnPoint.position - transform.position).sqrMagnitude > limitDistance * limitDistance)
+				{
+					LockOnRelease();
+				}
+			}
+		}
+
+		/// <summary>
+		/// マニュアルロックオン
+		/// </summary>
+		private void ManualLockOn()
 		{
 			// ロックオンする敵
 			Transform lockOnEnemy = null;
 			// 敵のリストを取得
-			Transform[] enemies = GameObject.FindGameObjectsWithTag(TagName.Enemy).Select((obj) => obj.transform).ToArray();
+			Transform[] enemies = GameObject.FindGameObjectsWithTag(TagName.Enemy)
+				.Select(obj => obj.transform)
+				.ToArray();
 			float playerAngle = cameraController.cameraTransform.eulerAngles.y;
-			float minDistance = 9999.0f;
+			float minDistance = float.PositiveInfinity;
 			foreach (Transform enemy in enemies)
 			{
 				// カメラの前方の円弧上の範囲をロックオン可能範囲とする
@@ -578,57 +547,54 @@ namespace Uxtuno
 			if (lockOnEnemy != null)
 			{
 				lockOnTarget = lockOnEnemy.GetComponent<Actor>();
-				isManualLockOn = true;
-				GameObject go = new GameObject("lockOnCameraTarget");
-				go.transform.position = (lockOnPoint.position + lockOnTarget.lockOnPoint.position) / 2.0f;
-				lookPoint = go.transform;
-				cameraController.SetTarget(lookPoint);
-				Quaternion q = Quaternion.LookRotation(lockOnEnemy.GetComponent<Actor>().lockOnPoint.position - cameraController.transform.position);
-				cameraController.SetNextRotation(q);
-				ManualLockOn();
-
+				playerCamera.BeginLockOn(lockOnTarget.lockOnPoint);
+				lockOnState = LockOnState.Manual;
+				lockOnIcon.Set(lockOnTarget.lockOnPoint, manualLockOnIconSprite);
 			}
 		}
 
 		/// <summary>
-		/// マニュアルロックオン
+		/// オートロックオン
+		/// ロックオン可能な相手を探して自動でロックオンする
 		/// </summary>
-		private void ManualLockOn()
+		void AutoLockOn()
 		{
-			if (manualLockOnIcon == null)
+			float minDistance2 = float.PositiveInfinity;
+			Transform tempLockOnTarget = null; // ロックオン対象候補を入れる
+			foreach (Transform enemy in containedObjects)
 			{
-				manualLockOnIcon = Instantiate(manualLockOnIconPrefab).transform;
-				manualLockOnIcon.position = lockOnTarget.lockOnPoint.position;
-				manualLockOnIcon.GetSafeComponent<LockOnIcon>().lockOnPoint = lockOnTarget.lockOnPoint;
+				// 距離の二乗のまま計算
+				float distance2 = (transform.position - enemy.position).sqrMagnitude;
+				if (minDistance2 > distance2)
+				{
+					minDistance2 = distance2;
+					tempLockOnTarget = enemy;
+				}
 			}
-			if (autoLockOnIcon != null)
+			// ロックオン対象が決定したので正式にロックオン
+			if (tempLockOnTarget != null)
 			{
-				Destroy(autoLockOnIcon.gameObject);
+				Actor nextLockOnTarget = tempLockOnTarget.GetComponent<Actor>();
+				// ロックオン対象が変更された時
+				if (lockOnTarget != nextLockOnTarget)
+				{
+					lockOnTarget = nextLockOnTarget;
+					lockOnIcon.Set(lockOnTarget.lockOnPoint, autoLockOnIconSprite);
+					lockOnState = LockOnState.Auto;
+				}
 			}
 		}
 
 		/// <summary>
-		/// マニュアルロックオン解除
+		/// ロックオン解除
 		/// </summary>
-		private void ManualLockOnRelease()
+		private void LockOnRelease()
 		{
 			// Todo :
 			lockOnTarget = null;
-			if (autoLockOnIcon != null)
-			{
-				Destroy(autoLockOnIcon.gameObject);
-			}
-			print("ロックオンを解除しました");
-			cameraController.SetDistance(3.0f);
-			cameraController.ResetTarget();
-			isManualLockOn = false;
-
-			if (manualLockOnIcon != null)
-			{
-				Destroy(manualLockOnIcon.gameObject);
-			}
+			lockOnIcon.Hide();
+			lockOnState = LockOnState.None;
 		}
-
 
 		private const float unGroundedSeconds = 0.08f; // 地面から離れたとみなす時間
 		private float ungroundedCount = 0.0f; // characterController.isGroundedがfalseを返してからの時間
@@ -691,6 +657,38 @@ namespace Uxtuno
 			direction.y = 0.0f;
 			// カメラの方向を加味して進行方向を計算
 			return direction;
+		}
+
+		/// <summary>
+		/// プレイヤーを移動させる
+		/// </summary>
+		/// <param name="vx">X軸移動量</param>
+		/// <param name="vy">Y軸移動量</param>
+		/// <param name="vz">Z軸移動量</param>
+		public void Move(float vx, float vy, float vz)
+		{
+		}
+
+		/// <summary>
+		/// プレイヤーを移動させる
+		/// </summary>
+		/// <param name="moveVector">移動ベクトル</param>
+		public void Move(Vector3 moveVector)
+		{
+			Vector3 oldPosition = transform.position; ;
+			characterController.Move(moveVector);
+
+			// 移動前後の座標から実際の移動量を計算
+			moveVector = transform.position - oldPosition;
+
+			// カメラ入力がされて無い時のみカメラの回転を行う
+			if (playerInput.cameraHorizontal == 0.0f &&
+				playerInput.cameraVertical == 0.0f &&
+				lockOnState != LockOnState.Manual
+				)
+			{
+				playerCamera.PlayerMoveToCameraRotation(moveVector);
+			}
 		}
 	}
 }

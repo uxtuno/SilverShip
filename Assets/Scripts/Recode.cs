@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Diagnostics;
 
 public class Recode : MonoBehaviour
 {
@@ -20,7 +21,8 @@ public class Recode : MonoBehaviour
 		if (Microphone.devices.Length <= 0)
 		{
 			//Throw a warning message at the console if there isn't  
-			Debug.LogWarning("Microphone not connected!");
+			UnityEngine.Debug.LogWarning("Microphone not connected!");
+			enabled = false;
 		}
 		else //At least one microphone is present  
 		{
@@ -42,6 +44,7 @@ public class Recode : MonoBehaviour
 		}
 	}
 
+	[Conditional("DEBUG")]
 	void Update()
 	{
 		if (!Microphone.IsRecording(null))
