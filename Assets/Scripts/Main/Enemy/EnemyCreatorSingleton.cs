@@ -6,6 +6,12 @@ using Uxtuno;
 
 namespace Kuvo
 {
+	/// <summary>
+	/// ステージ内に敵を配置するクラス
+	/// シングルトンパターンで実装しているが、
+	/// インスタンスの自動生成は行わないので
+	/// ヒエラルキーに手動で配置してください
+	/// </summary>
 	public class EnemyCreatorSingleton : MyMonoBehaviour
 	{
 		#region - シングルトンを実現させるための処理 -
@@ -19,16 +25,18 @@ namespace Kuvo
 		{
 		}
 
+		/// <summary>
+		/// インスタンス(ヒエラルキー内に配置されていない場合nullが返る)
+		/// </summary>
 		public static EnemyCreatorSingleton instance
 		{
 			get
 			{
 				if (!_instance)
 				{
-					if (!(_instance = FindObjectOfType<EnemyCreatorSingleton>()))
+					if(!(_instance = FindObjectOfType<EnemyCreatorSingleton>()))
 					{
-						GameObject go = new GameObject("EnemyCreatorSingleton");
-						_instance = go.AddComponent<EnemyCreatorSingleton>();
+						Debug.LogError("EnemyCreatorSingletonが存在しませんでした\n規定値としてnullを使用します。");
 					}
 				}
 
@@ -129,22 +137,30 @@ namespace Kuvo
 			}
 		}
 
-		private void Update()
-		{
-			print(currentAttackCostCount);
-		}
-
 		/// <summary>
 		/// 指定秒後に指定数のコストを加算する
 		/// (負の値を入れることで減算も可能)
 		/// </summary>
 		/// <param name="cost"> 加算するコスト</param>
 		/// <param name="second"> 待機時間(秒)</param>
-		public IEnumerator CostAddForSeconds(int cost, float second)
+		private IEnumerator CostAddForSeconds(int cost, float second)
 		{
 			yield return new WaitForSeconds(Mathf.Abs(second));
 
 			currentAttackCostCount += cost;
+		}
+
+		/// <summary>
+		/// プライベート・コルーチン:CostAddForSecondsを実行する
+		/// --CostAddForSecondsの仕様-->
+		/// 指定秒後に指定数のコストを加算する
+		/// (負の値を入れることで減算も可能)
+		/// </summary>
+		/// <param name="cost"> 加算するコスト</param>
+		/// <param name="second"> 待機時間(秒)</param>
+		public void StartCostAddForSeconds(int cost, float second)
+		{
+			StartCoroutine(CostAddForSeconds(cost, second));
 		}
 	}
 }

@@ -133,8 +133,7 @@ namespace Kuvo
 		public override IEnumerator ShortRangeAttack()
 		{
 			isAttack = true;
-			IEnumerator costAddForSeconds = EnemyCreatorSingleton.instance.CostAddForSeconds(attackCosts.shortRange, 0);
-			EnemyCreatorSingleton.instance.StartCoroutine(costAddForSeconds);
+			EnemyCreatorSingleton.instance.StartCostAddForSeconds(attackCosts.shortRange, 0);
 			currentState = EnemyState.Move;
 
 			// ここに予備動作
@@ -175,8 +174,7 @@ namespace Kuvo
 			yield return new WaitForSeconds(1.0f);
 
 			shortRangeAttackAreaObject.SetActive(false);
-			costAddForSeconds = EnemyCreatorSingleton.instance.CostAddForSeconds(-attackCosts.shortRange, 2);
-			EnemyCreatorSingleton.instance.StartCoroutine(costAddForSeconds);
+			EnemyCreatorSingleton.instance.StartCostAddForSeconds(-attackCosts.shortRange, 2);
 			isAttack = false;
 		}
 
@@ -186,8 +184,7 @@ namespace Kuvo
 		public override IEnumerator LongRangeAttack()
 		{
 			isAttack = true;
-			IEnumerator costAddForSeconds = EnemyCreatorSingleton.instance.CostAddForSeconds(attackCosts.longRange, 0);
-			EnemyCreatorSingleton.instance.StartCoroutine(costAddForSeconds);
+			EnemyCreatorSingleton.instance.StartCostAddForSeconds(attackCosts.longRange, 0);
 
 			yield return new WaitForSeconds(1f);
 
@@ -209,8 +206,7 @@ namespace Kuvo
 			}
 
 			currentState = EnemyState.None;
-			costAddForSeconds = EnemyCreatorSingleton.instance.CostAddForSeconds(-attackCosts.longRange, 2);
-			EnemyCreatorSingleton.instance.StartCoroutine(costAddForSeconds);
+			EnemyCreatorSingleton.instance.StartCostAddForSeconds(-attackCosts.longRange, 2);
 			isAttack = false;
 		}
 
