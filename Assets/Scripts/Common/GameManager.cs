@@ -39,7 +39,7 @@ public class GameManager : MyMonoBehaviour
 		}
 	}
 
-	private static readonly string followIconCanvas = "FollowIconCanvas";
+	//private static readonly string followIconCanvas = "FollowIconCanvas";
 	void Start()
 	{
 

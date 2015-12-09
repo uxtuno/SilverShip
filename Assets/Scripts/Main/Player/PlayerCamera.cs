@@ -39,9 +39,22 @@ namespace Uxtuno
 		public void BeginLockOn(Transform target)
 		{
 			this.target = target;
-			Quaternion q = Quaternion.LookRotation(target.position - controller.transform.position);
+			//controller.SetPovot((target.position + player.transform.position) / 2.0f);
+			Quaternion q = Quaternion.LookRotation(target.position - cameraTransform.position);
 			controller.SetRotation(q, 0.5f, CameraController.InterpolationMode.Curve);
 			controller.transform.SetParent(null);
+		}
+
+		/// <summary>
+		/// ロックオン終了時のカメラ動作
+		/// </summary>
+		public void EndLockOn()
+		{
+			Vector3 lookPoint = player.transform.Find("LookPoint").position;
+			//controller.SetPovot(lookPoint);
+			controller.transform.position = lookPoint;
+			controller.transform.SetParent(player.transform);
+			controller.DefaultLocalCameraPosition();
 		}
 
 		/// <summary>
@@ -90,34 +103,47 @@ namespace Uxtuno
 
 		public void LockOnCamera()
 		{
-			Vector2 playerPosition = new Vector2(player.transform.position.x, player.transform.position.z);
-			Vector2 cameraPosition = new Vector2(cameraTransform.position.x, cameraTransform.position.z);
-			Vector2 cameraToPlayer = playerPosition - cameraPosition;
-			Vector2 cameraVertical = new Vector2(cameraTransform.right.x, cameraTransform.right.z);
+			controller.SetPovot((target.position + player.transform.position) / 2.0f);
+
+			Vector3 playerPosition = new Vector3(player.transform.position.x, 0.0f, player.transform.position.z);
+			Vector3 cameraPosition = new Vector3(cameraTransform.position.x, 0.0f, cameraTransform.position.z);
+			Vector3 cameraToPlayer = playerPosition - cameraPosition;
+			Vector3 cameraVertical = new Vector3(cameraTransform.right.x, 0.0f, cameraTransform.right.z);
 			cameraVertical.Normalize();
 
 			// カメラの視線方向と垂直となるベクトルとプレイヤーの座標との直近点を求める
 			// 線分 と 点 の直近座標を求める式を利用
-			Vector2 nearPositionOnCameraVertical = cameraPosition + cameraVertical * Vector2.Dot(cameraToPlayer, cameraVertical);
+			Vector3 nearPositionOnCameraVertical = cameraPosition + cameraVertical * Vector3.Dot(cameraToPlayer, cameraVertical);
 
 			// カメラの水平ベクトルとプレイヤーとの距離
 			float cameraVerticalToPlayerDistance = (playerPosition - nearPositionOnCameraVertical).magnitude;
-			Debug.Log(cameraVerticalToPlayerDistance);
 
 			cameraToPlayer.Normalize();
-			Vector3 cameraFront2D = new Vector3(cameraTransform.forward.x, 0.0f, cameraTransform.forward.z);
-			cameraFront2D.Normalize();
-			
+			Vector3 cameraFrontXZ = new Vector3(cameraTransform.forward.x, 0.0f, cameraTransform.forward.z);
+			cameraFrontXZ.Normalize();
+
 			if (cameraVerticalToPlayerDistance > 5.0f)
 			{
-				cameraFront2D *= cameraVerticalToPlayerDistance - 5.0f;
-				controller.transform.position += cameraFront2D;
+				cameraFrontXZ *= cameraVerticalToPlayerDistance - 5.0f;
+				cameraTransform.position += cameraFrontXZ;
 			}
 			else if (cameraVerticalToPlayerDistance < 3.0f)
 			{
-				cameraFront2D *= 3.0f - cameraVerticalToPlayerDistance;
-				controller.transform.position -= cameraFront2D;
+				cameraFrontXZ *= 3.0f - cameraVerticalToPlayerDistance;
+				cameraTransform.position -= cameraFrontXZ;
 			}
+			//float cameraToPlayerAngle = Mathf.Acos(Vector3.Dot(cameraFrontXZ, cameraToPlayer.normalized)) * Mathf.Rad2Deg;
+			//if (cameraToPlayerAngle > 30.0f)
+			//{
+			//	if(cameraFrontXZ.x * cameraToPlayer.z - cameraFrontXZ.z * cameraToPlayer.x > 0.0f)
+			//	{
+			//		controller.CameraMove((cameraToPlayerAngle - 30.0f), 0.0f, 0.0f);
+			//	}
+			//	else
+			//	{
+			//		controller.CameraMove(-(cameraToPlayerAngle - 30.0f), 0.0f, 0.0f);
+			//	}
+			//}
 
 			//// マニュアルロックオン時カメラ動作
 			//// Todo : 何度もアクセスするためcameraTransformをフィールドとして保持したい

@@ -12,9 +12,9 @@ namespace Uxtuno
 	/// </summary>
 	public class FollowIcon : MyMonoBehaviour
 	{
-		
+
 		private Image image; // 自分自身の画像
-		[Tooltip("追従対象") , SerializeField]
+		[Tooltip("追従対象"), SerializeField]
 		private Transform target; // 追従対象
 
 		void Awake()
@@ -28,17 +28,23 @@ namespace Uxtuno
 
 		void LateUpdate()
 		{
-			if (target != null && image.enabled)
+			if (target != null && isShow)
 			{
 				// 対象の移動後に位置を反映する必要があるためLateUpdateで処理
 				transform.position = Camera.main.WorldToScreenPoint(target.position);
-				if(transform.position.z < 0.0f && isShow)
+				if (transform.position.z < 0.0f)
 				{
-					Hide();
+					if (image.enabled)
+					{
+						image.enabled = false;
+					}
 				}
-				else if(!isShow)
+				else
 				{
-					Show();
+					if (!image.enabled)
+					{
+						image.enabled = true;
+					}
 				}
 			}
 		}
@@ -71,7 +77,7 @@ namespace Uxtuno
 		public void SetSprite(Sprite sprite)
 		{
 			image.sprite = sprite;
-			image.enabled = true;
+			isShow = true;
 		}
 
 		/// <summary>
@@ -90,21 +96,22 @@ namespace Uxtuno
 			isShow = true;
 		}
 
-		/// <summary>
-		/// 表示状態を変更
-		/// </summary>
+		private bool _isShow = true; // 表示フラグ
+									 /// <summary>
+									 /// 表示状態を変更
+									 /// </summary>
 		public override bool isShow
 		{
 			get
 			{
-				return image.enabled;
+				return _isShow;
 			}
 
 			set
 			{
 				image.enabled = value;
+				_isShow = value;
 			}
 		}
-
 	}
 }

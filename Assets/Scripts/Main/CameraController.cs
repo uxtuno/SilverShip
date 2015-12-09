@@ -26,8 +26,8 @@ namespace Uxtuno
 		}
 
 		[Tooltip("カメラで追いかける対象"), SerializeField]
-		private Transform target = null;
-		private Transform defaultTarget;
+		private Transform pivot = null;
+		//private Transform defaultTarget;
 		[Tooltip("上に向ける限界角度"), SerializeField]
 		private float facingUpLimit = 5.0f;                 // 視点移動の上方向制限
 		[Tooltip("下に向ける限界角度"), SerializeField]
@@ -57,8 +57,13 @@ namespace Uxtuno
 		/// </summary>
 		public bool isInterpolation { get; set; }
 
+		//private float cameraToPivotDistance; // 中心点までの距離
+		private Vector3 defaultLocalCameraPosition; // カメラの初期ローカル座標
+
 		void Start()
 		{
+			//cameraToPivotDistance = (pivot.position - cameraTransform.position).magnitude;
+			defaultLocalCameraPosition = cameraTransform.localPosition;
 		}
 
 		void LateUpdate()
@@ -69,7 +74,7 @@ namespace Uxtuno
 			}
 			else
 			{
-				target.rotation = newRotation;
+				pivot.rotation = newRotation;
 			}
 
 		}
@@ -89,7 +94,7 @@ namespace Uxtuno
 				currentInterpolationPosition = Mathf.Sin((Mathf.PI * 0.5f) * interpolationCount);
 			}
 
-			target.rotation = Quaternion.Lerp(oldRotation, newRotation, currentInterpolationPosition);
+			pivot.rotation = Quaternion.Lerp(oldRotation, newRotation, currentInterpolationPosition);
 
 			// 補間終了
 			if (interpolationCount >= 1.0f)
@@ -169,6 +174,8 @@ namespace Uxtuno
 				angles.x = facingDownLimit;
 			}
 
+			angles.z = 0.0f;
+
 			newRotation.eulerAngles = angles;
 			isForceInterpolation = true;
 			InterpolationStart(interpolationSeconds, mode);
@@ -196,11 +203,27 @@ namespace Uxtuno
 		/// </summary>
 		public void SetPovot(Vector3 position)
 		{
-			// カメラに位置を反映させないように一度親子関係を解除
+			//// カメラに位置を反映させないように一度親子関係を解除
+			//Vector3 vec = cameraTransform.position - position;
+			//Vector3 cameraPosition = cameraTransform.position;
+			//cameraTransform.SetParent(null, false);
+			//pivot.position = position;
+			//float distance = vec.magnitude;
+			//         pivot.LookAt(position - cameraPosition);
+			//newRotation = pivot.rotation;
+			//cameraTransform.SetParent(pivot, false);
+			//cameraTransform.position = pivot.position + vec;
 			cameraTransform.SetParent(null);
-			target.position = position;
-			target.LookAt(cameraTransform);
-			cameraTransform.SetParent(target);
+			pivot.position = position;
+			cameraTransform.SetParent(pivot);
+		}
+
+		/// <summary>
+		/// カメラの中心点との位置関係を初期状態に戻す
+		/// </summary>
+		public void DefaultLocalCameraPosition()
+		{
+			cameraTransform.localPosition = defaultLocalCameraPosition;
 		}
 	}
 }

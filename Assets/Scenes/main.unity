@@ -509,6 +509,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3974fe65643fd2640bae875bb92f7e30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!4 &1105205079 stripped
+Transform:
+  m_PrefabParentObject: {fileID: 422256, guid: 63d5a08191beee044abca411d87bd242, type: 2}
+  m_PrefabInternal: {fileID: 1136564291}
 --- !u!1 &1123259478
 GameObject:
   m_ObjectHideFlags: 0
@@ -622,9 +626,9 @@ Prefab:
       value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 11479812, guid: 63d5a08191beee044abca411d87bd242, type: 2}
-      propertyPath: facingUpLimit
-      value: 10
-      objectReference: {fileID: 0}
+      propertyPath: pivot
+      value: 
+      objectReference: {fileID: 1105205079}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 63d5a08191beee044abca411d87bd242, type: 2}
   m_IsPrefabParent: 0
@@ -656,7 +660,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   monsterPrefab: {fileID: 184250, guid: f31da0a02feb5e04cbe534016c6bbd5e, type: 2}
-  generateNumber: 15
+  generateNumber: 1
 --- !u!4 &1290838127
 Transform:
   m_ObjectHideFlags: 0

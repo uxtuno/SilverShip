@@ -19,8 +19,8 @@ namespace Uxtuno
 		private float horizontalRotationSpeed = 120.0f; // 水平方向へのカメラ移動速度
 		[Tooltip("垂直方向のカメラ移動速度"), SerializeField]
 		private float verticalRotationSpeed = 40.0f; // 垂直方向へのカメラ移動速度
-		private static readonly float near = 0.5f; // カメラに映る最小距離
-		private static readonly float maxCameraRotateY = 5.0f; // プレイヤーが移動したときの最大カメラ回転量
+		//private static readonly float near = 0.5f; // カメラに映る最小距離
+		//private static readonly float maxCameraRotateY = 5.0f; // プレイヤーが移動したときの最大カメラ回転量
 
 		private PlayerInput playerInput = PlayerInput.instance;
 		private CharacterController characterController; // キャラクターコントローラー
@@ -336,23 +336,6 @@ namespace Uxtuno
 			private set { _lockOnTarget = value; }
 		}
 
-		[SerializeField]
-		private GameObject autoLockOnIconPrefab = null;
-		private Transform autoLockOnIcon;
-
-		private bool isManualLockOn = false;
-		[SerializeField]
-		private GameObject manualLockOnIconPrefab = null;
-		private Transform manualLockOnIcon = null;
-
-		[SerializeField]
-		//private GameObject playerAttackEffectPrefab = null;
-		private GameObject playerAttackEffect;
-
-		private Transform lookPoint; // カメラの中止点
-		private bool isCameraInvalidControll = false; // カメラ操作不能状態
-
-		private PlayerTrampled playerTrampled; // 踏みつけジャンプ動作
 
 		private bool isAirDashPossible = false; // 空中ダッシュができるか
 
@@ -426,15 +409,11 @@ namespace Uxtuno
 		{
 			if (playerInput.cameraToFront)
 			{
-				cameraController.SetRotation(Quaternion.LookRotation(meshRoot.rotation * cameraFront), 0.3f, CameraController.InterpolationMode.Curve);
-				isCameraInvalidControll = true;
+				cameraController.SetRotation(Quaternion.LookRotation(meshRoot.rotation * cameraFront), 0.6f, CameraController.InterpolationMode.Curve);
 			}
 			checkGrounded();
 
 			// プレイヤーが移動する前の「カメラ→プレイヤー」ベクトルを保持
-			Vector3 oldCameraToPlayer = transform.position - cameraController.cameraTransform.position;
-			Vector3 oldCameraPosition = cameraController.cameraTransform.position;
-			Vector3 oldPosition = transform.position;
 			BaseState oldState;
 			do
 			{
@@ -443,7 +422,6 @@ namespace Uxtuno
 				currentState.Move();
 			} while (currentState != oldState);
 			// 移動後の「カメラ→プレイヤー」ベクトル
-			Vector3 nowCameraToPlayer = transform.position - oldCameraPosition;
 
 			LockOn();
 		}
@@ -594,6 +572,7 @@ namespace Uxtuno
 			lockOnTarget = null;
 			lockOnIcon.Hide();
 			lockOnState = LockOnState.None;
+			playerCamera.EndLockOn();
 		}
 
 		private const float unGroundedSeconds = 0.08f; // 地面から離れたとみなす時間
