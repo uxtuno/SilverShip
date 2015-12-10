@@ -212,18 +212,7 @@ namespace Kuvo
 
 		protected virtual void LateUpdate()
 		{
-			if (hp <= 0 && currentState != EnemyState.Death && !isAttack)
-			{
-				currentState = EnemyState.Death;
-				BaseEnemyAI aI = GetComponent<BaseEnemyAI>();
-				if (aI)
-				{
-					aI.StopAllCoroutines();
-					aI.enabled = false;
-				}
-				StopAllCoroutines();
-				StartCoroutine(OnDie(2));
-			}
+			
 
 			if (contained)
 			{
@@ -256,6 +245,21 @@ namespace Kuvo
 		public override void Damage(int attackPower, float magnification)
 		{
 			base.Damage(attackPower, magnification);
+
+			if (hp <= 0 && currentState != EnemyState.Death && !isAttack)
+			{
+				currentState = EnemyState.Death;
+				BaseEnemyAI aI = GetComponent<BaseEnemyAI>();
+				if (aI)
+				{
+					aI.StopAllCoroutines();
+					aI.enabled = false;
+				}
+				StopAllCoroutines();
+				StartCoroutine(OnDie(2));
+				return;
+			}
+
 			if (haveGround)
 			{
 				StartCoroutine(GroundStagger());

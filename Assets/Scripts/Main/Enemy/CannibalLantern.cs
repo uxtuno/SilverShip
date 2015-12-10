@@ -43,7 +43,7 @@ namespace Kuvo
 
 			if (Input.GetKeyDown(KeyCode.B))
 			{
-				hp = 0;
+				Damage(int.MaxValue, Mathf.Infinity);
 			}
 
 			if (currentState != oldState)
