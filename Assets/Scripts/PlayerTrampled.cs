@@ -25,7 +25,7 @@ namespace Uxtuno
 		{
 			foreach(Transform enemy in trampledEnemies)
 			{
-				enemy.GetComponent<Kuvo.Enemy>().Damage(attackPower, magnification);
+				enemy.GetComponent<Kuvo.BaseEnemy>().Damage(attackPower, magnification);
 			}
 		}
 

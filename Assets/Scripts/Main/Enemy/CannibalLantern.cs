@@ -1,21 +1,15 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
 
 namespace Kuvo
 {
 	/// <summary>
 	/// 人食い提灯クラス
 	/// </summary>
-	public class CannibalLantern : Enemy
+	public class CannibalLantern : BaseEnemy
 	{
-		private enum FlyState
-		{
-			Up,
-			Down,
-		}
-
-		[SerializeField]
-		private GameObject bulletPrafab = null;
+		[Tooltip("弾のプレハブ"), SerializeField]
+		private GameObject bulletPrafab = null;     // 弾のプレハブ
 		private GameObject bulletCollecter = null;
 		private EnemyState oldState = EnemyState.None;
 
@@ -41,9 +35,6 @@ namespace Kuvo
 			{
 				bulletCollecter = new GameObject("BulletCollecter");
 			}
-
-
-			//StartCoroutine(Flying(0.5f));
 		}
 
 		protected override void Update()
@@ -52,7 +43,7 @@ namespace Kuvo
 
 			if (Input.GetKeyDown(KeyCode.B))
 			{
-				StartCoroutine(LongRangeAttack());
+				hp = 0;
 			}
 
 			if (currentState != oldState)
@@ -72,14 +63,14 @@ namespace Kuvo
 						break;
 
 					case EnemyState.SAttack:
-						if (!isAttack)
+						if (!isAttack && !EnemyCreatorSingleton.instance.isCostOver)
 						{
 							StartCoroutine(ShortRangeAttack());
 						}
 						break;
 
 					case EnemyState.LAttack:
-						if (!isAttack)
+						if (!isAttack && !EnemyCreatorSingleton.instance.isCostOver)
 						{
 							StartCoroutine(LongRangeAttack());
 						}
@@ -89,9 +80,6 @@ namespace Kuvo
 						break;
 
 					case EnemyState.Death:
-						BaseEnemyAI aI = GetComponent<BaseEnemyAI>();
-						aI.StopAllCoroutines();
-						aI.enabled = false;
 						break;
 				}
 
@@ -133,16 +121,39 @@ namespace Kuvo
 		public override IEnumerator ShortRangeAttack()
 		{
 			isAttack = true;
+			EnemyCreatorSingleton.instance.StartCostAddForSeconds(attackCosts.shortRange, 0);
+			currentState = EnemyState.Move;
 
 			// ここに予備動作
 			float counter = 0;
+			Vector3 playerPosition = player.lockOnPoint.position;
+			playerPosition.y = transform.position.y;
 			while (true)
 			{
-				counter += Time.deltaTime;
-				if (counter > 5)
+				if (!CheckDistance(playerPosition, 1f))
 				{
+					// プレイヤーの方向へ向きを変える
+					transform.LookAt(playerPosition);
+				}
+				else
+				{
+					if (currentState != EnemyState.None)
+					{
+						currentState = EnemyState.None;
+						break;
+					}
+				}
+
+				counter += Time.deltaTime;
+				if (counter > 1)
+				{
+					if (currentState != EnemyState.None)
+					{
+						currentState = EnemyState.None;
+					}
 					break;
 				}
+
 				yield return new WaitForEndOfFrame();
 			}
 
@@ -151,7 +162,7 @@ namespace Kuvo
 			yield return new WaitForSeconds(1.0f);
 
 			shortRangeAttackAreaObject.SetActive(false);
-			currentState = EnemyState.None;
+			EnemyCreatorSingleton.instance.StartCostAddForSeconds(-attackCosts.shortRange, 2);
 			isAttack = false;
 		}
 
@@ -161,8 +172,9 @@ namespace Kuvo
 		public override IEnumerator LongRangeAttack()
 		{
 			isAttack = true;
+			EnemyCreatorSingleton.instance.StartCostAddForSeconds(attackCosts.longRange, 0);
 
-			yield return new WaitForSeconds(0.5f);
+			yield return new WaitForSeconds(1f);
 
 			// 弾の発射位置・角度を登録
 			Transform t = (muzzle != null) ? muzzle : transform;
@@ -176,58 +188,15 @@ namespace Kuvo
 			}
 			else
 			{
+				// 弾のプロパティ・必須コンポーネントを設定
 				bullet.GetSafeComponent<Bullet>().target = player.lockOnPoint;
 				bullet.GetSafeComponent<AttackArea>().Set(attack, 1.0f);
 				bullet.transform.SetParent(bulletCollecter.transform);
 			}
 
 			currentState = EnemyState.None;
+			EnemyCreatorSingleton.instance.StartCostAddForSeconds(-attackCosts.longRange, 2);
 			isAttack = false;
-		}
-
-		private IEnumerator Flying(float deflectionHeight)
-		{
-			float y = transform.localPosition.y;
-			float max = deflectionHeight / 2 + y;
-			float min = -(deflectionHeight / 2) + y;
-			float speed = 0.5f;
-			FlyState flyState;
-
-			if ((y = Random.Range(min, max)) > transform.localPosition.y)
-			{
-				flyState = FlyState.Down;
-			}
-			else
-			{
-				flyState = FlyState.Up;
-			}
-
-			while (true)
-			{
-				switch (flyState)
-				{
-					case FlyState.Up:
-						y += speed * Time.deltaTime;
-						if (y > max)
-						{
-							y = max;
-							flyState = FlyState.Down;
-						}
-						break;
-
-					case FlyState.Down:
-						y -= speed * Time.deltaTime;
-						if (y < min)
-						{
-							y = min;
-							flyState = FlyState.Up;
-						}
-						break;
-				}
-
-				transform.localPosition = new Vector3(transform.localPosition.x, y, transform.localPosition.z);
-				yield return new WaitForEndOfFrame();
-			}
 		}
 	}
 }
