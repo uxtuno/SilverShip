@@ -660,7 +660,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   monsterPrefab: {fileID: 184250, guid: f31da0a02feb5e04cbe534016c6bbd5e, type: 2}
-  generateNumber: 1
+  generateNumber: 15
 --- !u!4 &1290838127
 Transform:
   m_ObjectHideFlags: 0

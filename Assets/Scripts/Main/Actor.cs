@@ -41,6 +41,5 @@ public class Actor : MyMonoBehaviour
 	{
 		float n = (attackPower / 2.0f - defence / 4.0f) * magnification * Random.Range(0.9f, 1.1f);
 		hp -= n;
-		print(hp.ToString() + ":" + n.ToString());
 	}
 }
