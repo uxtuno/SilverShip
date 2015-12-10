@@ -19,6 +19,20 @@ namespace Uxtuno
 		private float horizontalRotationSpeed = 120.0f; // 水平方向へのカメラ移動速度
 		[Tooltip("垂直方向のカメラ移動速度"), SerializeField]
 		private float verticalRotationSpeed = 40.0f; // 垂直方向へのカメラ移動速度
+		[SerializeField]
+		private int _attack = 5;
+		protected override int attack
+		{
+			get
+			{
+				return _attack;
+			}
+			set
+			{
+				_attack = value;
+			}
+		}
+
 		//private static readonly float near = 0.5f; // カメラに映る最小距離
 		//private static readonly float maxCameraRotateY = 5.0f; // プレイヤーが移動したときの最大カメラ回転量
 
@@ -97,6 +111,7 @@ namespace Uxtuno
 			{
 				if (!player.isGrounded && highJumpInput == HighJumpInput.None)
 				{
+					player.animator.SetFloat(player.speedID, 0.0f);
 					player.currentState = new AirState(player);
 					return;
 				}
@@ -117,6 +132,10 @@ namespace Uxtuno
 							player.currentState = new DepressionState(player);
 							player.isAirDashPossible = true;
 							return;
+						}
+						else if (highJumpInput == HighJumpInput.Attack)
+						{
+							player.Attack();
 						}
 
 						highJumpInputCount = 0.0f;
@@ -491,6 +510,10 @@ namespace Uxtuno
 					LockOnRelease();
 				}
 			}
+			else if (lockOnIcon.isShow)
+			{
+				lockOnIcon.Hide();
+			}
 		}
 
 		/// <summary>
@@ -667,6 +690,18 @@ namespace Uxtuno
 				)
 			{
 				playerCamera.PlayerMoveToCameraRotation(moveVector);
+			}
+		}
+
+		/// <summary>
+		/// 攻撃判定を発生
+		/// </summary>
+		private void Attack()
+		{
+			foreach(Transform enemy in containedObjects)
+			{
+				// todo : 技倍率は仮
+				enemy.GetComponent<Actor>().Damage(attack, 1.0f);
 			}
 		}
 	}

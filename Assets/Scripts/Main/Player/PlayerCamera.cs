@@ -103,6 +103,10 @@ namespace Uxtuno
 
 		public void LockOnCamera()
 		{
+			if(target == null)
+			{
+				return;
+			}
 			controller.SetPovot((target.position + player.transform.position) / 2.0f);
 
 			Vector3 playerPosition = new Vector3(player.transform.position.x, 0.0f, player.transform.position.z);
@@ -135,7 +139,7 @@ namespace Uxtuno
 			//float cameraToPlayerAngle = Mathf.Acos(Vector3.Dot(cameraFrontXZ, cameraToPlayer.normalized)) * Mathf.Rad2Deg;
 			//if (cameraToPlayerAngle > 30.0f)
 			//{
-			//	if(cameraFrontXZ.x * cameraToPlayer.z - cameraFrontXZ.z * cameraToPlayer.x > 0.0f)
+			//	if (cameraFrontXZ.x * cameraToPlayer.z - cameraFrontXZ.z * cameraToPlayer.x > 0.0f)
 			//	{
 			//		controller.CameraMove((cameraToPlayerAngle - 30.0f), 0.0f, 0.0f);
 			//	}

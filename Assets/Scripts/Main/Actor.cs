@@ -8,9 +8,9 @@ using Uxtuno;
 /// </summary>
 public class Actor : MyMonoBehaviour
 {
-	protected float hp { get; set; }
-	protected int attack { get; set; }
-	protected int defence { get; set; }
+	protected virtual float hp { get; set; }
+	protected virtual int attack { get; set; }
+	protected virtual int defence { get; set; }
 	private Transform _lockOnPoint;
 
 	public Transform lockOnPoint
@@ -39,6 +39,8 @@ public class Actor : MyMonoBehaviour
 	/// <param name="magnification">技倍率</param>
 	public virtual void Damage(int attackPower, float magnification)
 	{
-		hp -= (attackPower / 2.0f - defence / 4.0f) * magnification * Random.Range(0.9f, 1.1f);
+		float n = (attackPower / 2.0f - defence / 4.0f) * magnification * Random.Range(0.9f, 1.1f);
+		hp -= n;
+		print(hp.ToString() + ":" + n.ToString());
 	}
 }
