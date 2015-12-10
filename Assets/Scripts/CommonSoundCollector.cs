@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace Kuvo
+﻿namespace Kuvo
 {
 	/// <summary>
 	/// 特定の名前から

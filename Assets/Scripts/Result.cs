@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
 namespace Kuvo
 {
@@ -37,7 +37,7 @@ namespace Kuvo
 			{
 				if (nextButton.activeInHierarchy)
 				{
-					SceneChangerSingleton.Instance.FadeChange(SceneName.title);
+					SceneChangerSingleton.instance.FadeChange(SceneName.title);
 				}
 				else
 				{
