@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using UnityEngine;
 using Uxtuno;
 
 namespace Kuvo
@@ -7,8 +7,28 @@ namespace Kuvo
 	/// <summary>
 	/// 敵の共通動作を規定した抽象クラス
 	/// </summary>
-	abstract public class Enemy : Actor
+	abstract public class BaseEnemy : Actor
 	{
+		[System.Serializable]
+		public class AttackCosts
+		{
+			[Tooltip("近接攻撃")]
+			public int shortRange = 1;
+			[Tooltip("遠距離攻撃")]
+			public int longRange = 2;
+
+			/// <summary>
+			/// コストの大きい方を取得する
+			/// </summary>
+			public int largeCost
+			{
+				get { return (longRange > shortRange) ? longRange : shortRange; }
+			}
+		}
+
+		/// <summary>
+		/// 敵の状態(※AIの状態とは別で定義される)
+		/// </summary>
 		public enum EnemyState
 		{
 			None,
@@ -23,13 +43,15 @@ namespace Kuvo
 		}
 
 		[Tooltip("移動速度"), SerializeField]
-		protected float speed = 1;							// 移動速度
+		protected float speed = 1;                          // 移動速度
 		[Tooltip("視野角"), SerializeField]
 		protected float viewAngle = 120;                    // 視野角
 		[Tooltip("視認距離"), SerializeField]
 		protected float viewRange = 10;                     // 視認距離
 		[Tooltip("遠距離攻撃の弾の発射位置"), SerializeField]
 		protected Transform muzzle = null;                  // 遠距離攻撃の弾の発射位置
+		[Tooltip("攻撃コスト")]
+		public AttackCosts attackCosts;
 		protected ContainedObjects contained;
 		private CameraController cameraController;
 
@@ -101,9 +123,22 @@ namespace Kuvo
 		}
 
 		/// <summary>
+		/// チームを組んでいるかどうか
+		/// </summary>
+		public bool isTeamUp
+		{
+			get
+			{
+				BaseEnemyAI aI = GetComponent<BaseEnemyAI>() as BaseEnemyAI;
+				return aI ? aI.captain : false;
+			}
+		}
+
+		/// <summary>
 		/// 現在の状態
 		/// </summary>
 		public EnemyState currentState { get; set; }
+
 
 		/// <summary>
 		/// 地面の上に立っているかどうか
@@ -162,17 +197,22 @@ namespace Kuvo
 				isShow = true;
 			}
 
-			isPlayerLocate = PlayerSearch();
+			if (!isTeamUp)
+			{
+				isPlayerLocate = PlayerSearch();
+			}
+			else
+			{
+				if (!isPlayerLocate)
+				{
+					isPlayerLocate = true;
+				}
+			}
 		}
 
 		protected virtual void LateUpdate()
 		{
-			if (hp <= 0 && currentState != EnemyState.Death)
-			{
-				currentState = EnemyState.Death;
-				StopAllCoroutines();
-				StartCoroutine(OnDie(2));
-			}
+			
 
 			if (contained)
 			{
@@ -205,6 +245,21 @@ namespace Kuvo
 		public override void Damage(int attackPower, float magnification)
 		{
 			base.Damage(attackPower, magnification);
+
+			if (hp <= 0 && currentState != EnemyState.Death && !isAttack)
+			{
+				currentState = EnemyState.Death;
+				BaseEnemyAI aI = GetComponent<BaseEnemyAI>();
+				if (aI)
+				{
+					aI.StopAllCoroutines();
+					aI.enabled = false;
+				}
+				StopAllCoroutines();
+				StartCoroutine(OnDie(2));
+				return;
+			}
+
 			if (haveGround)
 			{
 				StartCoroutine(GroundStagger());
@@ -244,7 +299,7 @@ namespace Kuvo
 		}
 
 		/// <summary>
-		/// 対象との距離が指定された範囲内かを調べる
+		/// 対象との距離が指定された範囲内かを調べる(自身のLockOnPointから計測)
 		/// </summary>
 		/// <param name="targetPosition"> 対象の座標</param>
 		/// <param name="range"> 範囲</param>

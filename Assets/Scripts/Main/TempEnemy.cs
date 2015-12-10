@@ -3,7 +3,7 @@ using System.Collections;
 using Kuvo;
 using System;
 
-public class TempEnemy : Enemy {
+public class TempEnemy : BaseEnemy {
 	protected override float sight { get; set; }
 
 	protected override void Start()

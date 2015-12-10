@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace Kuvo
@@ -20,7 +18,7 @@ namespace Kuvo
 			soundCollector = gameObject.AddComponent<QuestSelectionSoundCollector>();
 			isFirstSelected = true;
 
-			if (!SoundPlayerSingleton.Instance.PlayBGM(soundCollector[QuestSelectionSoundCollector.SoundName.BGM], true, SoundPlayerSingleton.FadeMode.FadeIn))
+			if (!SoundPlayerSingleton.instance.PlayBGM(soundCollector[QuestSelectionSoundCollector.SoundName.BGM], true, SoundPlayerSingleton.FadeMode.FadeIn))
 			{
 				Debug.LogError("BGMの再生に失敗しました");
 			}
@@ -53,7 +51,7 @@ namespace Kuvo
 				return;
 			}
 
-			if (!SoundPlayerSingleton.Instance.PlaySE(gameObject, soundCollector[QuestSelectionSoundCollector.SoundName.CursorSelect]))
+			if (!SoundPlayerSingleton.instance.PlaySE(gameObject, soundCollector[QuestSelectionSoundCollector.SoundName.CursorSelect]))
 			{
 				Debug.LogError("SEが再生できませんでした。");
 			}

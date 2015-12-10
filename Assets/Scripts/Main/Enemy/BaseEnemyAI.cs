@@ -1,5 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 using Uxtuno;
 
 namespace Kuvo
@@ -7,9 +8,12 @@ namespace Kuvo
 	/// <summary>
 	/// エネミーのAIとしての共通動作を規定した抽象クラス
 	/// </summary>
-	[RequireComponent(typeof(Enemy))]
-	abstract public class BaseEnemyAI : BaseAI
+	[RequireComponent(typeof(BaseEnemy))]
+	abstract public class BaseEnemyAI : MyMonoBehaviour
 	{
+		/// <summary>
+		/// 敵AIの行動状態(※敵の状態とは別で定義される)
+		/// </summary>
 		protected enum ActionState
 		{
 			None,
@@ -18,12 +22,24 @@ namespace Kuvo
 			Attacking,
 		}
 
-		// actionTimeの初期値一覧
+		// actionTimeの初期値一覧(※配列にはconst修飾子が使えない)
 		private readonly float[] actionTimeCollection = { 1f, 1.5f, 2f, 2.5f, 3f };
 
 		[Tooltip("出現直後の待機時間"), SerializeField]
-		protected float wait = 3;                       // 出現直後の待機時間
+		protected float wait = 3;                   // 出現直後の待機時間(秒)
+		[Tooltip("チームを組む範囲(半径)"), SerializeField]
+		protected float teamRange = 30.0f;          // チームを組む範囲(半径)
 		protected ActionState currentState = ActionState.None;
+
+		/// <summary>
+		/// 上司を格納する
+		/// </summary>
+		public BaseEnemyAI captain { get; set; }
+
+		/// <summary>
+		/// 部下を格納する
+		/// </summary>
+		public List<BaseEnemyAI> members { get; set; }
 
 		/// <summary>
 		/// 行動時間を格納する
@@ -35,20 +51,56 @@ namespace Kuvo
 		/// </summary>
 		private float startTime { get; set; }
 
-		private Enemy _enemy;		// enemyプロパティの実体
+		/// <summary>
+		/// 自身が上司かどうかを格納する
+		/// </summary>
+		public bool isCaptain
+		{
+			get
+			{
+				if (captain)
+				{
+					if (captain == this)
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+		}
+
+		private BaseEnemy _enemy;       // enemyプロパティの実体
 
 		/// <summary>
-		/// 自身のEnemyクラスを格納する
+		/// 自身のBaseEnemyクラスを格納する
 		/// </summary>
-		protected Enemy enemy
+		public BaseEnemy enemy
 		{
 			get
 			{
 				if (!_enemy)
 				{
-					_enemy = this.GetComponent<Enemy>();
+					_enemy = GetComponent<BaseEnemy>();
 				}
 				return _enemy;
+			}
+		}
+
+		private Player _player;     // playerプロパティの実体
+
+		/// <summary>
+		/// プレイヤーの参照を格納する
+		/// </summary>
+		protected Player player
+		{
+			get
+			{
+				if (!_player)
+				{
+					_player = GameManager.instance.player;
+				}
+
+				return _player;
 			}
 		}
 
@@ -64,26 +116,180 @@ namespace Kuvo
 			}
 		}
 
+		protected virtual void Awake()
+		{
+			// 上司・部下の初期化
+			captain = null;
+			members = new List<BaseEnemyAI>();
+			members.Clear();
+		}
+
 		protected virtual void Start()
 		{
 			if (!enemy)
 			{
 				Debug.LogError("enemyの取得に失敗しました");
 			}
+
+			// waitには負の値が入らないようにする
+			if (wait < 0)
+			{
+				wait = Mathf.Abs(wait);
+			}
+
 			startTime = Time.time;
 		}
 
-		protected override void Update()
+		protected virtual void Update()
 		{
-			base.Update();
-
 			// 一定時間待機する
 			if (Time.time - startTime < wait)
 			{
 				return;
 			}
 
+			if (enemy.isPlayerLocate)
+			{
+				if (!enemy.isTeamUp)
+				{
+					TeamUp();
+				}
+			}
+
+			// チームを組んでいるenemyが倒されるとき
+			if (enemy.currentState == BaseEnemy.EnemyState.Death && enemy.isTeamUp)
+			{
+				if (isCaptain)  // 上司のとき
+				{
+					if (members.Count > 0)
+					{
+						// 最初の部下を新たな上司に
+						BaseEnemyAI newCaptain = members[0];
+
+						// 部下全員に新たな上司を設定
+						foreach (BaseEnemyAI member in members)
+						{
+							member.captain = newCaptain;
+						}
+					}
+				}
+				else if (captain.members.Contains(this))    // 部下のとき
+				{
+					captain.members.Remove(this);
+				}
+			}
+
+			// 上司のteamRangeからプレイヤーが外れたとき
+			if (isCaptain && !enemy.CheckDistance(player.lockOnPoint.position, teamRange))
+			{
+				TeamDisbanded();
+			}
+
 			Move();
+		}
+
+		public void OnDrawGizmos()
+		{
+			if (isCaptain && Application.loadedLevelName == "enemytest")
+			{
+				Gizmos.DrawSphere(enemy.lockOnPoint.position, teamRange);
+			}
+		}
+
+		/// <summary>
+		/// チームを組む
+		/// </summary>
+		private void TeamUp()
+		{
+			// 上司及び部下が設定されていないとき
+			if (!captain && members.Count <= 0)
+			{
+				// 上司をキャッシュ
+				BaseEnemyAI captainAI = EnemyCreatorSingleton.instance.captainAI;
+
+				// 上司が存在しなければ
+				if (!captainAI)
+				{
+					// 自身を上司に登録(これによりisCaptainおよびenemy.isTeamUpがtrueになる)
+					captain = this;
+
+					// Linqを使用してteamRange内に存在する自分以外のBaseEnemyAIを取得
+					BaseEnemyAI[] enemies = Physics.OverlapSphere(transform.position, teamRange)
+											.Select((obj) => obj.GetComponent<BaseEnemyAI>())
+											.Where((obj) => obj != null && transform != obj.transform)
+											.ToArray();
+
+					BaseEnemyAI member1 = null;     // 部下1
+					BaseEnemyAI member2 = null;     // 部下2
+					float min = Mathf.Infinity;     // エネミー同士の最短距離
+					float oldMin = min;             // 前回のmin
+					foreach (BaseEnemyAI current in enemies)
+					{
+						// メンバーとの距離を計算
+						float distance = Vector3.Distance(enemy.lockOnPoint.position, current.enemy.lockOnPoint.position);
+
+						// 最短ならば
+						if (min > distance)
+						{
+							oldMin = min;
+							min = distance;
+
+							if (member1)
+							{
+								member2 = member1;
+							}
+
+							member1 = current;
+						}
+						// 2番目に短ければ
+						else if (oldMin > distance)
+						{
+							member2 = current;
+						}
+					}
+
+					if (member1)
+					{
+						member1.captain = this;
+						members.Add(member1);
+					}
+
+					if (member2)
+					{
+						member2.captain = this;
+						members.Add(member2);
+					}
+
+				}
+				// 上司が存在していれば
+				else
+				{
+					captain = captainAI;
+					captain.members.Add(this);
+				}
+			}
+		}
+
+		/// <summary>
+		/// チームを解散する
+		/// </summary>
+		private void TeamDisbanded()
+		{
+			// 自身が上司でない場合何もしない
+			if (!isCaptain)
+			{
+				return;
+			}
+
+			// 全員の上司をnullに
+			captain = null;
+			foreach (BaseEnemyAI current in members)
+			{
+				current.captain = null;
+			}
+
+			// チーム解散
+			members.Clear();
 		}
 
 		/// <summary>
