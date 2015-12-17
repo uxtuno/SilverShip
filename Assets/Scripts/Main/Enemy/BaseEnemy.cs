@@ -7,35 +7,20 @@ namespace Kuvo
 	/// <summary>
 	/// 敵の共通動作を規定した抽象クラス
 	/// </summary>
+	[RequireComponent(typeof(BaseEnemyAI))]
 	abstract public class BaseEnemy : Actor
 	{
-		[System.Serializable]
-		public class AttackCosts
-		{
-			[Tooltip("近接攻撃")]
-			public int shortRange = 1;
-			[Tooltip("遠距離攻撃")]
-			public int longRange = 2;
-
-			/// <summary>
-			/// コストの大きい方を取得する
-			/// </summary>
-			public int largeCost
-			{
-				get { return (longRange > shortRange) ? longRange : shortRange; }
-			}
-		}
-
 		/// <summary>
 		/// 敵の状態(※AIの状態とは別で定義される)
 		/// </summary>
 		public enum EnemyState
 		{
-			None,
+			//None,
 			Idle,
 			Bone,
 			Search,
 			Move,
+			GoBack,
 			SAttack,
 			LAttack,
 			Stagger,
@@ -43,16 +28,15 @@ namespace Kuvo
 		}
 
 		[Tooltip("移動速度"), SerializeField]
-		protected float speed = 1;                          // 移動速度
+		protected float speed = 1;
 		[Tooltip("視野角"), SerializeField]
-		protected float viewAngle = 120;                    // 視野角
+		protected float viewAngle = 120;
 		[Tooltip("視認距離"), SerializeField]
-		protected float viewRange = 10;                     // 視認距離
+		protected float viewRange = 10;
 		[Tooltip("遠距離攻撃の弾の発射位置"), SerializeField]
-		protected Transform muzzle = null;                  // 遠距離攻撃の弾の発射位置
-		[Tooltip("攻撃コスト")]
-		public AttackCosts attackCosts;
-		protected ContainedObjects contained;
+		protected Transform muzzle = null;
+		[Tooltip("攻撃コストを保持する時間")]
+		protected float CostKeepSecond = 2;
 		private CameraController cameraController;
 
 		private Animation _animation;   // animationプロパティの実体
@@ -70,6 +54,24 @@ namespace Kuvo
 				}
 
 				return _animation;
+			}
+		}
+
+		private BaseEnemyAI _baseEnemyAI;   // baseEnemyAIプロパティの実体
+
+		/// <summary>
+		/// 自身のBaseEnemyAIを取得する
+		/// </summary>
+		protected BaseEnemyAI baseEnemyAI
+		{
+			get
+			{
+				if (!_baseEnemyAI)
+				{
+					_baseEnemyAI = GetComponent<BaseEnemyAI>();
+				}
+
+				return _baseEnemyAI;
 			}
 		}
 
@@ -175,7 +177,6 @@ namespace Kuvo
 			}
 
 			cameraController = GameObject.FindGameObjectWithTag(TagName.CameraController).GetComponent<CameraController>();
-			contained = GetComponentInChildren<ContainedObjects>() as ContainedObjects;
 		}
 
 		protected virtual void Update()
@@ -327,7 +328,20 @@ namespace Kuvo
 			}
 			Debug.Log("死んだー", gameObject);
 			Destroy(gameObject);
+
+			System.IO.StreamReader sr = new System.IO.StreamReader("");
+
+			using (sr)
+			{
+				//sr.Close();
+			}
+
 		}
+
+		//private class a<in T> where T : BaseEnemy
+		//{
+
+		//}
 
 		/// <summary>
 		/// 空中でよろける

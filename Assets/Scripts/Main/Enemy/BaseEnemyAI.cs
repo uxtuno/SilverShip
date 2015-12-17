@@ -22,13 +22,88 @@ namespace Kuvo
 			Attacking,
 		}
 
+		/// <summary>
+		/// 攻撃の各種パラメーターを保持する
+		/// </summary>
+		[System.Serializable]
+		public class AttackParameters
+		{
+			[Tooltip("近接攻撃範囲(半径)"), SerializeField]
+			private float _sAttackRange = 5f;
+
+			public float sAttackRange
+			{
+				get { return _sAttackRange; }
+			}
+
+			[Tooltip("遠距離攻撃範囲(半径)"), SerializeField]
+			private float _lAttackRange = 10f;
+
+			public float lAttackRange
+			{
+				get { return _lAttackRange; }
+			}
+
+			[Tooltip("近接攻撃コスト"), SerializeField]
+			private int _sAttackCost = 1;
+
+			public int sAttackCost
+			{
+				get { return _sAttackCost; }
+			}
+
+			[Tooltip("遠距離攻撃コスト"), SerializeField]
+			private int _lAttackCost = 2;
+
+			public int lAttackCost
+			{
+				get { return _lAttackCost; }
+			}
+
+			[Tooltip("近接攻撃の予備動作時間(秒)")]
+			private float _sAttackPreOperatSecond = 2;
+
+			public float sAttackPreOperatSecond
+			{
+				get { return _sAttackPreOperatSecond; }
+			}
+
+			[Tooltip("遠距離攻撃の予備動作時間(秒)")]
+			private float _lAttackPreOperatSecond = 2;
+
+			public float lAttackPreOperatSecond
+			{
+				get { return _lAttackPreOperatSecond; }
+			}
+
+			/// <summary>
+			/// 自身が通常使用する攻撃可能範囲を取得する
+			/// </summary>
+			/// <param name="isCaptain">上司かどうか</param>
+			/// <returns></returns>
+			public float UsedRange(bool isCaptain)
+			{
+				return isCaptain ? lAttackRange : sAttackRange;
+			}
+
+			/// <summary>
+			/// コストの大きい方を取得する
+			/// </summary>
+			public int largeCost
+			{
+				get { return (lAttackCost > sAttackCost) ? lAttackCost : sAttackCost; }
+			}
+		}
+
 		// actionTimeの初期値一覧(※配列にはconst修飾子が使えない)
 		private readonly float[] actionTimeCollection = { 1f, 1.5f, 2f, 2.5f, 3f };
 
 		[Tooltip("出現直後の待機時間"), SerializeField]
-		protected float wait = 3;                   // 出現直後の待機時間(秒)
+		protected float wait = 3;
+		[Tooltip("攻撃の各種パラメーター")]
+		public AttackParameters attackParameters = new AttackParameters();
 		[Tooltip("チームを組む範囲(半径)"), SerializeField]
-		protected float teamRange = 30.0f;          // チームを組む範囲(半径)
+		protected float teamRange = 30.0f;
 		protected ActionState currentState = ActionState.None;
 
 		/// <summary>
@@ -69,20 +144,20 @@ namespace Kuvo
 			}
 		}
 
-		private BaseEnemy _enemy;       // enemyプロパティの実体
+		private BaseEnemy _baseEnemy;       // enemyプロパティの実体
 
 		/// <summary>
 		/// 自身のBaseEnemyクラスを格納する
 		/// </summary>
-		public BaseEnemy enemy
+		public BaseEnemy baseEnemy
 		{
 			get
 			{
-				if (!_enemy)
+				if (!_baseEnemy)
 				{
-					_enemy = GetComponent<BaseEnemy>();
+					_baseEnemy = GetComponent<BaseEnemy>();
 				}
-				return _enemy;
+				return _baseEnemy;
 			}
 		}
 
@@ -126,7 +201,7 @@ namespace Kuvo
 
 		protected virtual void Start()
 		{
-			if (!enemy)
+			if (!baseEnemy)
 			{
 				Debug.LogError("enemyの取得に失敗しました");
 			}
@@ -148,16 +223,16 @@ namespace Kuvo
 				return;
 			}
 
-			if (enemy.isPlayerLocate)
+			if (baseEnemy.isPlayerLocate)
 			{
-				if (!enemy.isTeamUp)
+				if (!baseEnemy.isTeamUp)
 				{
 					TeamUp();
 				}
 			}
 
 			// チームを組んでいるenemyが倒されるとき
-			if (enemy.currentState == BaseEnemy.EnemyState.Death && enemy.isTeamUp)
+			if (baseEnemy.currentState == BaseEnemy.EnemyState.Death && baseEnemy.isTeamUp)
 			{
 				if (isCaptain)  // 上司のとき
 				{
@@ -180,7 +255,7 @@ namespace Kuvo
 			}
 
 			// 上司のteamRangeからプレイヤーが外れたとき
-			if (isCaptain && !enemy.CheckDistance(player.lockOnPoint.position, teamRange))
+			if (isCaptain && !baseEnemy.CheckDistance(player.lockOnPoint.position, teamRange))
 			{
 				TeamDisbanded();
 			}
@@ -192,7 +267,7 @@ namespace Kuvo
 		{
 			if (isCaptain && Application.loadedLevelName == "enemytest")
 			{
-				Gizmos.DrawSphere(enemy.lockOnPoint.position, teamRange);
+				Gizmos.DrawSphere(baseEnemy.lockOnPoint.position, teamRange);
 			}
 		}
 
@@ -226,7 +301,7 @@ namespace Kuvo
 					foreach (BaseEnemyAI current in enemies)
 					{
 						// メンバーとの距離を計算
-						float distance = Vector3.Distance(enemy.lockOnPoint.position, current.enemy.lockOnPoint.position);
+						float distance = Vector3.Distance(baseEnemy.lockOnPoint.position, current.baseEnemy.lockOnPoint.position);
 
 						// 最短ならば
 						if (min > distance)

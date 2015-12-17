@@ -7,28 +7,6 @@ namespace Kuvo
 	/// </summary>
 	public class AerialEnemyAI : BaseEnemyAI
 	{
-		[System.Serializable]
-		private class AttackableRanges
-		{
-			[Tooltip("近接攻撃")]
-			public float shortRange = 5f;
-			[Tooltip("遠距離攻撃")]
-			public float longRange = 10f;
-			
-			/// <summary>
-			/// 自身が通常使用する攻撃可能範囲を取得する
-			/// </summary>
-			/// <param name="isCaptain">上司かどうか</param>
-			/// <returns></returns>
-			public float UsedRange(bool isCaptain)
-			{
-				return isCaptain ? longRange : shortRange;
-			}
-		}
-
-		[Tooltip("攻撃可能範囲(半径)"), SerializeField]
-		private AttackableRanges attackableRanges = new AttackableRanges();
-
 		protected override void Start()
 		{
 			base.Start();
@@ -53,7 +31,7 @@ namespace Kuvo
 			actionTime -= Time.deltaTime;
 
 			// 攻撃動作中なら何もしない
-			if (enemy.isAttack)
+			if (baseEnemy.isAttack)
 			{
 				return;
 			}
@@ -65,45 +43,41 @@ namespace Kuvo
 				actionTime = initActionTime;
 			}
 
-			if (enemy.isPlayerLocate)
+			if (baseEnemy.isPlayerLocate)
 			{
+				Vector3 playerPosition = player.lockOnPoint.position;
+				playerPosition.y = transform.position.y;
+
+				// プレイヤーの方向へ向きを変える
+				transform.LookAt(playerPosition);
+
 				#region - プレイヤーを発見しているときの3態
 				switch (currentState)
 				{
 					case ActionState.Waiting:
-						Vector3 playerPosition = player.lockOnPoint.position;
-						playerPosition.y = transform.position.y;
 
-						// プレイヤーの方向へ向きを変える
-						transform.LookAt(playerPosition);
-
-						if (enemy.currentState != BaseEnemy.EnemyState.Idle)
+						if (baseEnemy.currentState != BaseEnemy.EnemyState.Idle)
 						{
-							enemy.currentState = BaseEnemy.EnemyState.Idle;
+							baseEnemy.currentState = BaseEnemy.EnemyState.Idle;
 						}
 
 						break;
 
 					case ActionState.Moving:
-						playerPosition = player.lockOnPoint.position;
-						playerPosition.y = transform.position.y;
-
-						// プレイヤーの方向へ向きを変える
-						transform.LookAt(playerPosition);
-
 						// プレイヤーに重ならない程度にエネミーを動かす
-						if (Mathf.Abs(transform.position.x - playerPosition.x) > 1f || Mathf.Abs(transform.position.z - playerPosition.z) > 1f)
+						//if (Mathf.Abs(transform.position.x - playerPosition.x) > 1f || Mathf.Abs(transform.position.z - playerPosition.z) > 1f)
+						if (!baseEnemy.CheckDistance(player.lockOnPoint.position, attackParameters.UsedRange(isCaptain)))
 						{
-							if (enemy.currentState != BaseEnemy.EnemyState.Move)
+							if (baseEnemy.currentState != BaseEnemy.EnemyState.Move)
 							{
-								enemy.currentState = BaseEnemy.EnemyState.Move;
+								baseEnemy.currentState = BaseEnemy.EnemyState.Move;
 							}
 						}
 						else
 						{
-							if (enemy.currentState != BaseEnemy.EnemyState.Idle)
+							if (baseEnemy.currentState != BaseEnemy.EnemyState.Idle)
 							{
-								enemy.currentState = BaseEnemy.EnemyState.Idle;
+								baseEnemy.currentState = BaseEnemy.EnemyState.Idle;
 							}
 						}
 						break;
@@ -118,11 +92,11 @@ namespace Kuvo
 						// 攻撃を実行(上司なら遠距離/部下なら近接)
 						if (isCaptain)
 						{
-							enemy.currentState = BaseEnemy.EnemyState.LAttack;
+							baseEnemy.currentState = BaseEnemy.EnemyState.LAttack;
 						}
 						else
 						{
-							enemy.currentState = BaseEnemy.EnemyState.SAttack;
+							baseEnemy.currentState = BaseEnemy.EnemyState.SAttack;
 						}
 						break;
 				}
@@ -134,16 +108,16 @@ namespace Kuvo
 				switch (currentState)
 				{
 					case ActionState.Waiting:
-						if (enemy.currentState != BaseEnemy.EnemyState.Idle)
+						if (baseEnemy.currentState != BaseEnemy.EnemyState.Idle)
 						{
-							enemy.currentState = BaseEnemy.EnemyState.Idle;
+							baseEnemy.currentState = BaseEnemy.EnemyState.Idle;
 						}
 						break;
 
 					case ActionState.Moving:
-						if (enemy.currentState != BaseEnemy.EnemyState.Move)
+						if (baseEnemy.currentState != BaseEnemy.EnemyState.Move)
 						{
-							enemy.currentState = BaseEnemy.EnemyState.Move;
+							baseEnemy.currentState = BaseEnemy.EnemyState.Move;
 						}
 						break;
 
@@ -160,13 +134,13 @@ namespace Kuvo
 		/// </summary>
 		private void ChangeState()
 		{
-			if (enemy.isPlayerLocate)
+			if (baseEnemy.isPlayerLocate)
 			{
 				switch (currentState)
 				{
 					case ActionState.Waiting:
 						// 攻撃可能範囲に入っている場合攻撃
-						if (enemy.CheckDistance(player.lockOnPoint.position, attackableRanges.UsedRange(isCaptain)))
+						if (baseEnemy.CheckDistance(player.lockOnPoint.position, attackParameters.UsedRange(isCaptain)))
 						{
 							currentState = ActionState.Attacking;
 						}
@@ -178,9 +152,9 @@ namespace Kuvo
 
 					case ActionState.Moving:
 						// 攻撃可能範囲に入っている場合変更
-						if (enemy.CheckDistance(player.lockOnPoint.position, attackableRanges.UsedRange(isCaptain)))
+						if (baseEnemy.CheckDistance(player.lockOnPoint.position, attackParameters.UsedRange(isCaptain)))
 						{
-							bool isAttackable = (EnemyCreatorSingleton.instance.maxAttackCost - EnemyCreatorSingleton.instance.currentAttackCostCount) >= enemy.attackCosts.largeCost;
+							bool isAttackable = (EnemyCreatorSingleton.instance.maxAttackCost - EnemyCreatorSingleton.instance.currentAttackCostCount) >= attackParameters.largeCost;
 							if (isAttackable)
 							{
 								currentState = ActionState.Attacking;
@@ -190,7 +164,7 @@ namespace Kuvo
 
 					case ActionState.Attacking:
 						// 攻撃可能範囲に入っている場合待機
-						if (enemy.CheckDistance(player.lockOnPoint.position, attackableRanges.UsedRange(isCaptain)))
+						if (baseEnemy.CheckDistance(player.lockOnPoint.position, attackParameters.UsedRange(isCaptain)))
 						{
 							currentState = ActionState.Waiting;
 						}
@@ -206,7 +180,7 @@ namespace Kuvo
 				switch (currentState)
 				{
 					case ActionState.Waiting:
-						enemy.transform.eulerAngles += new Vector3(0, Random.Range(0f, 359f), 0);
+						baseEnemy.transform.eulerAngles += new Vector3(0, Random.Range(0f, 359f), 0);
 						currentState = ActionState.Moving;
 						break;
 
@@ -215,7 +189,7 @@ namespace Kuvo
 						break;
 
 					case ActionState.Attacking:
-						enemy.transform.eulerAngles += new Vector3(0, Random.Range(0f, 359f), 0);
+						baseEnemy.transform.eulerAngles += new Vector3(0, Random.Range(0f, 359f), 0);
 						currentState = ActionState.Moving;
 						break;
 				}
