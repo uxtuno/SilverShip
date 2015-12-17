@@ -385,6 +385,8 @@ namespace Uxtuno
 		private static readonly float autoLockOnLimitDistance = 6.0f; // オートロックオン限界距離
 		private static readonly float manualLockOnLimitDistance = 30.0f; // マニュアルロックオン限界距離
 
+		private PlayerAttackFlow attackFlow;
+
 		#endregion
 
 		void Start()
@@ -420,6 +422,8 @@ namespace Uxtuno
 			GameObject lockOnIconPrefab = Resources.Load<GameObject>("Prefabs/UI/LockOnIcon");
 			lockOnIcon = Instantiate(lockOnIconPrefab).GetSafeComponent<FollowIcon>();
 			lockOnIcon.Hide();
+
+			attackFlow = new PlayerAttackFlow(animator);
 		}
 
 		Vector3 cameraFront = new Vector3(0.0f, -0.2f, 1.0f);
@@ -441,6 +445,8 @@ namespace Uxtuno
 				currentState.Move();
 			} while (currentState != oldState);
 			// 移動後の「カメラ→プレイヤー」ベクトル
+
+			attackFlow.Move();
 
 			LockOn();
 		}
