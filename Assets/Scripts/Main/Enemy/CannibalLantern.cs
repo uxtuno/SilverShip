@@ -56,6 +56,9 @@ namespace Kuvo
 					case EnemyState.Idle:
 						break;
 
+					case EnemyState.Move:
+						break;
+
 					case EnemyState.Bone:
 						break;
 
@@ -88,7 +91,13 @@ namespace Kuvo
 
 			if (currentState == EnemyState.Move)
 			{
-				transform.Translate(Vector3.forward * speed * Time.deltaTime);
+				//transform.Translate(Vector3.forward * speed * Time.deltaTime);
+				//rigidbody.AddRelativeForce(Vector3.forward * speed, ForceMode.Acceleration);
+				rigidbody.velocity = (player.lockOnPoint.position - lockOnPoint.position).normalized * speed;
+			}
+			else
+			{
+				rigidbody.velocity = Vector3.zero;
 			}
 		}
 
@@ -145,7 +154,7 @@ namespace Kuvo
 				}
 
 				counter += Time.deltaTime;
-				if (counter > 1)
+				if (counter > 2)
 				{
 					if (currentState != EnemyState.None)
 					{

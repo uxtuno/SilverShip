@@ -14,6 +14,16 @@ namespace Kuvo
 			public float shortRange = 5f;
 			[Tooltip("遠距離攻撃")]
 			public float longRange = 10f;
+			
+			/// <summary>
+			/// 自身が通常使用する攻撃可能範囲を取得する
+			/// </summary>
+			/// <param name="isCaptain">上司かどうか</param>
+			/// <returns></returns>
+			public float UsedRange(bool isCaptain)
+			{
+				return isCaptain ? longRange : shortRange;
+			}
 		}
 
 		[Tooltip("攻撃可能範囲(半径)"), SerializeField]
@@ -82,7 +92,7 @@ namespace Kuvo
 						transform.LookAt(playerPosition);
 
 						// プレイヤーに重ならない程度にエネミーを動かす
-						if (Mathf.Abs(transform.position.x - playerPosition.x) > 3f || Mathf.Abs(transform.position.z - playerPosition.z) > 3f)
+						if (Mathf.Abs(transform.position.x - playerPosition.x) > 1f || Mathf.Abs(transform.position.z - playerPosition.z) > 1f)
 						{
 							if (enemy.currentState != BaseEnemy.EnemyState.Move)
 							{
@@ -105,23 +115,15 @@ namespace Kuvo
 							break;
 						}
 
-						float shortRange = attackableRanges.shortRange;
-
-						// 上司の場合、近距離攻撃可能範囲を部下の1/5とする
+						// 攻撃を実行(上司なら遠距離/部下なら近接)
 						if (isCaptain)
 						{
-							shortRange /= 5;
+							enemy.currentState = BaseEnemy.EnemyState.LAttack;
 						}
-
-						// 近接攻撃可能範囲内なら近接攻撃を実行
-						if (enemy.CheckDistance(player.transform.position, shortRange))
+						else
 						{
 							enemy.currentState = BaseEnemy.EnemyState.SAttack;
-							break;
 						}
-
-						// 遠距離攻撃を実行
-						enemy.currentState = BaseEnemy.EnemyState.LAttack;
 						break;
 				}
 				#endregion
@@ -163,12 +165,20 @@ namespace Kuvo
 				switch (currentState)
 				{
 					case ActionState.Waiting:
-						currentState = ActionState.Moving;
+						// 攻撃可能範囲に入っている場合攻撃
+						if (enemy.CheckDistance(player.lockOnPoint.position, attackableRanges.UsedRange(isCaptain)))
+						{
+							currentState = ActionState.Attacking;
+						}
+						else
+						{
+							currentState = ActionState.Moving;
+						}
 						break;
 
 					case ActionState.Moving:
 						// 攻撃可能範囲に入っている場合変更
-						if (enemy.CheckDistance(player.lockOnPoint.position, attackableRanges.longRange))
+						if (enemy.CheckDistance(player.lockOnPoint.position, attackableRanges.UsedRange(isCaptain)))
 						{
 							bool isAttackable = (EnemyCreatorSingleton.instance.maxAttackCost - EnemyCreatorSingleton.instance.currentAttackCostCount) >= enemy.attackCosts.largeCost;
 							if (isAttackable)
@@ -180,7 +190,7 @@ namespace Kuvo
 
 					case ActionState.Attacking:
 						// 攻撃可能範囲に入っている場合待機
-						if (enemy.CheckDistance(player.lockOnPoint.position, attackableRanges.longRange))
+						if (enemy.CheckDistance(player.lockOnPoint.position, attackableRanges.UsedRange(isCaptain)))
 						{
 							currentState = ActionState.Waiting;
 						}

@@ -129,8 +129,7 @@ namespace Kuvo
 		{
 			get
 			{
-				BaseEnemyAI aI = GetComponent<BaseEnemyAI>() as BaseEnemyAI;
-				return aI ? aI.captain : false;
+				return GetComponent<BaseEnemyAI>().captain ?? false;
 			}
 		}
 
@@ -212,18 +211,16 @@ namespace Kuvo
 
 		protected virtual void LateUpdate()
 		{
-			
-
-			if (contained)
-			{
-				Vector3 aveVec = Vector3.zero;
-				foreach (Transform t in contained)
-				{
-					aveVec += t.position;
-				}
-				aveVec /= contained.GetContainedObjects().Count;
-				transform.position -= (aveVec - transform.position).normalized * Time.deltaTime;
-			}
+			//if (contained)
+			//{
+			//	Vector3 aveVec = Vector3.zero;
+			//	foreach (Transform t in contained)
+			//	{
+			//		aveVec += t.position;
+			//	}
+			//	aveVec /= contained.GetContainedObjects().Count;
+			//	transform.position -= (aveVec - transform.position).normalized * Time.deltaTime;
+			//}
 		}
 
 		protected virtual void OnCollisionExit(Collision collision)
