@@ -16,9 +16,9 @@ public class ContainedObjects : MonoBehaviour, IEnumerable<Transform>
 	/// <param name="name"></param>
 	public void AddTagName(string name)
 	{
-		// 一度Listに変換してから要素を追加
+		// 一度Listに変換してから要素を追加(重いかな～？)
 		List<string> list = new List<string>(tagNames);
-		if (list.Contains(name))
+		if (!list.Contains(name))
 		{
 			list.Add(name);
 		}

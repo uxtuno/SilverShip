@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+// 似たような処理の塊になっている、できるならループなどで一括で処理したい
 public class PlayerInput
 {
 	private PlayerInput() { }
 	private static PlayerInput _instance; // 唯一のインスタンス
+
 	/// <summary>
 	/// 唯一のインスタンスを返す
 	/// </summary>
@@ -41,35 +43,135 @@ public class PlayerInput
 	/// </summary>
 	public float cameraVertical { get; private set; }
 
+	#region - ここの処理はFixedUpdate内でも問題なく押した瞬間を検知するためにこのような回りくどい実装になっている
+	private bool _attack;
 	/// <summary>
 	/// 攻撃ボタン
 	/// </summary>
-	public bool attack { get; private set; }
+	public bool attack
+	{
+		get
+		{
+			if (_attack)
+			{
+				_attack = Input.GetButtonDown(InputName.Atack);
+				return false;
+			}
+			_attack = Input.GetButtonDown(InputName.Atack);
+			return _attack;
+		}
+	}
 
+	private bool _jump;
 	/// <summary>
 	/// ジャンプボタン
 	/// </summary>
-	public bool jump { get; private set; }
+	public bool jump
+	{
+		get
+		{
+			if (_jump)
+			{
+				_jump = Input.GetButtonDown(InputName.Jump);
+				return false;
+			}
+			_jump = Input.GetButtonDown(InputName.Jump);
+			return _jump;
+		}
+	}
 
+	private bool _barrier;
 	/// <summary>
 	/// 結界発動ボタン
 	/// </summary>
-	public bool barrier { get; private set; }
+	public bool barrier
+	{
+		get
+		{
+			if (_barrier)
+			{
+				_barrier = Input.GetButtonDown(InputName.Barrier);
+				return false;
+			}
+			_barrier = Input.GetButtonDown(InputName.Barrier);
+			return _barrier;
+		}
+	}
 
+	private bool _itemGet;
 	/// <summary>
 	/// アイテム入手ボタン
 	/// </summary>
-	public bool itemGet { get; private set; }
+	public bool itemGet
+	{
+		get
+		{
+			if (_itemGet)
+			{
+				_itemGet = Input.GetButtonDown(InputName.ItemGet);
+				return false;
+			}
+			_itemGet = Input.GetButtonDown(InputName.ItemGet);
+			return _itemGet;
+		}
+	}
 
+	private bool _cameraToFront;
 	/// <summary>
 	/// カメラを前方に向ける
 	/// </summary>
-	public bool cameraToFront { get; private set; }
+	public bool cameraToFront
+	{
+		get
+		{
+			if (_cameraToFront)
+			{
+				_cameraToFront = Input.GetButtonDown(InputName.CameraToFront);
+				return false;
+			}
+			_cameraToFront = Input.GetButtonDown(InputName.CameraToFront);
+			return _cameraToFront;
+		}
+	}
 
+	private bool _lockOn;
 	/// <summary>
 	/// ロックオン
 	/// </summary>
-	public bool lockOn { get; private set; }
+	public bool lockOn
+	{
+		get
+		{
+			if (_lockOn)
+			{
+				_lockOn = Input.GetButtonDown(InputName.LockOn);
+				return false;
+			}
+			_lockOn = Input.GetButtonDown(InputName.LockOn);
+			return _lockOn;
+		}
+	}
+	#endregion
+
+	private enum DoubleButtonInput
+	{
+		None,
+		OneButton,
+		TwoButton,
+		DoubleInput = OneButton | TwoButton,
+	}
+
+	DoubleButtonInput attackAndJumpInput; // 攻撃ボタンとジャンプボタンの同時押し判定用
+	private static readonly float inputGraceSeconds = 0.2f; // 同時入力猶予時間
+	private float inputGraceCount; // 入力猶予時間カウント用
+
+	/// <summary>
+	/// 同時押し判定
+	/// </summary>
+    public bool attackAndJump
+	{
+		get; private set;
+	}
 
 	/// <summary>
 	/// プレイヤー入力情報更新
@@ -86,7 +188,7 @@ public class PlayerInput
 		cameraVertical = Input.GetAxisRaw(InputName.CameraY);
 
 		// 微小な値を無視
-        if (Mathf.Abs(cameraHorizontal) < 0.2f)
+		if (Mathf.Abs(cameraHorizontal) < 0.2f)
 			cameraHorizontal = 0.0f;
 		if (Mathf.Abs(cameraVertical) < 0.2f)
 			cameraVertical = 0.0f;
@@ -99,22 +201,43 @@ public class PlayerInput
 			rotationInput.x -= 0.5f;
 			rotationInput.y -= 0.5f;
 			rotationInput *= 2.0f;
-			if(Mathf.Abs(rotationInput.y) < 0.5f)
+			if (Mathf.Abs(rotationInput.y) < 0.5f)
 			{
 				rotationInput.y = 0.0f;
-            }
+			}
 
 			cameraHorizontal = rotationInput.x;
 			cameraVertical = rotationInput.y;
 		}
 
-		// ゲームコントローラのABXY
-		attack = Input.GetButtonDown(InputName.Atack);
-		jump = Input.GetButtonDown(InputName.Jump);
-		barrier = Input.GetButtonDown(InputName.Barrier);
-		itemGet = Input.GetButtonDown(InputName.ItemGet);
+		DoubleButtonInput oldattackAndJumpInput = attackAndJumpInput;
+		if(Input.GetButtonDown(InputName.Atack))
+		{
+			attackAndJumpInput |= DoubleButtonInput.OneButton;
+		}
 
-		cameraToFront = Input.GetButtonDown(InputName.CameraToFront);
-		lockOn = Input.GetButtonDown(InputName.LockOn);
+		if (Input.GetButtonDown(InputName.Jump))
+		{
+			attackAndJumpInput |= DoubleButtonInput.TwoButton;
+		}
+
+		if(attackAndJumpInput != DoubleButtonInput.None)
+		{
+			if(inputGraceCount < inputGraceSeconds)
+			{
+				if (attackAndJumpInput == DoubleButtonInput.DoubleInput)
+				{
+					attackAndJump = true;
+				}
+			}
+			else
+			{
+				// 猶予時間を超えているので入力状態をリセット
+				attackAndJumpInput = DoubleButtonInput.None;
+				inputGraceCount = 0.0f;
+				attackAndJump = false;
+			}
+			inputGraceCount += Time.deltaTime;
+		}
 	}
 }

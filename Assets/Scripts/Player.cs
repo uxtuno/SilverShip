@@ -38,13 +38,16 @@ namespace Uxtuno
 
 		private PlayerInput playerInput = PlayerInput.instance;
 		private CharacterController characterController; // キャラクターコントローラー
-		private CameraController cameraController; // キャラクターコントローラー
+		private CameraController cameraController; // カメラコントローラー
+		private PlayerTrampled playerTrampled; // 踏みつけジャンプ用クラス
 		private Transform meshRoot; // プレイヤーメッシュのルート
 		private Animator animator; // アニメーションのコントロール用
 		private PlayerCamera playerCamera; // カメラ動作を委譲
 
+		// アニメーション用ID
 		private int speedID;
 		private int isJumpID;
+		private int isTrampledID;
 
 		/// <summary>
 		/// ジャンプ状態
@@ -78,6 +81,7 @@ namespace Uxtuno
 
 		private BaseState currentState; // 現在の状態
 
+		// プレーヤーの各状態をそれぞれクラスとして表す
 		#region - 状態クラス
 
 		/// <summary>
@@ -104,6 +108,7 @@ namespace Uxtuno
 				player.currentJumpState = JumpState.None;
 				player.jumpVY = 0.0f;
 				player.animator.SetBool(player.isJumpID, false);
+				player.animator.SetBool(player.isTrampledID, false);
 				player.isAirDashPossible = false;
 			}
 
@@ -127,9 +132,7 @@ namespace Uxtuno
 						// 同時押しではなかったので通常の動作
 						if (highJumpInput == HighJumpInput.Jump)
 						{
-							player.jumpVY = player.jumpPower;
-							player.currentJumpState = JumpState.Jumping;
-							player.currentState = new DepressionState(player);
+							player.Jumping();
 							player.isAirDashPossible = true;
 							return;
 						}
@@ -156,10 +159,8 @@ namespace Uxtuno
 				// ハイジャンプ入力
 				if (highJumpInput == HighJumpInput.HighJump)
 				{
-					player.jumpVY = player.highJumpPower;
-					player.currentJumpState = JumpState.HighJumping;
+					player.HighJumping();
 					highJumpInput = HighJumpInput.None;
-					player.currentState = new DepressionState(player);
 					return;
 				}
 				else if (highJumpInput != HighJumpInput.None)
@@ -206,6 +207,21 @@ namespace Uxtuno
 			{
 				airDashPossibleCount += Time.deltaTime;
 
+				AnimatorStateInfo state = player.animator.GetCurrentAnimatorStateInfo(0);
+				if(state.IsName("Base Layer.Trampled"))
+				{
+					player.animator.SetBool(player.isTrampledID, false);
+				}
+
+				// 踏みつけジャンプ
+				if (player.playerTrampled.hasTarget() && playerInput.attack)
+				{
+					player.animator.SetBool(player.isTrampledID, true);
+					player.Jumping();
+					player.playerTrampled.Trampled(5, 1.0f);
+					return;
+				}
+
 				// 接地しているので通常状態に
 				if (player.isGrounded && player.jumpVY <= 0.0f)
 				{
@@ -221,7 +237,16 @@ namespace Uxtuno
 					player.currentState = new NormalState(player);
 				}
 
-				player.Gravity();
+				if(player.jumpVY < 0.0f)
+				{
+					// 落下中は速度を落とす
+					player.FallGravity();
+				}
+				else
+				{
+					// 上昇中の重力
+					player.Gravity();
+				}
 				Vector3 moveVector = moveDirection * speed;
 				moveVector.y = player.jumpVY;
 
@@ -235,7 +260,6 @@ namespace Uxtuno
 
 				if (playerInput.jump && player.currentJumpState == JumpState.Jumping)
 				{
-					// 一定期間内なら空中ダッシュ
 					if (airDashPossibleCount > airDashPossibleSeconds && airDashPossibleCount < airDashDisableSeconds)
 					{
 						if (player.isAirDashPossible)
@@ -373,7 +397,8 @@ namespace Uxtuno
 		/// <summary>
 		/// ロックオン状態
 		/// </summary>
-		public LockOnState lockOnState {
+		public LockOnState lockOnState
+		{
 			get { return _lockOnState; }
 			private set { _lockOnState = value; }
 		}
@@ -396,7 +421,8 @@ namespace Uxtuno
 			manualLockOnIconSprite = Resources.Load<Sprite>("Sprites/ManualRockOnIcon");
 
 			characterController = GetComponent<CharacterController>();
-			cameraController = this.GetComponentInChildren<CameraController>();
+			cameraController = GameObject.FindGameObjectWithTag(TagName.CameraController).GetComponent<CameraController>();
+			playerTrampled = GetComponentInChildren<PlayerTrampled>();
 			playerCamera = new PlayerCamera(cameraController, horizontalRotationSpeed, verticalRotationSpeed);
 			animator = GetComponentInChildren<Animator>(); // アニメーションをコントロールするためのAnimatorを子から取得
 			meshRoot = animator.transform; // Animatorがアタッチされているのがメッシュのはずだから
@@ -413,6 +439,7 @@ namespace Uxtuno
 
 			speedID = Animator.StringToHash("Speed");
 			isJumpID = Animator.StringToHash("IsJump");
+			isTrampledID = Animator.StringToHash("IsTrampled");
 
 			// 初期状態へ
 			currentState = new NormalState(this);
@@ -428,8 +455,13 @@ namespace Uxtuno
 
 		Vector3 cameraFront = new Vector3(0.0f, -0.2f, 1.0f);
 
-		void Update()
+		void FixedUpdate()
 		{
+			if (lockOnState == LockOnState.Manual)
+			{
+				cameraController.LookAt(lockOnTarget.transform, 1.0f, CameraController.InterpolationMode.Curve);
+			}
+
 			if (playerInput.cameraToFront)
 			{
 				cameraController.SetRotation(Quaternion.LookRotation(meshRoot.rotation * cameraFront), 0.6f, CameraController.InterpolationMode.Curve);
@@ -468,7 +500,7 @@ namespace Uxtuno
 		/// </summary>
 		private void LockOnCamera()
 		{
-			
+
 		}
 
 		private const float LockOnAngleHulfRange = 45.0f; // ロックオン可能角度の半分
@@ -640,6 +672,14 @@ namespace Uxtuno
 		}
 
 		/// <summary>
+		/// 重力計算(通常の半分の重力)
+		/// </summary>
+		private void FallGravity()
+		{
+			jumpVY += Physics.gravity.y * Time.deltaTime * 0.4f;
+		}
+
+		/// <summary>
 		/// XZ平面上で現在向いている方向を返す
 		/// </summary>
 		/// <returns></returns>
@@ -704,11 +744,31 @@ namespace Uxtuno
 		/// </summary>
 		private void Attack()
 		{
-			foreach(Transform enemy in containedObjects)
+			foreach (Transform enemy in containedObjects)
 			{
 				// todo : 技倍率は仮
 				enemy.GetComponent<Actor>().Damage(attack, 1.0f);
 			}
+		}
+
+		/// <summary>
+		/// プレイヤーにジャンプさせる
+		/// </summary>
+		private void Jumping()
+		{
+			jumpVY = jumpPower;
+			currentJumpState = JumpState.Jumping;
+			currentState = new DepressionState(this);
+		}
+
+		/// <summary>
+		/// プレイヤーにハイジャンプさせる
+		/// </summary>
+		private void HighJumping()
+		{
+			jumpVY = highJumpPower;
+			currentJumpState = JumpState.HighJumping;
+			currentState = new DepressionState(this);
 		}
 	}
 }

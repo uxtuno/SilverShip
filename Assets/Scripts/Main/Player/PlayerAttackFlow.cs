@@ -69,8 +69,6 @@ namespace Uxtuno
 			{
 				foreach (Motion motion in nextMotions)
 				{
-					Debug.Log(motionCount.ToString() + ":1");
-					Debug.Log((motionSeconds - inputReceptionSeconds).ToString() + ":2");
 					if (Input.GetButtonDown(motion.nextInputName) &&
 						motionCount >= motionSeconds - inputReceptionSeconds) // 入力受付時間内なら
 					{
