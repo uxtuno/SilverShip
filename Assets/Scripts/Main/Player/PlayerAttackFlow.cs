@@ -22,7 +22,7 @@ namespace Uxtuno
 			private readonly string nextInputName;
 			private readonly float inputReceptionSeconds;
 			private readonly int motionID;
-			private Motion currenMotion;
+			//private Motion currenMotion;
 			private Motion changeMotion;
 
 			/// <summary>
@@ -43,7 +43,7 @@ namespace Uxtuno
 			/// <param name="inputReceptionSeconds">入力受付時間</param>
 			public Motion(string name, float motionSeconds = 0.0f, int motionID = 0, string nextInputName = "", float inputReceptionSeconds = 0.0f)
 			{
-				currenMotion = this;
+				//currenMotion = this;
 				this.name = name;
 				_motionSeconds = motionSeconds;
 				this.motionID = motionID;
@@ -130,9 +130,9 @@ namespace Uxtuno
 		{
 			this.animator = animator;
 			rootMotion = new Motion();
-			Motion attack1 = new Motion("Attack1", 1.3f, 1, InputName.Atack, 0.5f);
-			Motion attack2 = new Motion("Attack2", 1.3f, 2, InputName.Atack, 0.5f);
-			Motion attack3 = new Motion("Attack3", 1.3f, 3, InputName.Atack, 0.5f);
+			Motion attack1 = new Motion("Attack1", 1.3f, 1, InputName.Attack, 0.5f);
+			Motion attack2 = new Motion("Attack2", 1.3f, 2, InputName.Attack, 0.5f);
+			Motion attack3 = new Motion("Attack3", 1.3f, 3, InputName.Attack, 0.5f);
 
 			// コンボ攻撃を追加
 			rootMotion.AddNextMotion(attack1);
