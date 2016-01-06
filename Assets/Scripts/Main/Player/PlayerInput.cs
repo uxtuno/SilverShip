@@ -3,6 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 
 // 似たような処理の塊になっている、できるならループなどで一括で処理したい
+
+/// <summary>
+/// 押した瞬間を返すプロパティは取得した段階でfalseとなる
+/// そのため値を使いまわしたい場合は変数に代入して使用すること
+/// UpdateでもFixedUpdateでも利用できるように、このような仕様になっている
+/// FixedUpdateが呼ばれるまえにUpdateが複数回呼ばれた場合
+/// 通常、FixedUpdate内では入力した瞬間などを検知できないからだ
+/// </summary>
 public class PlayerInput
 {
 	private PlayerInput()
@@ -56,42 +64,103 @@ public class PlayerInput
 	public float cameraVertical { get; private set; }
 
 	#region - 押した瞬間を検知するボタン
+
+	private bool _attack;
 	/// <summary>
 	/// 攻撃ボタン
 	/// </summary>
-	public bool attack { get; private set; }
+	public bool attack
+	{
+		get
+		{
+			bool ret = _attack;
+			_attack = false;
+			return ret;
+		}
+		private set { _attack = value; }
+	}
 
+	private bool _jump;
 	/// <summary>
 	/// ジャンプボタン
 	/// </summary>
-	public bool jump { get; private set; }
+	public bool jump
+	{
+		get
+		{
+			bool ret = _jump;
+			_jump = false;
+			return ret;
+		}
+		private set { _jump = value; }
+	}
 
+	private bool _barrier;
 	/// <summary>
 	/// 結界発動ボタン
 	/// </summary>
-	public bool barrier { get; private set; }
+	public bool barrier
+	{
+		get
+		{
+			bool ret = _barrier;
+			_barrier = false;
+			return ret;
+		}
+		private set { _barrier = value; }
+	}
 
+	private bool _itemGet;
 	/// <summary>
 	/// アイテム入手ボタン
 	/// </summary>
-	public bool itemGet { get; private set; }
+	public bool itemGet
+	{
+		get
+		{
+			bool ret = _itemGet;
+			_itemGet = false;
+			return ret;
+		}
+		private set { _itemGet = value; }
+	}
 
+	private bool _cameraToFront;
 	/// <summary>
 	/// カメラを前方に向ける
 	/// </summary>
-	public bool cameraToFront { get; private set; }
+	public bool cameraToFront
+	{
+		get
+		{
+			bool ret = _cameraToFront;
+			_cameraToFront = false;
+			return ret;
+		}
+		private set { _cameraToFront = value; }
+	}
 
+	private bool _lockOn;
 	/// <summary>
 	/// ロックオン
 	/// </summary>
-	public bool lockOn { get; private set; }
+	public bool lockOn
+	{
+		get
+		{
+			bool ret = _lockOn;
+			lockOn = false;
+			return ret;
+		}
+		private set { _lockOn = value; }
+	}
 
 	#endregion
 
 	/// <summary>
 	/// 同時押し判定
 	/// </summary>
-    public bool attackAndJump
+	public bool attackAndJump
 	{
 		get; private set;
 	}
@@ -156,7 +225,7 @@ public class PlayerInput
 		attack = Input.GetButtonDown(InputName.Attack) ? true : attack;
 		lockOn = Input.GetButtonDown(InputName.LockOn) ? true : lockOn;
 
-		if(updateCount > 2)
+		if (updateCount > 2)
 		{
 			Debug.Log("入力情報が正しく検知できません。入力更新メソッドを適切に呼び出してください");
 		}
@@ -165,8 +234,7 @@ public class PlayerInput
 
 	/// <summary>
 	/// 入力更新
-	/// FixedUpdate内でも正しく入力を受け取れるように
-	/// FixedUpdate内でこのコルーチンを呼び出す
+	/// FixedUpdate内でこのメソッドをStartCoroutineで呼び出す
 	/// </summary>
 	public IEnumerator LateFixedUpdate()
 	{
@@ -178,5 +246,5 @@ public class PlayerInput
 		attack = false;
 		lockOn = false;
 		updateCount = 0;
-    }
+	}
 }
