@@ -97,9 +97,10 @@ namespace Uxtuno
 		}
 
 		private bool _isShow = true; // 表示フラグ
-									 /// <summary>
-									 /// 表示状態を変更
-									 /// </summary>
+
+		/// <summary>
+		/// 表示状態を変更
+		/// </summary>
 		public override bool isShow
 		{
 			get

@@ -52,9 +52,9 @@ namespace Uxtuno
 		{
 			Vector3 lookPoint = player.transform.Find("LookPoint").position;
 			//controller.SetPovot(lookPoint);
-			controller.transform.position = lookPoint;
-			controller.transform.SetParent(player.transform);
-			controller.DefaultLocalCameraPosition();
+			//controller.transform.position = lookPoint;
+			//controller.transform.SetParent(player.transform);
+			//controller.DefaultLocalCameraPosition();
 		}
 
 		/// <summary>
