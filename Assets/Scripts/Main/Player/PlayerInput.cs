@@ -1,10 +1,30 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 // 似たような処理の塊になっている、できるならループなどで一括で処理したい
+
+/// <summary>
+/// 押した瞬間を返すプロパティは取得した段階でfalseとなる
+/// そのため値を使いまわしたい場合は変数に代入して使用すること
+/// UpdateでもFixedUpdateでも利用できるように、このような仕様になっている
+/// FixedUpdateが呼ばれるまえにUpdateが複数回呼ばれた場合
+/// 通常、FixedUpdate内では入力した瞬間などを検知できないからだ
+/// </summary>
 public class PlayerInput
 {
-	private PlayerInput() { }
+	private PlayerInput()
+	{
+		Initialize();
+	}
+
+	/// <summary>
+	/// 初期化
+	/// </summary>
+	private void Initialize()
+	{
+	}
+
 	private static PlayerInput _instance; // 唯一のインスタンス
 
 	/// <summary>
@@ -43,7 +63,8 @@ public class PlayerInput
 	/// </summary>
 	public float cameraVertical { get; private set; }
 
-	#region - ここの処理はFixedUpdate内でも問題なく押した瞬間を検知するためにこのような回りくどい実装になっている
+	#region - 押した瞬間を検知するボタン
+
 	private bool _attack;
 	/// <summary>
 	/// 攻撃ボタン
@@ -52,14 +73,11 @@ public class PlayerInput
 	{
 		get
 		{
-			if (_attack)
-			{
-				_attack = Input.GetButtonDown(InputName.Atack);
-				return false;
-			}
-			_attack = Input.GetButtonDown(InputName.Atack);
-			return _attack;
+			bool ret = _attack;
+			_attack = false;
+			return ret;
 		}
+		private set { _attack = value; }
 	}
 
 	private bool _jump;
@@ -70,14 +88,11 @@ public class PlayerInput
 	{
 		get
 		{
-			if (_jump)
-			{
-				_jump = Input.GetButtonDown(InputName.Jump);
-				return false;
-			}
-			_jump = Input.GetButtonDown(InputName.Jump);
-			return _jump;
+			bool ret = _jump;
+			_jump = false;
+			return ret;
 		}
+		private set { _jump = value; }
 	}
 
 	private bool _barrier;
@@ -88,14 +103,11 @@ public class PlayerInput
 	{
 		get
 		{
-			if (_barrier)
-			{
-				_barrier = Input.GetButtonDown(InputName.Barrier);
-				return false;
-			}
-			_barrier = Input.GetButtonDown(InputName.Barrier);
-			return _barrier;
+			bool ret = _barrier;
+			_barrier = false;
+			return ret;
 		}
+		private set { _barrier = value; }
 	}
 
 	private bool _itemGet;
@@ -106,14 +118,11 @@ public class PlayerInput
 	{
 		get
 		{
-			if (_itemGet)
-			{
-				_itemGet = Input.GetButtonDown(InputName.ItemGet);
-				return false;
-			}
-			_itemGet = Input.GetButtonDown(InputName.ItemGet);
-			return _itemGet;
+			bool ret = _itemGet;
+			_itemGet = false;
+			return ret;
 		}
+		private set { _itemGet = value; }
 	}
 
 	private bool _cameraToFront;
@@ -124,14 +133,11 @@ public class PlayerInput
 	{
 		get
 		{
-			if (_cameraToFront)
-			{
-				_cameraToFront = Input.GetButtonDown(InputName.CameraToFront);
-				return false;
-			}
-			_cameraToFront = Input.GetButtonDown(InputName.CameraToFront);
-			return _cameraToFront;
+			bool ret = _cameraToFront;
+			_cameraToFront = false;
+			return ret;
 		}
+		private set { _cameraToFront = value; }
 	}
 
 	private bool _lockOn;
@@ -142,36 +148,38 @@ public class PlayerInput
 	{
 		get
 		{
-			if (_lockOn)
-			{
-				_lockOn = Input.GetButtonDown(InputName.LockOn);
-				return false;
-			}
-			_lockOn = Input.GetButtonDown(InputName.LockOn);
-			return _lockOn;
+			bool ret = _lockOn;
+			lockOn = false;
+			return ret;
 		}
+		private set { _lockOn = value; }
 	}
+
 	#endregion
-
-	private enum DoubleButtonInput
-	{
-		None,
-		OneButton,
-		TwoButton,
-		DoubleInput = OneButton | TwoButton,
-	}
-
-	DoubleButtonInput attackAndJumpInput; // 攻撃ボタンとジャンプボタンの同時押し判定用
-	private static readonly float inputGraceSeconds = 0.2f; // 同時入力猶予時間
-	private float inputGraceCount; // 入力猶予時間カウント用
 
 	/// <summary>
 	/// 同時押し判定
 	/// </summary>
-    public bool attackAndJump
+	public bool attackAndJump
 	{
 		get; private set;
 	}
+
+	/// <summary>
+	/// 論理ボタン名
+	/// </summary>
+	public enum ButtonName
+	{
+		None,
+		Attack,
+		Jump,
+		Barrier,
+		ItemGet,
+		LockOn,
+		CameraToFront,
+	}
+
+	private int updateCount; // エラーチェック用カウンタ
 
 	/// <summary>
 	/// プレイヤー入力情報更新
@@ -210,34 +218,33 @@ public class PlayerInput
 			cameraVertical = rotationInput.y;
 		}
 
-		DoubleButtonInput oldattackAndJumpInput = attackAndJumpInput;
-		if(Input.GetButtonDown(InputName.Atack))
-		{
-			attackAndJumpInput |= DoubleButtonInput.OneButton;
-		}
+		cameraToFront = Input.GetButtonDown(InputName.CameraToFront) ? true : cameraToFront;
+		itemGet = Input.GetButtonDown(InputName.ItemGet) ? true : itemGet;
+		barrier = Input.GetButtonDown(InputName.Barrier) ? true : barrier;
+		jump = Input.GetButtonDown(InputName.Jump) ? true : jump;
+		attack = Input.GetButtonDown(InputName.Attack) ? true : attack;
+		lockOn = Input.GetButtonDown(InputName.LockOn) ? true : lockOn;
 
-		if (Input.GetButtonDown(InputName.Jump))
+		if (updateCount > 2)
 		{
-			attackAndJumpInput |= DoubleButtonInput.TwoButton;
+			Debug.Log("入力情報が正しく検知できません。入力更新メソッドを適切に呼び出してください");
 		}
+		++updateCount;
+	}
 
-		if(attackAndJumpInput != DoubleButtonInput.None)
-		{
-			if(inputGraceCount < inputGraceSeconds)
-			{
-				if (attackAndJumpInput == DoubleButtonInput.DoubleInput)
-				{
-					attackAndJump = true;
-				}
-			}
-			else
-			{
-				// 猶予時間を超えているので入力状態をリセット
-				attackAndJumpInput = DoubleButtonInput.None;
-				inputGraceCount = 0.0f;
-				attackAndJump = false;
-			}
-			inputGraceCount += Time.deltaTime;
-		}
+	/// <summary>
+	/// 入力更新
+	/// FixedUpdate内でこのメソッドをStartCoroutineで呼び出す
+	/// </summary>
+	public IEnumerator LateFixedUpdate()
+	{
+		yield return new WaitForFixedUpdate();
+		cameraToFront = false;
+		itemGet = false;
+		barrier = false;
+		jump = false;
+		attack = false;
+		lockOn = false;
+		updateCount = 0;
 	}
 }

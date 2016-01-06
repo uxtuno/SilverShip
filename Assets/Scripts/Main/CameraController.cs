@@ -47,9 +47,6 @@ namespace Uxtuno
 		private Quaternion pivotTargetRotation; // 基準位置の回転後角度
 		private Quaternion transformTargetRotation; // 回転後角度
 
-		private Quaternion oldRotation; // 補間前の角度
-		private Quaternion newRotation; // 新しい角度
-
 		// 補間
 		public enum InterpolationMode
 		{
@@ -71,14 +68,9 @@ namespace Uxtuno
 		/// </summary>
 		public bool isInterpolation { get; set; }
 
-		//private float cameraToPivotDistance; // 中心点までの距離
-		private Vector3 defaultLocalCameraPosition; // カメラの初期ローカル座標
 
 		void Start()
 		{
-			//cameraToPivotDistance = (pivot.position - cameraTransform.position).magnitude;
-			defaultLocalCameraPosition = cameraTransform.localPosition;
-
 			pivot = cameraTransform.transform.parent;
 			pivotTargetRotation = pivot.localRotation;
 			pivotEulers = pivot.localEulerAngles;

@@ -50,7 +50,7 @@ namespace Uxtuno
 		/// </summary>
 		public void EndLockOn()
 		{
-			Vector3 lookPoint = player.transform.Find("LookPoint").position;
+			//Vector3 lookPoint = player.transform.Find("LookPoint").position;
 			//controller.SetPovot(lookPoint);
 			//controller.transform.position = lookPoint;
 			//controller.transform.SetParent(player.transform);

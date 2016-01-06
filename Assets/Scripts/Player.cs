@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Linq;
+using System.Reflection;
 using System.Collections.Generic;
 using Kuvo;
 
@@ -39,7 +40,7 @@ namespace Uxtuno
 		private PlayerInput playerInput = PlayerInput.instance;
 		private CharacterController characterController; // キャラクターコントローラー
 		private CameraController cameraController; // カメラコントローラー
-		private PlayerTrampled playerTrampled; // 踏みつけジャンプ用クラス
+												   //private PlayerTrampled playerTrampled; // 踏みつけジャンプ用クラス
 		private Transform meshRoot; // プレイヤーメッシュのルート
 		private Animator animator; // アニメーションのコントロール用
 		private PlayerCamera playerCamera; // カメラ動作を委譲
@@ -110,6 +111,7 @@ namespace Uxtuno
 				player.animator.SetBool(player.isJumpID, false);
 				player.animator.SetBool(player.isTrampledID, false);
 				player.isAirDashPossible = false;
+				player.attackFlow.ChangeMode(PlayerAttackFlow.Mode.Ground);
 			}
 
 			public override void Move()
@@ -120,6 +122,8 @@ namespace Uxtuno
 					player.currentState = new AirState(player);
 					return;
 				}
+
+				player.attackFlow.Move();
 
 				Vector3 moveDirection = player.calclateMoveDirection();
 				float speed = player.maxSpeed;
@@ -163,10 +167,6 @@ namespace Uxtuno
 					highJumpInput = HighJumpInput.None;
 					return;
 				}
-				else if (highJumpInput != HighJumpInput.None)
-				{
-					return;
-				}
 
 				// 地上にいるので重力による落下量は0から計算
 				player.jumpVY = 0.0f;
@@ -194,6 +194,17 @@ namespace Uxtuno
 		/// </summary>
 		private class AirState : BaseState
 		{
+			private enum TrampledJumpInput
+			{
+				None,
+				Jump,
+				Attack,
+				TrampledJump = Jump | Attack,
+			}
+			TrampledJumpInput trampledJumpInput = TrampledJumpInput.None; // 踏みつけジャンプ入力検知用
+			private static readonly float trampledJumpInputSeconds = 0.1f; // 踏みつけジャンプ入力同時押し猶予時間
+			private float trampledJumpInputCount; // 踏みつけジャンプ入力受付カウンタ
+
 			private static readonly float movementRestriction = 0.5f; // この値を掛けることで移動速度を制限
 			private static readonly float airDashPossibleSeconds = 0.4f; // 空中ダッシュが可能になる時間
 			private static readonly float airDashDisableSeconds = 1.4f; // 空中ダッシュが可能になる時間
@@ -201,6 +212,7 @@ namespace Uxtuno
 			public AirState(Player player)
 				: base(player)
 			{
+				player.attackFlow.ChangeMode(PlayerAttackFlow.Mode.Air);
 			}
 
 			public override void Move()
@@ -208,17 +220,65 @@ namespace Uxtuno
 				airDashPossibleCount += Time.deltaTime;
 
 				AnimatorStateInfo state = player.animator.GetCurrentAnimatorStateInfo(0);
-				if(state.IsName("Base Layer.Trampled"))
+				if (state.IsName("Base Layer.Trampled"))
 				{
 					player.animator.SetBool(player.isTrampledID, false);
 				}
 
-				// 踏みつけジャンプ
-				if (player.playerTrampled.hasTarget() && playerInput.attack)
+				player.attackFlow.Move();
+
+				if (trampledJumpInput != TrampledJumpInput.None)
 				{
-					player.animator.SetBool(player.isTrampledID, true);
-					player.Jumping();
-					player.playerTrampled.Trampled(5, 1.0f);
+					trampledJumpInputCount += Time.deltaTime;
+					if (trampledJumpInputCount >= trampledJumpInputSeconds)
+					{
+						// 同時押しではなかったので通常の動作
+						if (trampledJumpInput == TrampledJumpInput.Jump && player.currentJumpState == JumpState.Jumping)
+						{
+							// 入力受付時間内なら空中ダッシュ
+							if (airDashPossibleCount > airDashPossibleSeconds && airDashPossibleCount < airDashDisableSeconds)
+							{
+								if (player.isAirDashPossible)
+								{
+									player.currentState = new AirDashState(player);
+									return;
+								}
+							}
+						}
+						else if (trampledJumpInput == TrampledJumpInput.Attack)
+						{
+							player.Attack();
+						}
+
+						trampledJumpInputCount = 0.0f;
+						trampledJumpInput = TrampledJumpInput.None;
+					}
+				}
+
+				// 同時押しのそれぞれのボタンの入力情報を追加していく
+				if (playerInput.jump)
+				{
+					trampledJumpInput |= TrampledJumpInput.Jump;
+				}
+
+				if (playerInput.attack)
+				{
+					trampledJumpInput |= TrampledJumpInput.Attack;
+				}
+
+				// 踏みつけジャンプ入力成功
+				if (trampledJumpInput == TrampledJumpInput.TrampledJump)
+				{
+					trampledJumpInput = TrampledJumpInput.None;
+					if (player.lockOnTarget != null)
+					{
+						// todo : 空中ダッシュ入力受付時間をそのまま踏みつけジャンプの受付時間に利用している
+						// そのうち整理するだろう(希望的観測
+						if (airDashPossibleCount > airDashPossibleSeconds && airDashPossibleCount < airDashDisableSeconds)
+						{
+							player.currentState = new DashToTargetState(player);
+						}
+					}
 					return;
 				}
 
@@ -237,7 +297,7 @@ namespace Uxtuno
 					player.currentState = new NormalState(player);
 				}
 
-				if(player.jumpVY < 0.0f)
+				if (player.jumpVY < 0.0f)
 				{
 					// 落下中は速度を落とす
 					player.FallGravity();
@@ -256,19 +316,6 @@ namespace Uxtuno
 					Vector3 newAngles = Vector3.zero;
 					newAngles.y = Mathf.Atan2(moveVector.x, moveVector.z) * Mathf.Rad2Deg;
 					player.meshRoot.eulerAngles = newAngles;
-				}
-
-				if (playerInput.jump && player.currentJumpState == JumpState.Jumping)
-				{
-					if (airDashPossibleCount > airDashPossibleSeconds && airDashPossibleCount < airDashDisableSeconds)
-					{
-						if (player.isAirDashPossible)
-						{
-							player.currentState = new AirDashState(player);
-							player.isAirDashPossible = false;
-						}
-					}
-					return;
 				}
 			}
 		}
@@ -291,6 +338,7 @@ namespace Uxtuno
 			{
 				speed = initialVelocity;
 				player.jumpVY = 0.0f;
+				player.isAirDashPossible = false;
 			}
 
 			public override void Move()
@@ -310,7 +358,6 @@ namespace Uxtuno
 						return;
 					}
 					speed -= fallDeceleration;
-
 					if (!Input.GetButton(InputName.Jump))
 					{
 						player.currentState = new AirState(player);
@@ -354,13 +401,69 @@ namespace Uxtuno
 		/// </summary>
 		private class DashToTargetState : BaseState
 		{
+			private static readonly float contactDistance = 0.2f; // 対象に接触したとみなす距離
+			private static readonly float speed = 20.0f; // 対象へ向かうスピード
+			private Vector3 moveVector;
+			private Transform target;
 			public DashToTargetState(Player player)
+				: base(player)
+			{
+				target = player.lockOnTarget.transform;
+			}
+
+			public override void Move()
+			{
+				Vector3 oldPosition = player.transform.position;
+				// 移動ベクトルを計算し、プレイヤーを移動させる
+				moveVector = target.position - player.transform.position;
+				moveVector.Normalize();
+				moveVector *= Time.deltaTime * speed;
+				player.Move(moveVector);
+				// 対象に十分接触している、もしくは移動量がmoveVectorで指定した値よりも少なかったら(何かにぶつかって移動できなかった)
+				if ((target.position - player.transform.position).magnitude < contactDistance ||
+					(player.transform.position - oldPosition).magnitude < moveVector.magnitude * 0.9f)
+				{
+					// ジャンプさせる
+					player.Jumping();
+					player.animator.SetBool(player.isTrampledID, true);
+					player.currentState = new DepressionState(player);
+					return;
+				}
+			}
+		}
+
+		/// <summary>
+		/// 攻撃状態
+		/// </summary>
+		private class AttackState : BaseState
+		{
+			private Vector3 moveVector;
+			public AttackState(Player player)
 				: base(player)
 			{
 			}
 
 			public override void Move()
 			{
+				player.attackFlow.Move();
+				if (!player.attackFlow.isAction())
+				{
+					if (player.isGrounded)
+					{
+						player.currentState = new NormalState(player);
+					}
+					else
+					{
+						player.currentState = new AirState(player);
+					}
+
+					return;
+				}
+				player.FallGravity();
+				// マジックナンバーがなんぼのもんじゃーい
+				moveVector.y = player.jumpVY * 0.15f * Time.deltaTime;
+				Debug.Log(moveVector.y);
+				player.Move(moveVector);
 			}
 		}
 
@@ -416,13 +519,15 @@ namespace Uxtuno
 
 		void Start()
 		{
+			Physics.gravity = new Vector3(0.0f, Physics.gravity.y * 2.0f, 0.0f);
+
 			// リソースロード
 			autoLockOnIconSprite = Resources.Load<Sprite>("Sprites/AutoLockOnIcon");
 			manualLockOnIconSprite = Resources.Load<Sprite>("Sprites/ManualRockOnIcon");
 
 			characterController = GetComponent<CharacterController>();
 			cameraController = GameObject.FindGameObjectWithTag(TagName.CameraController).GetComponent<CameraController>();
-			playerTrampled = GetComponentInChildren<PlayerTrampled>();
+			//playerTrampled = GetComponentInChildren<PlayerTrampled>();
 			playerCamera = new PlayerCamera(cameraController, horizontalRotationSpeed, verticalRotationSpeed);
 			animator = GetComponentInChildren<Animator>(); // アニメーションをコントロールするためのAnimatorを子から取得
 			meshRoot = animator.transform; // Animatorがアタッチされているのがメッシュのはずだから
@@ -441,6 +546,8 @@ namespace Uxtuno
 			isJumpID = Animator.StringToHash("IsJump");
 			isTrampledID = Animator.StringToHash("IsTrampled");
 
+			attackFlow = new PlayerAttackFlow(animator);
+
 			// 初期状態へ
 			currentState = new NormalState(this);
 
@@ -449,8 +556,6 @@ namespace Uxtuno
 			GameObject lockOnIconPrefab = Resources.Load<GameObject>("Prefabs/UI/LockOnIcon");
 			lockOnIcon = Instantiate(lockOnIconPrefab).GetSafeComponent<FollowIcon>();
 			lockOnIcon.Hide();
-
-			attackFlow = new PlayerAttackFlow(animator);
 		}
 
 		Vector3 cameraFront = new Vector3(0.0f, -0.2f, 1.0f);
@@ -477,9 +582,7 @@ namespace Uxtuno
 				currentState.Move();
 			} while (currentState != oldState);
 			// 移動後の「カメラ→プレイヤー」ベクトル
-
-			attackFlow.Move();
-
+			print(currentState);
 			LockOn();
 		}
 
@@ -672,11 +775,11 @@ namespace Uxtuno
 		}
 
 		/// <summary>
-		/// 重力計算(通常の半分の重力)
+		/// 重力計算(落下時)
 		/// </summary>
 		private void FallGravity()
 		{
-			jumpVY += Physics.gravity.y * Time.deltaTime * 0.4f;
+			jumpVY += Physics.gravity.y * Time.deltaTime * 0.2f;
 		}
 
 		/// <summary>
@@ -715,6 +818,7 @@ namespace Uxtuno
 		/// <param name="vz">Z軸移動量</param>
 		public void Move(float vx, float vy, float vz)
 		{
+			Move(new Vector3(vx, vy, vz));
 		}
 
 		/// <summary>
@@ -744,6 +848,13 @@ namespace Uxtuno
 		/// </summary>
 		private void Attack()
 		{
+			// 空中攻撃
+			attackFlow.Move();
+			if (attackFlow.isAction())
+			{
+				currentState = new AttackState(this);
+			}
+
 			foreach (Transform enemy in containedObjects)
 			{
 				// todo : 技倍率は仮
