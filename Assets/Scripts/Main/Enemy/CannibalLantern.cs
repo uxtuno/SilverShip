@@ -230,6 +230,12 @@ namespace Kuvo
 
 				transform.LookAt(lookPosition);
 				rigidbody.velocity = (targetPosition - lockOnPoint.position).normalized * speed;
+
+				if(CheckDistance(targetPosition, 0.125f))
+				{
+					break;
+				}
+
 				yield return new WaitForFixedUpdate();
 			}
 
