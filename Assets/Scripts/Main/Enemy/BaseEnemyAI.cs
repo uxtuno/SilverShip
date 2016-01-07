@@ -114,7 +114,8 @@ namespace Kuvo
 		/// <summary>
 		/// 部下を格納する
 		/// </summary>
-		public List<BaseEnemyAI> members { get; set; }
+		//public List<BaseEnemyAI> members { get; set; }
+		public List<BaseEnemyAI> members = new List<BaseEnemyAI>();
 
 		/// <summary>
 		/// 行動時間を格納する

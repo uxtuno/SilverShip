@@ -30,7 +30,7 @@ namespace Kuvo
 		[Tooltip("移動速度"), SerializeField]
 		protected float speed = 1;
 		[Tooltip("視野角"), SerializeField]
-		protected float viewAngle = 120;
+		protected float viewAngle = 90;
 		[Tooltip("視認距離"), SerializeField]
 		protected float viewRange = 10;
 		[Tooltip("遠距離攻撃の弾の発射位置"), SerializeField]
@@ -149,7 +149,13 @@ namespace Kuvo
 		/// <summary>
 		/// プレイヤーを発見しているかどうか
 		/// </summary>
-		public bool isPlayerLocate { get; private set; }
+		public bool isPlayerLocate
+		{
+			get
+			{
+				return isTeamUp ? true : PlayerSearch();
+			}
+		}
 
 		/// <summary>
 		/// 攻撃中かどうか
@@ -196,32 +202,6 @@ namespace Kuvo
 			{
 				isShow = true;
 			}
-
-			if (!isTeamUp)
-			{
-				isPlayerLocate = PlayerSearch();
-			}
-			else
-			{
-				if (!isPlayerLocate)
-				{
-					isPlayerLocate = true;
-				}
-			}
-		}
-
-		protected virtual void LateUpdate()
-		{
-			//if (contained)
-			//{
-			//	Vector3 aveVec = Vector3.zero;
-			//	foreach (Transform t in contained)
-			//	{
-			//		aveVec += t.position;
-			//	}
-			//	aveVec /= contained.GetContainedObjects().Count;
-			//	transform.position -= (aveVec - transform.position).normalized * Time.deltaTime;
-			//}
 		}
 
 		protected virtual void OnCollisionExit(Collision collision)
@@ -328,20 +308,7 @@ namespace Kuvo
 			}
 			Debug.Log("死んだー", gameObject);
 			Destroy(gameObject);
-
-			System.IO.StreamReader sr = new System.IO.StreamReader("");
-
-			using (sr)
-			{
-				//sr.Close();
-			}
-
 		}
-
-		//private class a<in T> where T : BaseEnemy
-		//{
-
-		//}
 
 		/// <summary>
 		/// 空中でよろける

@@ -1000,7 +1000,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 184250}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 2.01999998}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 488272}
@@ -1169,6 +1169,7 @@ MonoBehaviour:
     _sAttackCost: 1
     _lAttackCost: 2
   teamRange: 30
+  members: []
 --- !u!114 &11439618
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1194,8 +1195,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 3
-  viewAngle: 120
-  viewRange: 10
+  viewAngle: 90
+  viewRange: 5
   muzzle: {fileID: 490490}
   bulletPrafab: {fileID: 172264, guid: 50cc16a0b3bb7084ea8e729b5a113b35, type: 2}
 --- !u!135 &13535592
@@ -1241,7 +1242,7 @@ CapsuleCollider:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 184250}
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: .332233012
   m_Height: 1.16163313

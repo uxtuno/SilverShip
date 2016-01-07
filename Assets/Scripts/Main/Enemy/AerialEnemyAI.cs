@@ -65,7 +65,6 @@ namespace Kuvo
 
 					case ActionState.Moving:
 						// プレイヤーに重ならない程度にエネミーを動かす
-						//if (Mathf.Abs(transform.position.x - playerPosition.x) > 1f || Mathf.Abs(transform.position.z - playerPosition.z) > 1f)
 						if (!baseEnemy.CheckDistance(player.lockOnPoint.position, attackParameters.UsedRange(isCaptain)))
 						{
 							if (baseEnemy.currentState != BaseEnemy.EnemyState.Move)

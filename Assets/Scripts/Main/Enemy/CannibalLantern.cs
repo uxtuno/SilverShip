@@ -94,9 +94,18 @@ namespace Kuvo
 		{
 			if (currentState == EnemyState.Move)
 			{
-				//transform.Translate(Vector3.forward * speed * Time.deltaTime);
-				//rigidbody.AddRelativeForce(Vector3.forward * speed, ForceMode.Acceleration);
-				rigidbody.velocity = (player.lockOnPoint.position - lockOnPoint.position).normalized * speed;
+				if (isPlayerLocate)
+				{
+					Vector3 lookPosition = player.lockOnPoint.position;
+					lookPosition.y = transform.position.y;
+
+					transform.LookAt(lookPosition);
+					rigidbody.velocity = (player.lockOnPoint.position - lockOnPoint.position).normalized * speed;
+				}
+				else
+				{
+					rigidbody.velocity = transform.forward * speed;
+				}
 			}
 			else if(currentState != EnemyState.GoBack)
 			{
@@ -224,7 +233,7 @@ namespace Kuvo
 
 			for (float elapsedTime = 0; second > elapsedTime; elapsedTime += Time.deltaTime)
 			{
-				print("ξ" + (targetPosition - lockOnPoint.position).normalized * speed);
+				//print("ξ" + (targetPosition - lockOnPoint.position).normalized * speed);
 				Vector3 lookPosition = targetPosition;
 				lookPosition.y = transform.position.y;
 
@@ -241,6 +250,7 @@ namespace Kuvo
 
 			rigidbody.velocity = Vector3.zero;
 			currentState = EnemyState.Idle;
+
 			if (isAttack)
 			{
 				isAttack = false;
