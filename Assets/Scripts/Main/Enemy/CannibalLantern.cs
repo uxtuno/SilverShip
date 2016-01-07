@@ -107,7 +107,7 @@ namespace Kuvo
 					rigidbody.velocity = transform.forward * speed;
 				}
 			}
-			else if(currentState != EnemyState.GoBack)
+			else if (currentState != EnemyState.GoBack)
 			{
 				if (rigidbody.velocity != Vector3.zero)
 				{
@@ -123,7 +123,7 @@ namespace Kuvo
 		{
 			EnemyState oldState = currentState;
 			currentState = EnemyState.Stagger;
-			print("ぐはっ！");
+			Debug.Log("ぐはっ！");
 
 			yield return new WaitForSeconds(1);
 
@@ -226,30 +226,34 @@ namespace Kuvo
 		/// <param name="second"> 移動する時間(秒)</param>
 		private IEnumerator MovingPosition(Vector3 targetPosition, float second)
 		{
-			if(currentState != EnemyState.GoBack)
+			const float min = 0.125f;
+
+			if (!CheckDistance(targetPosition, min))
 			{
-				currentState = EnemyState.GoBack;
-			}
-
-			for (float elapsedTime = 0; second > elapsedTime; elapsedTime += Time.deltaTime)
-			{
-				//print("ξ" + (targetPosition - lockOnPoint.position).normalized * speed);
-				Vector3 lookPosition = targetPosition;
-				lookPosition.y = transform.position.y;
-
-				transform.LookAt(lookPosition);
-				rigidbody.velocity = (targetPosition - lockOnPoint.position).normalized * speed;
-
-				if(CheckDistance(targetPosition, 0.125f))
+				if (currentState != EnemyState.GoBack)
 				{
-					break;
+					currentState = EnemyState.GoBack;
 				}
 
-				yield return new WaitForFixedUpdate();
-			}
+				for (float elapsedTime = 0; second > elapsedTime; elapsedTime += Time.deltaTime)
+				{
+					Vector3 lookPosition = targetPosition;
+					lookPosition.y = transform.position.y;
 
-			rigidbody.velocity = Vector3.zero;
-			currentState = EnemyState.Idle;
+					transform.LookAt(lookPosition);
+					rigidbody.velocity = (targetPosition - lockOnPoint.position).normalized * speed;
+
+					if (CheckDistance(targetPosition, min))
+					{
+						break;
+					}
+
+					yield return new WaitForFixedUpdate();
+				}
+
+				rigidbody.velocity = Vector3.zero;
+				currentState = EnemyState.Idle;
+			}
 
 			if (isAttack)
 			{
