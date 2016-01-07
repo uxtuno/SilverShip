@@ -425,6 +425,7 @@ namespace Uxtuno
 				{
 					// ジャンプさせる
 					player.Jumping();
+					player.isAirDashPossible = true;
 					player.animator.SetBool(player.isTrampledID, true);
 					player.currentState = new DepressionState(player);
 					return;

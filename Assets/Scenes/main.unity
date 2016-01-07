@@ -3937,6 +3937,48 @@ Transform:
   - {fileID: 376297433}
   m_Father: {fileID: 1729076435}
   m_RootOrder: 1
+--- !u!1001 &1067677209
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 402454, guid: bca657c6b96131a4da26223df4c7026b, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: -1.75390625
+      objectReference: {fileID: 0}
+    - target: {fileID: 402454, guid: bca657c6b96131a4da26223df4c7026b, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: -.620000005
+      objectReference: {fileID: 0}
+    - target: {fileID: 402454, guid: bca657c6b96131a4da26223df4c7026b, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: -.14453125
+      objectReference: {fileID: 0}
+    - target: {fileID: 402454, guid: bca657c6b96131a4da26223df4c7026b, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: -.707106829
+      objectReference: {fileID: 0}
+    - target: {fileID: 402454, guid: bca657c6b96131a4da26223df4c7026b, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 402454, guid: bca657c6b96131a4da26223df4c7026b, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 402454, guid: bca657c6b96131a4da26223df4c7026b, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: .707106829
+      objectReference: {fileID: 0}
+    - target: {fileID: 402454, guid: bca657c6b96131a4da26223df4c7026b, type: 2}
+      propertyPath: m_RootOrder
+      value: 16
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: bca657c6b96131a4da26223df4c7026b, type: 2}
+  m_IsPrefabParent: 0
 --- !u!1 &1069378796
 GameObject:
   m_ObjectHideFlags: 0
@@ -5906,7 +5948,15 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11468570, guid: ee5d5e9e34c4c2a4e930e76fa9a7a808, type: 2}
       propertyPath: xAngleMin
-      value: 5
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 409300, guid: ee5d5e9e34c4c2a4e930e76fa9a7a808, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 442886, guid: ee5d5e9e34c4c2a4e930e76fa9a7a808, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 1.25
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ee5d5e9e34c4c2a4e930e76fa9a7a808, type: 2}
