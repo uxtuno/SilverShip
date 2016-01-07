@@ -55,7 +55,6 @@ namespace Kuvo
 				switch (currentState)
 				{
 					case ActionState.Waiting:
-
 						if (baseEnemy.currentState != BaseEnemy.EnemyState.Idle)
 						{
 							baseEnemy.currentState = BaseEnemy.EnemyState.Idle;
@@ -143,7 +142,7 @@ namespace Kuvo
 						{
 							currentState = ActionState.Attacking;
 						}
-						else
+						else if(!baseEnemy.CheckDistance(player.lockOnPoint.position, attackParameters.lAttackRange))
 						{
 							currentState = ActionState.Moving;
 						}
@@ -163,18 +162,18 @@ namespace Kuvo
 
 					case ActionState.Attacking:
 						// 攻撃可能範囲に入っている場合待機
-						if (baseEnemy.CheckDistance(player.lockOnPoint.position, attackParameters.UsedRange(isCaptain)))
+						if (!baseEnemy.CheckDistance(player.lockOnPoint.position, attackParameters.lAttackRange))
 						{
-							currentState = ActionState.Waiting;
+							currentState = ActionState.Moving;
 						}
 						else
 						{
-							currentState = ActionState.Moving;
+							currentState = ActionState.Waiting;
 						}
 						break;
 				}
 			}
-			else
+			else		// プレイヤー未発見時
 			{
 				switch (currentState)
 				{
