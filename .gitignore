@@ -6,6 +6,7 @@
 Sounds/
 SilverShip/
 
+ProjectSettings/
 *.exe
 *.csproj
 *.unityproj
