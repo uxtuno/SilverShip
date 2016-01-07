@@ -21,7 +21,7 @@ public class Recode : MonoBehaviour
 		if (Microphone.devices.Length <= 0)
 		{
 			//Throw a warning message at the console if there isn't  
-			UnityEngine.Debug.LogWarning("Microphone not connected!");
+			//UnityEngine.Debug.LogWarning("Microphone not connected!");
 			enabled = false;
 		}
 		else //At least one microphone is present  
