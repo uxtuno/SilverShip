@@ -227,7 +227,7 @@ public class PlayerInput
 
 		if (updateCount > 2)
 		{
-			Debug.Log("入力情報が正しく検知できません。入力更新メソッドを適切に呼び出してください");
+			//Debug.Log("入力情報が正しく検知できません。入力更新メソッドを適切に呼び出してください");
 		}
 		++updateCount;
 	}

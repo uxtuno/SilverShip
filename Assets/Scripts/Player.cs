@@ -463,7 +463,6 @@ namespace Uxtuno
 				player.FallGravity();
 				// マジックナンバーがなんぼのもんじゃーい
 				moveVector.y = player.jumpVY * 0.15f * Time.deltaTime;
-				Debug.Log(moveVector.y);
 				player.Move(moveVector);
 			}
 		}
@@ -583,7 +582,6 @@ namespace Uxtuno
 				currentState.Move();
 			} while (currentState != oldState);
 			// 移動後の「カメラ→プレイヤー」ベクトル
-			print(currentState);
 			LockOn();
 		}
 
