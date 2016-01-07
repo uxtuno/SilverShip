@@ -1044,9 +1044,6 @@ MonoBehaviour:
   viewAngle: 120
   viewRange: 10
   muzzle: {fileID: 0}
-  attackCosts:
-    shortRange: 1
-    longRange: 2
 --- !u!1 &1897807464
 GameObject:
   m_ObjectHideFlags: 0
