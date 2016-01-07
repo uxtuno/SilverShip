@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
+using System.Collections;
 
 namespace Uxtuno
 {
@@ -25,13 +25,27 @@ namespace Uxtuno
 			}
 		}
 
-		[Tooltip("カメラで追いかける対象"), SerializeField]
-		private Transform pivot = null;
-		//private Transform defaultTarget;
-		[Tooltip("上に向ける限界角度"), SerializeField]
-		private float facingUpLimit = 5.0f;                 // 視点移動の上方向制限
-		[Tooltip("下に向ける限界角度"), SerializeField]
-		private float facingDownLimit = 45.0f;              // 視点移動の下方向制限
+		[SerializeField, Tooltip("追従対象")]
+		private Transform target = null;
+		[SerializeField, Tooltip("追従対象との距離")]
+		private float distance = 2.0f;
+
+		[SerializeField, Tooltip("追従速度")]
+		private float movenSmoothing = 0.2f;
+		[SerializeField, Tooltip("X軸回転の下方向最大角")]
+		private float xAngleMin = 45.0f;
+		[SerializeField, Tooltip("X軸回転の上方向最大角")]
+		private float xAngleMax = 45.0f;
+		[SerializeField, Tooltip("カメラ回転を滑らかにするための値")]
+		private float turnSeconds = 0.2f;
+
+		private float yAngle; // Y軸方向の回転角
+		private float xAngle; // X軸方向の回転角
+
+		private Transform pivot; // 基準位置(X軸回転に使用)
+		private Vector3 pivotEulers; // 基準位置のオイラー角を保持
+		private Quaternion pivotTargetRotation; // 基準位置の回転後角度
+		private Quaternion transformTargetRotation; // 回転後角度
 
 		private Quaternion oldRotation; // 補間前の角度
 		private Quaternion newRotation; // 新しい角度
@@ -64,25 +78,32 @@ namespace Uxtuno
 		{
 			//cameraToPivotDistance = (pivot.position - cameraTransform.position).magnitude;
 			defaultLocalCameraPosition = cameraTransform.localPosition;
+
+			pivot = cameraTransform.transform.parent;
+			pivotTargetRotation = pivot.localRotation;
+			pivotEulers = pivot.localEulerAngles;
+			transformTargetRotation = transform.localRotation;
+			cameraTransform.localPosition = -Vector3.forward * distance;
 		}
 
 		void LateUpdate()
 		{
-			if (isInterpolation)
-			{
-				Interpolation();
-			}
-			else
-			{
-				pivot.rotation = newRotation;
-			}
+			//if (isInterpolation)
+			//{
+			//	Interpolation();
+			//}
+			//else
+			//{
+			//	pivot.rotation = newRotation;
+			//}
 
 		}
 
 		/// <summary>
-		/// 補間
+		/// 補間中の位置を0~1で返す
 		/// </summary>
-		private void Interpolation()
+		/// <returns></returns>
+		private float Interpolation()
 		{
 			// 補間中の経過時間を0~1に正規化
 			interpolationCount += Time.deltaTime * (1 / interpolationSeconds);
@@ -94,14 +115,15 @@ namespace Uxtuno
 				currentInterpolationPosition = Mathf.Sin((Mathf.PI * 0.5f) * interpolationCount);
 			}
 
-			pivot.rotation = Quaternion.Lerp(oldRotation, newRotation, currentInterpolationPosition);
-
 			// 補間終了
 			if (interpolationCount >= 1.0f)
 			{
+				interpolationCount = 1.0f;
+				currentInterpolationPosition = 1.0f;
 				isInterpolation = false;
 				isForceInterpolation = false;
 			}
+			return currentInterpolationPosition;
 		}
 
 		/// <summary>
@@ -112,40 +134,9 @@ namespace Uxtuno
 		/// <param name="mode">補間モード</param>
 		public void CameraMove(float horizontal, float vertical, float interpolationSeconds = 1.0f, InterpolationMode mode = InterpolationMode.Curve)
 		{
-			if (horizontal == 0.0f && vertical == 0.0f ||
-				isForceInterpolation)
-			{
-				return;
-			}
-			Vector3 angles = newRotation.eulerAngles;
-
-			angles.x -= vertical;
-			if (angles.x > 180.0f)
-			{
-				angles.x -= 360.0f;
-			}
-
-			// 上方制限
-			if (vertical > 0.0f)
-			{
-				if (angles.x < -facingUpLimit)
-				{
-					angles.x = -facingUpLimit;
-				}
-			}
-
-			// 下方制限
-			if (vertical < 0.0f)
-			{
-				if (angles.x > facingDownLimit)
-				{
-					angles.x = facingDownLimit;
-				}
-			}
-
-			angles.y += horizontal;
-			angles.z = 0.0f;
-			newRotation.eulerAngles = angles;
+			HorizontalRotation(horizontal);
+			VerticalRotation(vertical);
+			InterpolationStart(interpolationSeconds, mode);
 		}
 
 		/// <summary>
@@ -157,28 +148,28 @@ namespace Uxtuno
 		/// <param name="mode">補間モード</param>
 		public void SetRotation(Quaternion rotation, float interpolationSeconds, InterpolationMode mode)
 		{
-			Vector3 angles = rotation.eulerAngles;
-			if (angles.x > 180.0f)
-			{
-				angles.x -= 360.0f;
-			}
+			//Vector3 angles = rotation.eulerAngles;
+			//if (angles.x > 180.0f)
+			//{
+			//	angles.x -= 360.0f;
+			//}
 
-			// 上方制限
-			if (angles.x < -facingUpLimit)
-			{
-				angles.x = -facingUpLimit;
-			}
+			//// 上方制限
+			//if (angles.x < -facingUpLimit)
+			//{
+			//	angles.x = -facingUpLimit;
+			//}
 
-			if (angles.x > facingDownLimit)
-			{
-				angles.x = facingDownLimit;
-			}
+			//if (angles.x > facingDownLimit)
+			//{
+			//	angles.x = facingDownLimit;
+			//}
 
-			angles.z = 0.0f;
+			//angles.z = 0.0f;
 
-			newRotation.eulerAngles = angles;
-			isForceInterpolation = true;
-			InterpolationStart(interpolationSeconds, mode);
+			//newRotation.eulerAngles = angles;
+			//isForceInterpolation = true;
+			//InterpolationStart(interpolationSeconds, mode);
 		}
 
 		/// <summary>
@@ -188,7 +179,6 @@ namespace Uxtuno
 		/// <param name="mode">補間モード</param>
 		private void InterpolationStart(float interpolationSeconds = 0.2f, InterpolationMode mode = InterpolationMode.Curve)
 		{
-			oldRotation = transform.rotation;
 			if (interpolationSeconds > 0.0f)
 			{
 				isInterpolation = true;
@@ -213,9 +203,9 @@ namespace Uxtuno
 			//newRotation = pivot.rotation;
 			//cameraTransform.SetParent(pivot, false);
 			//cameraTransform.position = pivot.position + vec;
-			cameraTransform.SetParent(null);
-			pivot.position = position;
-			cameraTransform.SetParent(pivot);
+			//cameraTransform.SetParent(null);
+			//pivot.position = position;
+			//cameraTransform.SetParent(pivot);
 		}
 
 		/// <summary>
@@ -223,7 +213,121 @@ namespace Uxtuno
 		/// </summary>
 		public void DefaultLocalCameraPosition()
 		{
-			cameraTransform.localPosition = defaultLocalCameraPosition;
+			//cameraTransform.localPosition = defaultLocalCameraPosition;
 		}
+
+		/// <summary>
+		/// カメラを水平方向に回転
+		/// </summary>
+		/// <param name="value"></param>
+		public void HorizontalRotation(float value)
+		{
+			yAngle += value;
+			yAngle = Mathf.Repeat(yAngle, 360.0f);
+			transformTargetRotation = Quaternion.Euler(0.0f, yAngle, 0.0f);
+		}
+
+		/// <summary>
+		/// カメラを垂直方向に回転
+		/// </summary>
+		/// <param name="value"></param>
+		public void VerticalRotation(float value)
+		{
+			xAngle -= value;
+			xAngle = Mathf.Clamp(xAngle, -xAngleMin, xAngleMax);
+			pivotTargetRotation = Quaternion.Euler(xAngle, pivotEulers.y, pivotEulers.z);
+		}
+
+		void Update()
+		{
+			// 追尾対象からの距離を反映
+			cameraTransform.localPosition = -Vector3.forward * distance;
+
+		}
+
+		void FixedUpdate()
+		{
+			// カメラの追従を行う
+			StartCoroutine(TargetTracking());
+		}
+
+		// このコードにより、すべてのFixedUpdate終了後に呼び出される
+		IEnumerator TargetTracking()
+		{
+			yield return new WaitForFixedUpdate();
+			transform.position = Vector3.Lerp(transform.position, target.position, movenSmoothing);
+
+			float interpolationPosition = Interpolation();
+			transform.localRotation = Quaternion.Lerp(transform.localRotation, transformTargetRotation, interpolationPosition);
+			pivot.localRotation = Quaternion.Lerp(pivot.localRotation, pivotTargetRotation, interpolationPosition);
+		}
+
+		#region -LookAt
+
+		/// <summary>
+		/// カメラで指定の方向を向く
+		/// 注視点点から見た方向を指定
+		/// </summary>
+		/// <param name="direction">方向</param>
+		/// <param name="interpolationSeconds">補間時間</param>
+		/// <param name="mode">補間モード</param>
+		public void LookDirection(Vector3 direction, float interpolationSeconds, InterpolationMode mode)
+		{
+			LookAt(transform.position + direction, interpolationSeconds, mode);
+		}
+
+		public void LookDirection(Vector3 direction)
+		{
+			LookAt(transform.position + direction, turnSeconds, InterpolationMode.Curve);
+		}
+
+		public void LookAt(Transform target)
+		{
+			if (target == null)
+			{
+				return;
+			}
+			LookAt(target.position, turnSeconds, InterpolationMode.Curve);
+		}
+
+		public void LookAt(Vector3 targetPosition)
+		{
+			LookAt(targetPosition, turnSeconds, InterpolationMode.Curve);
+		}
+
+		public void LookAt(Transform target, float interpolationSeconds, InterpolationMode mode)
+		{
+			if (target == null)
+			{
+				return;
+			}
+			LookAt(target.position, interpolationSeconds, mode);
+		}
+
+		/// <summary>
+		/// 対象の方向へカメラを向ける
+		/// </summary>
+		/// <param name="targetPosition"></param>
+		public void LookAt(Vector3 targetPosition, float interpolationSeconds, InterpolationMode mode)
+		{
+			// Y軸回転の計算なのでY軸座標を無視する
+			Vector3 targetPositionXZ = Vector3.Scale(targetPosition, new Vector3(1.0f, 0.0f, 1.0f));
+			Vector3 cameraRigPositionXZ = Vector3.Scale(transform.position, new Vector3(1.0f, 0.0f, 1.0f));
+			Vector3 toTargetXZ = targetPositionXZ - cameraRigPositionXZ;
+			float toTargetAngleY = Mathf.Atan2(toTargetXZ.x, toTargetXZ.z) * Mathf.Rad2Deg;
+
+			// 角度を360度でループさせる
+			toTargetAngleY = Mathf.Repeat(toTargetAngleY, 360);
+			HorizontalRotation(-(yAngle - toTargetAngleY));
+
+			// XZ座標の距離と高さの差からX軸回転量を求める
+			float toTargetDistanceXZ = toTargetXZ.magnitude;
+			float toTargetHeightDiff = targetPosition.y - transform.position.y;
+			float toTargetAngleX = Mathf.Atan2(toTargetDistanceXZ, toTargetHeightDiff) * Mathf.Rad2Deg - 90.0f;
+			VerticalRotation((xAngle - toTargetAngleX));
+
+			InterpolationStart(interpolationSeconds, mode);
+		}
+		#endregion
 	}
 }

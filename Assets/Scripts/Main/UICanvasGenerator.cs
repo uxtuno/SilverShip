@@ -8,7 +8,8 @@ public class UICanvasGenerator : MonoBehaviour {
 		get {
 			if(_followIconCanvas == null)
 			{
-				_followIconCanvas = FollowIconCanvasGenerate();
+				GameObject go = Resources.Load<GameObject>("Prefabs/UI/FollowIconCanvas");
+				_followIconCanvas = Instantiate(go);
 			}
 			return _followIconCanvas;
 		}
@@ -16,7 +17,6 @@ public class UICanvasGenerator : MonoBehaviour {
 
 	public static GameObject FollowIconCanvasGenerate()
 	{
-		GameObject go = Resources.Load<GameObject>("Prefabs/UI/FollowIconCanvas");
-		return Instantiate(go);
+		return followIconCanvas;
 	}
 }

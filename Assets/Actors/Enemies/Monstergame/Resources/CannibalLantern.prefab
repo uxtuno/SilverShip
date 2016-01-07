@@ -121,7 +121,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &113532
 GameObject:
   m_ObjectHideFlags: 1
@@ -1000,7 +1000,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 184250}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 2.01999998}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 488272}
@@ -1130,9 +1130,9 @@ Rigidbody:
   m_Drag: 0
   m_AngularDrag: .0500000007
   m_UseGravity: 0
-  m_IsKinematic: 1
+  m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!95 &9572514
 Animator:
@@ -1163,10 +1163,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   wait: 3
+  attackParameters:
+    _sAttackRange: 5
+    _lAttackRange: 10
+    _sAttackCost: 1
+    _lAttackCost: 2
   teamRange: 30
-  attackableRanges:
-    shortRange: 5
-    longRange: 10
+  members: []
 --- !u!114 &11439618
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1192,12 +1195,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 3
-  viewAngle: 120
-  viewRange: 10
+  viewAngle: 90
+  viewRange: 5
   muzzle: {fileID: 490490}
-  attackCosts:
-    shortRange: 1
-    longRange: 2
   bulletPrafab: {fileID: 172264, guid: 50cc16a0b3bb7084ea8e729b5a113b35, type: 2}
 --- !u!135 &13535592
 SphereCollider:
@@ -1206,7 +1206,7 @@ SphereCollider:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 187042}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: .5
@@ -1266,6 +1266,10 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: attackStateRange
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: m_IsTrigger
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
