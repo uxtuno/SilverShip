@@ -428,6 +428,7 @@ namespace Uxtuno
 					player.isAirDashPossible = true;
 					player.animator.SetBool(player.isTrampledID, true);
 					player.currentState = new DepressionState(player);
+					Instantiate(player.powerPointPrefab, player.lockOnTarget.transform.position, Quaternion.identity);
 					return;
 				}
 			}
@@ -514,6 +515,7 @@ namespace Uxtuno
 		private static readonly float manualLockOnLimitDistance = 30.0f; // マニュアルロックオン限界距離
 
 		private PlayerAttackFlow attackFlow;
+		private GameObject powerPointPrefab; // 結界ポイントエフェクト
 
 		#endregion
 
@@ -556,7 +558,8 @@ namespace Uxtuno
 			GameObject lockOnIconPrefab = Resources.Load<GameObject>("Prefabs/UI/LockOnIcon");
 			lockOnIcon = Instantiate(lockOnIconPrefab).GetSafeComponent<FollowIcon>();
 			lockOnIcon.Hide();
-			Debug.Log("こんにちは");
+
+			powerPointPrefab = Resources.Load<GameObject>("Prefabs/Effects/PowerPoint");
 		}
 
 		Vector3 cameraFront = new Vector3(0.0f, -0.2f, 1.0f);
