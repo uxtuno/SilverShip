@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using Uxtuno;
+using System.Diagnostics;
 
 namespace Uxtuno
 {

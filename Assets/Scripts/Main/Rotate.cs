@@ -13,11 +13,11 @@ namespace Uxtuno
 		}
 
 		[SerializeField]
-		private Axis rotateAxis; // 回転の軸、定数
+		private Axis rotateAxis = Axis.Forward; // 回転の軸、定数
 		private Vector3 axis; // 回転の軸
 
 		[SerializeField]
-		private float speed; // 回転速度
+		private float speed = 1.0f; // 回転速度
 
 		void Start()
 		{

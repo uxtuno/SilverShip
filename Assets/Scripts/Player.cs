@@ -556,6 +556,7 @@ namespace Uxtuno
 			GameObject lockOnIconPrefab = Resources.Load<GameObject>("Prefabs/UI/LockOnIcon");
 			lockOnIcon = Instantiate(lockOnIconPrefab).GetSafeComponent<FollowIcon>();
 			lockOnIcon.Hide();
+			Debug.Log("こんにちは");
 		}
 
 		Vector3 cameraFront = new Vector3(0.0f, -0.2f, 1.0f);
