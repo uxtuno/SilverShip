@@ -9,9 +9,9 @@ namespace Kuvo
 	public class CannibalLantern : BaseEnemy
 	{
 		[Tooltip("弾のプレハブ"), SerializeField]
-		private GameObject bulletPrafab = null;     // 弾のプレハブ
+		private GameObject bulletPrafab = null;
 		private GameObject bulletCollecter = null;
-		private EnemyState oldState = EnemyState.None;
+		private EnemyState oldState = EnemyState.Idle;
 
 		/// <summary>
 		/// 人食い提灯を目視することができる最も近い距離
@@ -50,10 +50,13 @@ namespace Kuvo
 			{
 				switch (currentState)
 				{
-					case EnemyState.None:
+					case EnemyState.Idle:
 						break;
 
-					case EnemyState.Idle:
+					case EnemyState.Move:
+						break;
+
+					case EnemyState.GoBack:
 						break;
 
 					case EnemyState.Bone:
@@ -85,10 +88,31 @@ namespace Kuvo
 
 				oldState = currentState;
 			}
+		}
 
+		private void FixedUpdate()
+		{
 			if (currentState == EnemyState.Move)
 			{
-				transform.Translate(Vector3.forward * speed * Time.deltaTime);
+				if (isPlayerLocate)
+				{
+					Vector3 lookPosition = player.lockOnPoint.position;
+					lookPosition.y = transform.position.y;
+
+					transform.LookAt(lookPosition);
+					rigidbody.velocity = (player.lockOnPoint.position - lockOnPoint.position).normalized * speed;
+				}
+				else
+				{
+					rigidbody.velocity = transform.forward * speed;
+				}
+			}
+			else if(currentState != EnemyState.GoBack)
+			{
+				if (rigidbody.velocity != Vector3.zero)
+				{
+					rigidbody.velocity = Vector3.zero;
+				}
 			}
 		}
 
@@ -121,8 +145,9 @@ namespace Kuvo
 		public override IEnumerator ShortRangeAttack()
 		{
 			isAttack = true;
-			EnemyCreatorSingleton.instance.StartCostAddForSeconds(attackCosts.shortRange, 0);
+			EnemyCreatorSingleton.instance.StartCostAddForSeconds(baseEnemyAI.attackParameters.sAttackCost, 0);
 			currentState = EnemyState.Move;
+			Vector3 startPosition = transform.position;
 
 			// ここに予備動作
 			float counter = 0;
@@ -130,26 +155,20 @@ namespace Kuvo
 			playerPosition.y = transform.position.y;
 			while (true)
 			{
-				if (!CheckDistance(playerPosition, 1f))
+				if (CheckDistance(playerPosition, 1f))
 				{
-					// プレイヤーの方向へ向きを変える
-					transform.LookAt(playerPosition);
-				}
-				else
-				{
-					if (currentState != EnemyState.None)
+					if (currentState != EnemyState.Idle)
 					{
-						currentState = EnemyState.None;
-						break;
+						currentState = EnemyState.Idle;
 					}
 				}
 
 				counter += Time.deltaTime;
-				if (counter > 1)
+				if (counter > baseEnemyAI.attackParameters.sAttackPreOperatSecond)
 				{
-					if (currentState != EnemyState.None)
+					if (currentState != EnemyState.Idle)
 					{
-						currentState = EnemyState.None;
+						currentState = EnemyState.Idle;
 					}
 					break;
 				}
@@ -162,8 +181,8 @@ namespace Kuvo
 			yield return new WaitForSeconds(1.0f);
 
 			shortRangeAttackAreaObject.SetActive(false);
-			EnemyCreatorSingleton.instance.StartCostAddForSeconds(-attackCosts.shortRange, 2);
-			isAttack = false;
+			EnemyCreatorSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.sAttackCost, CostKeepSecond);
+			StartCoroutine(MovingPosition(startPosition, baseEnemyAI.attackParameters.sAttackPreOperatSecond));
 		}
 
 		/// <summary>
@@ -172,9 +191,10 @@ namespace Kuvo
 		public override IEnumerator LongRangeAttack()
 		{
 			isAttack = true;
-			EnemyCreatorSingleton.instance.StartCostAddForSeconds(attackCosts.longRange, 0);
+			EnemyCreatorSingleton.instance.StartCostAddForSeconds(baseEnemyAI.attackParameters.lAttackCost, 0);
 
-			yield return new WaitForSeconds(1f);
+			// ここに予備動作
+			yield return new WaitForSeconds(baseEnemyAI.attackParameters.lAttackPreOperatSecond);
 
 			// 弾の発射位置・角度を登録
 			Transform t = (muzzle != null) ? muzzle : transform;
@@ -184,6 +204,7 @@ namespace Kuvo
 			if (!bullet)
 			{
 				Destroy(bullet);
+				isAttack = false;
 				yield break;
 			}
 			else
@@ -194,9 +215,46 @@ namespace Kuvo
 				bullet.transform.SetParent(bulletCollecter.transform);
 			}
 
-			currentState = EnemyState.None;
-			EnemyCreatorSingleton.instance.StartCostAddForSeconds(-attackCosts.longRange, 2);
+			EnemyCreatorSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.lAttackCost, CostKeepSecond);
 			isAttack = false;
+		}
+
+		/// <summary>
+		/// 指定方向に進む
+		/// </summary>
+		/// <param name="targetPosition"> 移動する先の座標</param>
+		/// <param name="second"> 移動する時間(秒)</param>
+		private IEnumerator MovingPosition(Vector3 targetPosition, float second)
+		{
+			if(currentState != EnemyState.GoBack)
+			{
+				currentState = EnemyState.GoBack;
+			}
+
+			for (float elapsedTime = 0; second > elapsedTime; elapsedTime += Time.deltaTime)
+			{
+				//print("ξ" + (targetPosition - lockOnPoint.position).normalized * speed);
+				Vector3 lookPosition = targetPosition;
+				lookPosition.y = transform.position.y;
+
+				transform.LookAt(lookPosition);
+				rigidbody.velocity = (targetPosition - lockOnPoint.position).normalized * speed;
+
+				if(CheckDistance(targetPosition, 0.125f))
+				{
+					break;
+				}
+
+				yield return new WaitForFixedUpdate();
+			}
+
+			rigidbody.velocity = Vector3.zero;
+			currentState = EnemyState.Idle;
+
+			if (isAttack)
+			{
+				isAttack = false;
+			}
 		}
 	}
 }
