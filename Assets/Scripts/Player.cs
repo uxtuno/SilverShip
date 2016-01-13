@@ -397,7 +397,7 @@ namespace Uxtuno
 		}
 
 		/// <summary>
-		/// 対象へダッシュ(ロックオン対象など)
+		/// 対象へダッシュ(ロックオン対象)
 		/// </summary>
 		private class DashToTargetState : BaseState
 		{
@@ -428,7 +428,7 @@ namespace Uxtuno
 					player.isAirDashPossible = true;
 					player.animator.SetBool(player.isTrampledID, true);
 					player.currentState = new DepressionState(player);
-					Instantiate(player.powerPointPrefab, player.lockOnTarget.transform.position, Quaternion.identity);
+					player.powerPointCreator.Create(player.lockOnTarget.transform.position);
 					player.LockOnRelease();
 					return;
 				}
@@ -518,6 +518,7 @@ namespace Uxtuno
 
 		private PlayerAttackFlow attackFlow;
 		private GameObject powerPointPrefab; // 結界ポイントエフェクト
+		private PowerPointCreator powerPointCreator; // 結界の点を生成するためのクラス
 
 		#endregion
 
@@ -562,6 +563,9 @@ namespace Uxtuno
 			lockOnIcon.Hide();
 
 			powerPointPrefab = Resources.Load<GameObject>("Prefabs/Effects/PowerPoint");
+
+			// 結界の点を生成するためのスクリプトをアタッチ
+			powerPointCreator = gameObject.AddComponent<PowerPointCreator>();
 		}
 
 		Vector3 cameraFront = new Vector3(0.0f, -0.2f, 1.0f);
@@ -886,5 +890,16 @@ namespace Uxtuno
 			currentJumpState = JumpState.HighJumping;
 			currentState = new DepressionState(this);
 		}
-	}
+
+		/// <summary>
+		/// 踏みつけジャンプ入力処理
+		/// 入力されたら対象へダッシュ状態へ移行
+		/// </summary>
+		private  void JumpTrampledInput()
+		{
+			currentState = new DashToTargetState(this);
+		}
+
+
+    }
 }
