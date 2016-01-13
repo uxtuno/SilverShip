@@ -48,6 +48,7 @@ namespace Uxtuno
 		// アニメーション用ID
 		private int speedID;
 		private int isJumpID;
+		private int isGroundedID;
 		private int isTrampledID;
 
 		/// <summary>
@@ -108,8 +109,8 @@ namespace Uxtuno
 				// 接地しているのでジャンプ状態を解除
 				player.currentJumpState = JumpState.None;
 				player.jumpVY = 0.0f;
-				player.animator.SetBool(player.isJumpID, false);
 				player.animator.SetBool(player.isTrampledID, false);
+				player.animator.SetBool(player.isGroundedID, true);
 				player.isAirDashPossible = false;
 				player.attackFlow.ChangeMode(PlayerAttackFlow.Mode.Ground);
 			}
@@ -383,7 +384,7 @@ namespace Uxtuno
 			public DepressionState(Player player)
 				: base(player)
 			{
-				player.animator.SetBool(player.isJumpID, true);
+				player.animator.SetTrigger(player.isJumpID);
 			}
 
 			public override void Move()
@@ -549,6 +550,7 @@ namespace Uxtuno
 
 			speedID = Animator.StringToHash("Speed");
 			isJumpID = Animator.StringToHash("IsJump");
+			isGroundedID = Animator.StringToHash("IsGrounded");
 			isTrampledID = Animator.StringToHash("IsTrampled");
 
 			attackFlow = new PlayerAttackFlow(animator);
@@ -878,6 +880,8 @@ namespace Uxtuno
 		{
 			jumpVY = jumpPower;
 			currentJumpState = JumpState.Jumping;
+			// 正しくアニメーションを遷移させるために接地フラグをfalseに
+			animator.SetBool(isGroundedID, false);
 			currentState = new DepressionState(this);
 		}
 
@@ -888,6 +892,8 @@ namespace Uxtuno
 		{
 			jumpVY = highJumpPower;
 			currentJumpState = JumpState.HighJumping;
+			// 正しくアニメーションを遷移させるために接地フラグをfalseに
+			animator.SetBool(isGroundedID, false);
 			currentState = new DepressionState(this);
 		}
 
