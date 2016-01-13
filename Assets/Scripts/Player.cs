@@ -429,6 +429,7 @@ namespace Uxtuno
 					player.animator.SetBool(player.isTrampledID, true);
 					player.currentState = new DepressionState(player);
 					Instantiate(player.powerPointPrefab, player.lockOnTarget.transform.position, Quaternion.identity);
+					player.LockOnRelease();
 					return;
 				}
 			}
@@ -463,6 +464,7 @@ namespace Uxtuno
 				}
 				player.FallGravity();
 				// マジックナンバーがなんぼのもんじゃーい
+				// 攻撃中の落下速度調整用数値
 				moveVector.y = player.jumpVY * 0.15f * Time.deltaTime;
 				player.Move(moveVector);
 			}
