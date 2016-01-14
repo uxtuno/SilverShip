@@ -20,7 +20,7 @@ namespace Kuvo
 
 		protected override void Awake()
 		{
-			hp = 30;
+			hp = 5;
 			attack = 1;
 			defence = 2;
 			sight = 1.5f;
@@ -104,7 +104,28 @@ namespace Kuvo
 				}
 				else
 				{
-					rigidbody.velocity = transform.forward * speed;
+					if (transform.position.y < 5f)
+					{
+						rigidbody.velocity = (transform.forward + Vector3.up / 2) * speed;
+					}
+					else
+					{
+						rigidbody.velocity = transform.forward * speed;
+					}
+				}
+			}
+			else if (currentState == EnemyState.Idle)
+			{
+				if (transform.position.y > 1)
+				{
+					rigidbody.velocity = Vector3.down;
+				}
+				else
+				{
+					if (rigidbody.velocity != Vector3.zero)
+					{
+						rigidbody.velocity = Vector3.zero;
+					}
 				}
 			}
 			else if (currentState != EnemyState.GoBack)
