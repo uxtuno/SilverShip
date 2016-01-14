@@ -254,7 +254,7 @@ namespace Uxtuno
 			pivot.localRotation = Quaternion.Lerp(pivot.localRotation, pivotTargetRotation, interpolationPosition);
 		}
 
-		#region -LookAt
+		#region - LookAt
 
 		/// <summary>
 		/// カメラで指定の方向を向く
@@ -316,6 +316,7 @@ namespace Uxtuno
 			float toTargetDistanceXZ = toTargetXZ.magnitude;
 			float toTargetHeightDiff = targetPosition.y - transform.position.y;
 			float toTargetAngleX = Mathf.Atan2(toTargetDistanceXZ, toTargetHeightDiff) * Mathf.Rad2Deg - 90.0f;
+			toTargetAngleX = Mathf.Abs(toTargetAngleX);
 			VerticalRotation((xAngle - toTargetAngleX));
 
 			InterpolationStart(interpolationSeconds, mode);
