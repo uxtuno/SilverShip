@@ -48,6 +48,7 @@ namespace Uxtuno
 		// アニメーション用ID
 		private int speedID;
 		private int isJumpID;
+		private int isGroundedID;
 		private int isTrampledID;
 
 		/// <summary>
@@ -90,81 +91,45 @@ namespace Uxtuno
 		/// </summary>
 		private class NormalState : BaseState
 		{
-			private enum HighJumpInput
-			{
-				None,
-				Jump,
-				Attack,
-				HighJump = Jump | Attack,
-			}
-
-			private HighJumpInput highJumpInput; // ハイジャンプ入力受付用
-			private static readonly float highJumpInputSeconds = 0.1f; // ハイジャンプ入力同時押し猶予時間
-			private float highJumpInputCount; // ハイジャンプ入力受付カウンタ
-
 			public NormalState(Player player)
 				: base(player)
 			{
 				// 接地しているのでジャンプ状態を解除
 				player.currentJumpState = JumpState.None;
 				player.jumpVY = 0.0f;
-				player.animator.SetBool(player.isJumpID, false);
 				player.animator.SetBool(player.isTrampledID, false);
+				player.animator.SetBool(player.isGroundedID, true);
 				player.isAirDashPossible = false;
 				player.attackFlow.ChangeMode(PlayerAttackFlow.Mode.Ground);
 			}
 
 			public override void Move()
 			{
-				if (!player.isGrounded && highJumpInput == HighJumpInput.None)
+				if (!player.isGrounded)
 				{
 					player.animator.SetFloat(player.speedID, 0.0f);
 					player.currentState = new AirState(player);
 					return;
 				}
 
-				player.attackFlow.Move();
-
 				Vector3 moveDirection = player.calclateMoveDirection();
 				float speed = player.maxSpeed;
 
-				if (highJumpInput != HighJumpInput.None)
+				if (playerInput.jump)
 				{
-					highJumpInputCount += Time.deltaTime;
-					if (highJumpInputCount >= highJumpInputSeconds)
-					{
-						// 同時押しではなかったので通常の動作
-						if (highJumpInput == HighJumpInput.Jump)
-						{
-							player.Jumping();
-							player.isAirDashPossible = true;
-							return;
-						}
-						else if (highJumpInput == HighJumpInput.Attack)
-						{
-							player.Attack();
-						}
-
-						highJumpInputCount = 0.0f;
-						highJumpInput = HighJumpInput.None;
-					}
+					player.Jumping();
+					player.isAirDashPossible = true;
+					return;
 				}
-
-				if (player.playerInput.jump)
+				else if (playerInput.attack)
 				{
-					highJumpInput |= HighJumpInput.Jump;
-				}
-
-				if (player.playerInput.attack)
-				{
-					highJumpInput |= HighJumpInput.Attack;
+					player.Attack();
 				}
 
 				// ハイジャンプ入力
-				if (highJumpInput == HighJumpInput.HighJump)
+				if (playerInput.jumpTrampled)
 				{
 					player.HighJumping();
-					highJumpInput = HighJumpInput.None;
 					return;
 				}
 
@@ -383,7 +348,7 @@ namespace Uxtuno
 			public DepressionState(Player player)
 				: base(player)
 			{
-				player.animator.SetBool(player.isJumpID, true);
+				player.animator.SetTrigger(player.isJumpID);
 			}
 
 			public override void Move()
@@ -397,7 +362,7 @@ namespace Uxtuno
 		}
 
 		/// <summary>
-		/// 対象へダッシュ(ロックオン対象など)
+		/// 対象へダッシュ(ロックオン対象)
 		/// </summary>
 		private class DashToTargetState : BaseState
 		{
@@ -428,7 +393,8 @@ namespace Uxtuno
 					player.isAirDashPossible = true;
 					player.animator.SetBool(player.isTrampledID, true);
 					player.currentState = new DepressionState(player);
-					Instantiate(player.powerPointPrefab, player.lockOnTarget.transform.position, Quaternion.identity);
+					player.powerPointCreator.Create(player.lockOnTarget.transform.position);
+					player.LockOnRelease();
 					return;
 				}
 			}
@@ -463,6 +429,7 @@ namespace Uxtuno
 				}
 				player.FallGravity();
 				// マジックナンバーがなんぼのもんじゃーい
+				// 攻撃中の落下速度調整用数値
 				moveVector.y = player.jumpVY * 0.15f * Time.deltaTime;
 				player.Move(moveVector);
 			}
@@ -516,6 +483,7 @@ namespace Uxtuno
 
 		private PlayerAttackFlow attackFlow;
 		private GameObject powerPointPrefab; // 結界ポイントエフェクト
+		private PowerPointCreator powerPointCreator; // 結界の点を生成するためのクラス
 
 		#endregion
 
@@ -546,6 +514,7 @@ namespace Uxtuno
 
 			speedID = Animator.StringToHash("Speed");
 			isJumpID = Animator.StringToHash("IsJump");
+			isGroundedID = Animator.StringToHash("IsGrounded");
 			isTrampledID = Animator.StringToHash("IsTrampled");
 
 			attackFlow = new PlayerAttackFlow(animator);
@@ -560,6 +529,9 @@ namespace Uxtuno
 			lockOnIcon.Hide();
 
 			powerPointPrefab = Resources.Load<GameObject>("Prefabs/Effects/PowerPoint");
+
+			// 結界の点を生成するためのスクリプトをアタッチ
+			powerPointCreator = gameObject.AddComponent<PowerPointCreator>();
 		}
 
 		Vector3 cameraFront = new Vector3(0.0f, -0.2f, 1.0f);
@@ -872,6 +844,8 @@ namespace Uxtuno
 		{
 			jumpVY = jumpPower;
 			currentJumpState = JumpState.Jumping;
+			// 正しくアニメーションを遷移させるために接地フラグをfalseに
+			animator.SetBool(isGroundedID, false);
 			currentState = new DepressionState(this);
 		}
 
@@ -882,7 +856,20 @@ namespace Uxtuno
 		{
 			jumpVY = highJumpPower;
 			currentJumpState = JumpState.HighJumping;
+			// 正しくアニメーションを遷移させるために接地フラグをfalseに
+			animator.SetBool(isGroundedID, false);
 			currentState = new DepressionState(this);
 		}
+
+		/// <summary>
+		/// 踏みつけジャンプ入力処理
+		/// 入力されたら対象へダッシュ状態へ移行
+		/// </summary>
+		private void JumpTrampledInput()
+		{
+			currentState = new DashToTargetState(this);
+		}
+
+
 	}
 }
