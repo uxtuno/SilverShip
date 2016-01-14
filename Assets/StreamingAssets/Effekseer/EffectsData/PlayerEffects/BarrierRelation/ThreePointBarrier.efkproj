@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<EffekseerProject>
+  <Root>
+    <Name>Root</Name>
+    <Children>
+      <Node>
+        <RotationValues>
+          <Fixed>
+            <Rotation>
+              <X>90</X>
+            </Rotation>
+          </Fixed>
+        </RotationValues>
+        <RendererCommonValues>
+          <ZTest>False</ZTest>
+        </RendererCommonValues>
+        <DrawingValues>
+          <Type>4</Type>
+          <Ring>
+            <VertexCount>32</VertexCount>
+            <ViewingAngle>1</ViewingAngle>
+            <Inner_Fixed>
+              <Location>
+                <X>2</X>
+                <Y>-2</Y>
+              </Location>
+            </Inner_Fixed>
+            <CenterRatio_Fixed>1</CenterRatio_Fixed>
+          </Ring>
+        </DrawingValues>
+        <Name>Ring</Name>
+        <Children />
+      </Node>
+    </Children>
+  </Root>
+  <Behavior>
+    <Distance>0</Distance>
+  </Behavior>
+  <ToolVersion>1.01</ToolVersion>
+  <Version>3</Version>
+  <StartFrame>0</StartFrame>
+  <EndFrame>120</EndFrame>
+  <IsLoop>True</IsLoop>
+</EffekseerProject>
