@@ -10,6 +10,7 @@ using System.Collections.Generic;
 /// UpdateでもFixedUpdateでも利用できるように、このような仕様になっている
 /// FixedUpdateが呼ばれるまえにUpdateが複数回呼ばれた場合
 /// 通常、FixedUpdate内では入力した瞬間などを検知できないからだ
+/// todo : ただしこの仕様だといろいろ問題があるので見直しが必要
 /// </summary>
 public class PlayerInput
 {
@@ -74,12 +75,12 @@ public class PlayerInput
 		get
 		{
 			bool ret = _attack;
-			_attack = false;
 			// 同時入力判定中はfalseを返す
 			if (jumpTrampledInputCount <= jumpTrampledInputSeconds)
 			{
 				return false;
 			}
+			_attack = false;
 			return ret;
 		}
 		private set { _attack = value; }
@@ -94,12 +95,12 @@ public class PlayerInput
 		get
 		{
 			bool ret = _jump;
-			_jump = false;
 			// 同時入力判定中はfalseを返す
 			if (jumpTrampledInputCount <= jumpTrampledInputSeconds)
 			{
 				return false;
 			}
+			_jump = false;
 			return ret;
 		}
 		private set { _jump = value; }
@@ -294,7 +295,6 @@ public class PlayerInput
 		if (jumpTrampledInputCount >= jumpTrampledInputSeconds)
 		{
 			jumpTrampled = false;
-
 		}
 
 		lockOn = Input.GetButtonDown(InputName.LockOn) ? true : lockOn;

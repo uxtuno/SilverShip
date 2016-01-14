@@ -91,18 +91,6 @@ namespace Uxtuno
 		/// </summary>
 		private class NormalState : BaseState
 		{
-			private enum HighJumpInput
-			{
-				None,
-				Jump,
-				Attack,
-				HighJump = Jump | Attack,
-			}
-
-			private HighJumpInput highJumpInput; // ハイジャンプ入力受付用
-			private static readonly float highJumpInputSeconds = 0.1f; // ハイジャンプ入力同時押し猶予時間
-			private float highJumpInputCount; // ハイジャンプ入力受付カウンタ
-
 			public NormalState(Player player)
 				: base(player)
 			{
@@ -117,55 +105,31 @@ namespace Uxtuno
 
 			public override void Move()
 			{
-				if (!player.isGrounded && highJumpInput == HighJumpInput.None)
+				if (!player.isGrounded)
 				{
 					player.animator.SetFloat(player.speedID, 0.0f);
 					player.currentState = new AirState(player);
 					return;
 				}
 
-				player.attackFlow.Move();
-
 				Vector3 moveDirection = player.calclateMoveDirection();
 				float speed = player.maxSpeed;
 
-				if (highJumpInput != HighJumpInput.None)
+				if (playerInput.jump)
 				{
-					highJumpInputCount += Time.deltaTime;
-					if (highJumpInputCount >= highJumpInputSeconds)
-					{
-						// 同時押しではなかったので通常の動作
-						if (highJumpInput == HighJumpInput.Jump)
-						{
-							player.Jumping();
-							player.isAirDashPossible = true;
-							return;
-						}
-						else if (highJumpInput == HighJumpInput.Attack)
-						{
-							player.Attack();
-						}
-
-						highJumpInputCount = 0.0f;
-						highJumpInput = HighJumpInput.None;
-					}
+					player.Jumping();
+					player.isAirDashPossible = true;
+					return;
 				}
-
-				if (player.playerInput.jump)
+				else if (playerInput.attack)
 				{
-					highJumpInput |= HighJumpInput.Jump;
-				}
-
-				if (player.playerInput.attack)
-				{
-					highJumpInput |= HighJumpInput.Attack;
+					player.Attack();
 				}
 
 				// ハイジャンプ入力
-				if (highJumpInput == HighJumpInput.HighJump)
+				if (playerInput.jumpTrampled)
 				{
 					player.HighJumping();
-					highJumpInput = HighJumpInput.None;
 					return;
 				}
 
@@ -901,11 +865,11 @@ namespace Uxtuno
 		/// 踏みつけジャンプ入力処理
 		/// 入力されたら対象へダッシュ状態へ移行
 		/// </summary>
-		private  void JumpTrampledInput()
+		private void JumpTrampledInput()
 		{
 			currentState = new DashToTargetState(this);
 		}
 
 
-    }
+	}
 }
