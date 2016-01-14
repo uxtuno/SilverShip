@@ -1,0 +1,636 @@
+fileFormatVersion: 2
+guid: fa96c54fc6c5f1c419594a558b1d7774
+timeCreated: 1452154003
+licenseType: Free
+ModelImporter:
+  serializedVersion: 18
+  fileIDToRecycleName:
+    100000: //RootNode
+    100002: Lower
+    100004: Lower_Ctrl
+    100006: Lower_Ctrl 1
+    100008: pasted__pSphere1
+    100010: pSphere4
+    100012: Upper
+    100014: Upper_Ctrl
+    100016: Upper_Ctrl1
+    400000: //RootNode
+    400002: Lower
+    400004: Lower_Ctrl
+    400006: Lower_Ctrl 1
+    400008: pasted__pSphere1
+    400010: pSphere4
+    400012: Upper
+    400014: Upper_Ctrl
+    400016: Upper_Ctrl1
+    2300000: pasted__pSphere1
+    2300002: pSphere4
+    3300000: pasted__pSphere1
+    3300002: pSphere4
+    4300000: pSphere4
+    4300002: pasted__pSphere1
+    7400000: Wait
+    7400002: SAttack
+    7400004: Short1
+    7400006: Short2
+    7400008: LAttack
+    7400010: Long1
+    7400012: Long2
+    7400014: RightLook
+    7400016: LeftLook
+    7400018: Damage
+    7400020: Die
+    7400022: BombDie
+    9500000: //RootNode
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: .5
+    animationPositionError: .5
+    animationScaleError: .5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Wait
+      takeName: Take 001
+      firstFrame: 1
+      lastFrame: 60
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Upper_Ctrl1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower/pasted__pSphere1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/pSphere4
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    - serializedVersion: 16
+      name: SAttack
+      takeName: Take 001
+      firstFrame: 70
+      lastFrame: 130
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Upper_Ctrl1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower/pasted__pSphere1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/pSphere4
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    - serializedVersion: 16
+      name: Short1
+      takeName: Take 001
+      firstFrame: 140
+      lastFrame: 160
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Upper_Ctrl1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower/pasted__pSphere1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/pSphere4
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    - serializedVersion: 16
+      name: Short2
+      takeName: Take 001
+      firstFrame: 170
+      lastFrame: 200
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Upper_Ctrl1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower/pasted__pSphere1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/pSphere4
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    - serializedVersion: 16
+      name: LAttack
+      takeName: Take 001
+      firstFrame: 290
+      lastFrame: 350
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Upper_Ctrl1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower/pasted__pSphere1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/pSphere4
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    - serializedVersion: 16
+      name: Long1
+      takeName: Take 001
+      firstFrame: 360
+      lastFrame: 390
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Upper_Ctrl1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower/pasted__pSphere1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/pSphere4
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    - serializedVersion: 16
+      name: Long2
+      takeName: Take 001
+      firstFrame: 400
+      lastFrame: 430
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Upper_Ctrl1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower/pasted__pSphere1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/pSphere4
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    - serializedVersion: 16
+      name: RightLook
+      takeName: Take 001
+      firstFrame: 440
+      lastFrame: 500
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Upper_Ctrl1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower/pasted__pSphere1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/pSphere4
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    - serializedVersion: 16
+      name: LeftLook
+      takeName: Take 001
+      firstFrame: 510
+      lastFrame: 570
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Upper_Ctrl1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower/pasted__pSphere1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/pSphere4
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    - serializedVersion: 16
+      name: Damage
+      takeName: Take 001
+      firstFrame: 580
+      lastFrame: 640
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Upper_Ctrl1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower/pasted__pSphere1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/pSphere4
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    - serializedVersion: 16
+      name: Die
+      takeName: Take 001
+      firstFrame: 650
+      lastFrame: 710
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Upper_Ctrl1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower/pasted__pSphere1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/pSphere4
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    - serializedVersion: 16
+      name: BombDie
+      takeName: Take 001
+      firstFrame: 720
+      lastFrame: 790
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Upper_Ctrl1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/Lower_Ctrl/Lower_Ctrl 1/Lower/pasted__pSphere1
+        weight: 1
+      - path: Upper_Ctrl1/Upper_Ctrl/Upper/pSphere4
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 10
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    splitTangentsAcrossUV: 1
+    normalImportMode: 0
+    tangentImportMode: 1
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: .5
+    foreArmTwist: .5
+    upperLegTwist: .5
+    legTwist: .5
+    armStretch: .0500000007
+    legStretch: .0500000007
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

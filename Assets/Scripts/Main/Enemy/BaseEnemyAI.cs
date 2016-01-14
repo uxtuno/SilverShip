@@ -216,7 +216,7 @@ namespace Kuvo
 			startTime = Time.time;
 		}
 
-		protected virtual void Update()
+		protected virtual void FixedUpdate()
 		{
 			// 一定時間待機する
 			if (Time.time - startTime < wait)
