@@ -41,7 +41,6 @@ namespace Uxtuno
 			this.target = target;
 			//controller.SetPovot((target.position + player.transform.position) / 2.0f);
 			Quaternion q = Quaternion.LookRotation(target.position - cameraTransform.position);
-			controller.SetRotation(q, 0.5f, CameraController.InterpolationMode.Curve);
 			controller.transform.SetParent(null);
 		}
 
@@ -107,7 +106,6 @@ namespace Uxtuno
 			{
 				return;
 			}
-			controller.SetPovot((target.position + player.transform.position) / 2.0f);
 
 			Vector3 playerPosition = new Vector3(player.transform.position.x, 0.0f, player.transform.position.z);
 			Vector3 cameraPosition = new Vector3(cameraTransform.position.x, 0.0f, cameraTransform.position.z);

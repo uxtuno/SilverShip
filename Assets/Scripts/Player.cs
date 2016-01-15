@@ -115,6 +115,8 @@ namespace Uxtuno
 				Vector3 moveDirection = player.calclateMoveDirection();
 				float speed = player.maxSpeed;
 
+				player.attackFlow.Move();
+
 				if (playerInput.jump)
 				{
 					player.Jumping();
@@ -192,49 +194,23 @@ namespace Uxtuno
 
 				player.attackFlow.Move();
 
-				if (trampledJumpInput != TrampledJumpInput.None)
-				{
-					trampledJumpInputCount += Time.deltaTime;
-					if (trampledJumpInputCount >= trampledJumpInputSeconds)
-					{
-						// 同時押しではなかったので通常の動作
-						if (trampledJumpInput == TrampledJumpInput.Jump && player.currentJumpState == JumpState.Jumping)
-						{
-							// 入力受付時間内なら空中ダッシュ
-							if (airDashPossibleCount > airDashPossibleSeconds && airDashPossibleCount < airDashDisableSeconds)
-							{
-								if (player.isAirDashPossible)
-								{
-									player.currentState = new AirDashState(player);
-									return;
-								}
-							}
-						}
-						else if (trampledJumpInput == TrampledJumpInput.Attack)
-						{
-							player.Attack();
-						}
-
-						trampledJumpInputCount = 0.0f;
-						trampledJumpInput = TrampledJumpInput.None;
-					}
-				}
-
-				// 同時押しのそれぞれのボタンの入力情報を追加していく
 				if (playerInput.jump)
 				{
-					trampledJumpInput |= TrampledJumpInput.Jump;
+					if (player.isAirDashPossible)
+					{
+						Debug.Log(player.currentState);
+						player.currentState = new AirDashState(player);
+						return;
+					}
 				}
-
-				if (playerInput.attack)
+				else if (playerInput.attack)
 				{
-					trampledJumpInput |= TrampledJumpInput.Attack;
+					player.Attack();
 				}
 
 				// 踏みつけジャンプ入力成功
-				if (trampledJumpInput == TrampledJumpInput.TrampledJump)
+				if (playerInput.jumpTrampled)
 				{
-					trampledJumpInput = TrampledJumpInput.None;
 					if (player.lockOnTarget != null)
 					{
 						// todo : 空中ダッシュ入力受付時間をそのまま踏みつけジャンプの受付時間に利用している
@@ -545,7 +521,7 @@ namespace Uxtuno
 
 			if (playerInput.cameraToFront)
 			{
-				cameraController.SetRotation(Quaternion.LookRotation(meshRoot.rotation * cameraFront), 0.6f, CameraController.InterpolationMode.Curve);
+				cameraController.LookDirection(meshRoot.TransformDirection(cameraFront), 1.0f, CameraController.InterpolationMode.Curve);
 			}
 			checkGrounded();
 

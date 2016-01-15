@@ -299,6 +299,9 @@ public class PlayerInput
 		if(jumpTrampledInputFrame == 1)
 		{
 			jumpTrampled = true;
+			// 同時押しが成立した瞬間それぞれのボタン入力は無効
+			attack = false;
+			jump = false;
 		}
 		lockOn = Input.GetButtonDown(InputName.LockOn) ? true : lockOn;
 	}
@@ -315,7 +318,7 @@ public class PlayerInput
 		barrier = false;
 
 		// attack と jump については同時押しに使用するボタンなので判定に使用後のタイミングでリセット
-		if (jumpTrampledInputCount >= jumpTrampledInputSeconds+1.0f)
+		if (jumpTrampledInputCount >= jumpTrampledInputSeconds)
 		{
 			jump = false;
 			attack = false;

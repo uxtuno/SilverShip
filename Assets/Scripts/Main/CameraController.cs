@@ -30,6 +30,16 @@ namespace Uxtuno
 		[SerializeField, Tooltip("追従対象との距離")]
 		private float distance = 2.0f;
 
+		private float _defaultDistance;
+		/// <summary>
+		/// 注視点とカメラの距離のデフォルト値
+		/// </summary>
+		public float defaultDistance
+		{
+			get{ return _defaultDistance; }
+			private set{ _defaultDistance = value; }
+		}
+
 		[SerializeField, Tooltip("追従速度")]
 		private float movenSmoothing = 0.2f;
 		[SerializeField, Tooltip("X軸回転の下方向最大角")]
@@ -68,7 +78,6 @@ namespace Uxtuno
 		/// </summary>
 		public bool isInterpolation { get; set; }
 
-
 		void Start()
 		{
 			pivot = cameraTransform.transform.parent;
@@ -76,19 +85,7 @@ namespace Uxtuno
 			pivotEulers = pivot.localEulerAngles;
 			transformTargetRotation = transform.localRotation;
 			cameraTransform.localPosition = -Vector3.forward * distance;
-		}
-
-		void LateUpdate()
-		{
-			//if (isInterpolation)
-			//{
-			//	Interpolation();
-			//}
-			//else
-			//{
-			//	pivot.rotation = newRotation;
-			//}
-
+			defaultDistance = distance;
 		}
 
 		/// <summary>
@@ -132,39 +129,6 @@ namespace Uxtuno
 		}
 
 		/// <summary>
-		/// カメラが向く方向を指定
-		/// このメソッドによる補間が完了するまではCameraMove()は無効
-		/// </summary>
-		/// <param name="rotation">クオータニオン</param>
-		/// <param name="interpolationSeconds">補間時間</param>
-		/// <param name="mode">補間モード</param>
-		public void SetRotation(Quaternion rotation, float interpolationSeconds, InterpolationMode mode)
-		{
-			//Vector3 angles = rotation.eulerAngles;
-			//if (angles.x > 180.0f)
-			//{
-			//	angles.x -= 360.0f;
-			//}
-
-			//// 上方制限
-			//if (angles.x < -facingUpLimit)
-			//{
-			//	angles.x = -facingUpLimit;
-			//}
-
-			//if (angles.x > facingDownLimit)
-			//{
-			//	angles.x = facingDownLimit;
-			//}
-
-			//angles.z = 0.0f;
-
-			//newRotation.eulerAngles = angles;
-			//isForceInterpolation = true;
-			//InterpolationStart(interpolationSeconds, mode);
-		}
-
-		/// <summary>
 		/// 補間開始時の初期化
 		/// </summary>
 		/// <param name="interpolationSeconds">補間時間(秒)</param>
@@ -178,34 +142,6 @@ namespace Uxtuno
 			this.interpolationSeconds = interpolationSeconds;
 			interpolationCount = 0.0f;
 			interpolationMode = mode;
-		}
-
-		/// <summary>
-		/// 回転の中心点を変更
-		/// </summary>
-		public void SetPovot(Vector3 position)
-		{
-			//// カメラに位置を反映させないように一度親子関係を解除
-			//Vector3 vec = cameraTransform.position - position;
-			//Vector3 cameraPosition = cameraTransform.position;
-			//cameraTransform.SetParent(null, false);
-			//pivot.position = position;
-			//float distance = vec.magnitude;
-			//         pivot.LookAt(position - cameraPosition);
-			//newRotation = pivot.rotation;
-			//cameraTransform.SetParent(pivot, false);
-			//cameraTransform.position = pivot.position + vec;
-			//cameraTransform.SetParent(null);
-			//pivot.position = position;
-			//cameraTransform.SetParent(pivot);
-		}
-
-		/// <summary>
-		/// カメラの中心点との位置関係を初期状態に戻す
-		/// </summary>
-		public void DefaultLocalCameraPosition()
-		{
-			//cameraTransform.localPosition = defaultLocalCameraPosition;
 		}
 
 		/// <summary>
