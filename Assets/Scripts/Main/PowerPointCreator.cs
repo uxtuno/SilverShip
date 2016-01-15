@@ -5,7 +5,7 @@ public class PowerPointCreator : MonoBehaviour
 {
 	private GameObject powerPointPrefab;
 	private Transform powerPointParent; // 結界の点をまとめる親
-	private LinkedList<Transform> powerPointList;
+	private LinkedList<Transform> powerPointList = new LinkedList<Transform>();
 	private static readonly int powerPointMax = 5; // 結界点の同時設置可能数
 
 	void Start()
@@ -27,7 +27,7 @@ public class PowerPointCreator : MonoBehaviour
 		{
 			LinkedListNode<Transform> first = powerPointList.First;
 			// 最初の点をシーン上から削除
-			if (first.Value.gameObject != null)
+			if (first.Value != null)
 			{
 				Destroy(first.Value.gameObject);
 			}

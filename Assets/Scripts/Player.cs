@@ -680,6 +680,11 @@ namespace Uxtuno
 			Transform tempLockOnTarget = null; // ロックオン対象候補を入れる
 			foreach (Transform enemy in containedObjects)
 			{
+				if (enemy == null)
+				{
+					continue;
+				}
+
 				// 距離の二乗のまま計算
 				float distance2 = (transform.position - enemy.position).sqrMagnitude;
 				if (minDistance2 > distance2)

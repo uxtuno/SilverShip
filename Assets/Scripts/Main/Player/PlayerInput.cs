@@ -76,7 +76,7 @@ public class PlayerInput
 		{
 			bool ret = _attack;
 			// 同時入力判定中はfalseを返す
-			if (jumpTrampledInputCount <= jumpTrampledInputSeconds)
+			if (jumpTrampledInputCount < jumpTrampledInputSeconds)
 			{
 				return false;
 			}
@@ -96,7 +96,7 @@ public class PlayerInput
 		{
 			bool ret = _jump;
 			// 同時入力判定中はfalseを返す
-			if (jumpTrampledInputCount <= jumpTrampledInputSeconds)
+			if (jumpTrampledInputCount < jumpTrampledInputSeconds)
 			{
 				return false;
 			}
@@ -213,7 +213,8 @@ public class PlayerInput
 		All,
 	}
 
-	private static readonly float jumpTrampledInputSeconds = 0.1f; //　同時押し判定用 猶予時間
+	private static readonly float jumpTrampledInputSeconds = 0.15f; //　同時押し判定用 猶予時間
+	private int jumpTrampledInputFrame; //　同時押し継続フレーム数
 	private float jumpTrampledInputCount; //　同時押し判定用 猶予カウンタ
 	private JumpTrampledInput jumpTrampledInput = JumpTrampledInput.None;
 
@@ -256,12 +257,12 @@ public class PlayerInput
 			cameraVertical = rotationInput.y;
 		}
 
-		cameraToFront = Input.GetButtonDown(InputName.CameraToFront) ? true : cameraToFront;
-		itemGet = Input.GetButtonDown(InputName.ItemGet) ? true : itemGet;
-		barrier = Input.GetButtonDown(InputName.Barrier) ? true : barrier;
+		cameraToFront = Input.GetButtonDown(InputName.CameraToFront) ? true : _cameraToFront;
+		itemGet = Input.GetButtonDown(InputName.ItemGet) ? true : _itemGet;
+		barrier = Input.GetButtonDown(InputName.Barrier) ? true : _barrier;
 
-		jump = Input.GetButtonDown(InputName.Jump) ? true : jump;
-		attack = Input.GetButtonDown(InputName.Attack) ? true : attack;
+		jump = Input.GetButtonDown(InputName.Jump) ? true : _jump;
+		attack = Input.GetButtonDown(InputName.Attack) ? true : _attack;
 		if (Input.GetButton(InputName.Jump))
 		{
 			jumpTrampledInput |= JumpTrampledInput.Jump;
@@ -286,24 +287,20 @@ public class PlayerInput
 		if (jumpTrampledInput == JumpTrampledInput.All &&
 			jumpTrampledInputCount < jumpTrampledInputSeconds)
 		{
-			jumpTrampled = true;
-			// 同時押し判定が複数回発生しないようにカウンタを猶予時間外に設定
-			jumpTrampledInputCount = jumpTrampledInputSeconds;
+			// 同時押し判定が複数回発生しないように入力フレームをカウント
+			++jumpTrampledInputFrame;
         }
-
-		// 同時入力猶予時間を超えた
-		if (jumpTrampledInputCount >= jumpTrampledInputSeconds)
+		else
 		{
-			jumpTrampled = false;
+			jumpTrampledInputFrame = 0;
 		}
 
+		// 同時押しの瞬間にtrue
+		if(jumpTrampledInputFrame == 1)
+		{
+			jumpTrampled = true;
+		}
 		lockOn = Input.GetButtonDown(InputName.LockOn) ? true : lockOn;
-
-		if (updateCount > 2)
-		{
-			//Debug.Log("入力情報が正しく検知できません。入力更新メソッドを適切に呼び出してください");
-		}
-		++updateCount;
 	}
 
 	/// <summary>
@@ -318,13 +315,15 @@ public class PlayerInput
 		barrier = false;
 
 		// attack と jump については同時押しに使用するボタンなので判定に使用後のタイミングでリセット
-		if (jumpTrampledInputCount >= jumpTrampledInputSeconds)
+		if (jumpTrampledInputCount >= jumpTrampledInputSeconds+1.0f)
 		{
 			jump = false;
 			attack = false;
+			jumpTrampledInputCount = 0.0f;
+			jumpTrampledInput = JumpTrampledInput.None;
 		}
 
 		lockOn = false;
-		updateCount = 0;
+		jumpTrampled = false;
 	}
 }
