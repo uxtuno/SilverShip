@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 
 //[RequireComponent(typeof(CharacterController))]
@@ -530,18 +531,28 @@ namespace Uxtuno
 			} while (currentState != oldState);
 			// 移動後の「カメラ→プレイヤー」ベクトル
 			LockOn();
+
+			StartCoroutine(CameraControl());
 		}
 
-		void LateUpdate()
+		IEnumerator CameraControl()
 		{
 			if (lockOnState == LockOnState.Manual)
 			{
 				playerCamera.LockOnCamera();
 			}
-			else
+
+			yield return new WaitForFixedUpdate();
+
+			if (lockOnState != LockOnState.Manual)
 			{
 				playerCamera.CameraInput();
 			}
+		}
+
+		void LateUpdate()
+		{
+			
 		}
 
 		/// <summary>
@@ -754,9 +765,9 @@ namespace Uxtuno
 			// directionは進行方向を表すので上下入力はzに格納
 			input.x = PlayerInput.horizontal;
 			input.z = PlayerInput.vertical;
-			input.Normalize();
 			Vector3 direction = cameraController.cameraTransform.rotation * input;
 			direction.y = 0.0f;
+			direction.Normalize();
 			// カメラの方向を加味して進行方向を計算
 			return direction;
 		}

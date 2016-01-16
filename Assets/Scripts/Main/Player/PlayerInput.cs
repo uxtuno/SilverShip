@@ -211,6 +211,7 @@ namespace Uxtuno
 			//buttonState[ButtonName.Jump] = false;
 			buttonState[ButtonName.JumpTrampled] = false;
 			buttonState[ButtonName.LockOn] = false;
+			buttonState[ButtonName.CameraToFront] = false;
 		}
 
 		/// <summary>

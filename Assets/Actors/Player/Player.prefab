@@ -5495,7 +5495,7 @@ MonoBehaviour:
   jumpHeight: 5
   highJumpHeight: 10
   horizontalRotationSpeed: 120
-  verticalRotationSpeed: 40
+  verticalRotationSpeed: 80
   _attack: 5
 --- !u!114 &11413996
 MonoBehaviour:

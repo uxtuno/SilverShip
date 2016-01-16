@@ -36,8 +36,8 @@ namespace Uxtuno
 		/// </summary>
 		public float defaultDistance
 		{
-			get{ return _defaultDistance; }
-			private set{ _defaultDistance = value; }
+			get { return _defaultDistance; }
+			private set { _defaultDistance = value; }
 		}
 
 		[SerializeField, Tooltip("追従速度")]
@@ -188,6 +188,11 @@ namespace Uxtuno
 			float interpolationPosition = Interpolation();
 			transform.localRotation = Quaternion.Lerp(transform.localRotation, transformTargetRotation, interpolationPosition);
 			pivot.localRotation = Quaternion.Lerp(pivot.localRotation, pivotTargetRotation, interpolationPosition);
+		}
+
+		void LateUpdate()
+		{ 
+			
 		}
 
 		#region - LookAt
