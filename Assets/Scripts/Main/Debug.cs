@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
+using UnityEditor;
 using System.Diagnostics;
 
 namespace Uxtuno
 {
-	public class Debug
+	public class Debug : EditorWindow
 	{
 		[Conditional("Uxtuno")]
 		public static void Log(object message)

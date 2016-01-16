@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using System.Linq;
-using System.Reflection;
 using System.Collections.Generic;
-using Kuvo;
 
 //[RequireComponent(typeof(CharacterController))]
 
