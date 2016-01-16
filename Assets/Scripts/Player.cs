@@ -35,7 +35,6 @@ namespace Uxtuno
 		//private static readonly float near = 0.5f; // カメラに映る最小距離
 		//private static readonly float maxCameraRotateY = 5.0f; // プレイヤーが移動したときの最大カメラ回転量
 
-		private PlayerInput playerInput = PlayerInput.instance;
 		private CharacterController characterController; // キャラクターコントローラー
 		private CameraController cameraController; // カメラコントローラー
 												   //private PlayerTrampled playerTrampled; // 踏みつけジャンプ用クラス
@@ -66,7 +65,6 @@ namespace Uxtuno
 
 		private abstract class BaseState
 		{
-			protected PlayerInput playerInput = PlayerInput.instance;
 			protected Player player;
 			public BaseState(Player player)
 			{
@@ -115,19 +113,19 @@ namespace Uxtuno
 
 				player.attackFlow.Move();
 
-				if (playerInput.jump)
+				if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Jump))
 				{
 					player.Jumping();
 					player.isAirDashPossible = true;
 					return;
 				}
-				else if (playerInput.attack)
+				else if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Attack))
 				{
 					player.Attack();
 				}
 
 				// ハイジャンプ入力
-				if (playerInput.jumpTrampled)
+				if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.JumpTrampled))
 				{
 					player.HighJumping();
 					return;
@@ -192,22 +190,21 @@ namespace Uxtuno
 
 				player.attackFlow.Move();
 
-				if (playerInput.jump)
+				if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Jump))
 				{
 					if (player.isAirDashPossible)
 					{
-						Debug.Log(player.currentState);
 						player.currentState = new AirDashState(player);
 						return;
 					}
 				}
-				else if (playerInput.attack)
+				else if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Attack))
 				{
 					player.Attack();
 				}
 
 				// 踏みつけジャンプ入力成功
-				if (playerInput.jumpTrampled)
+				if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.JumpTrampled))
 				{
 					if (player.lockOnTarget != null)
 					{
@@ -517,7 +514,7 @@ namespace Uxtuno
 				cameraController.LookAt(lockOnTarget.transform, 1.0f, CameraController.InterpolationMode.Curve);
 			}
 
-			if (playerInput.cameraToFront)
+			if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.CameraToFront))
 			{
 				cameraController.LookDirection(meshRoot.TransformDirection(cameraFront), 1.0f, CameraController.InterpolationMode.Curve);
 			}
@@ -564,7 +561,7 @@ namespace Uxtuno
 		private void LockOn()
 		{
 			// マニュアルロックオン
-			if (playerInput.lockOn)
+			if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.LockOn))
 			{
 				if (lockOnState != LockOnState.Manual)
 				{
@@ -755,8 +752,8 @@ namespace Uxtuno
 		{
 			Vector3 input = Vector3.zero;
 			// directionは進行方向を表すので上下入力はzに格納
-			input.x = playerInput.horizontal;
-			input.z = playerInput.vertical;
+			input.x = PlayerInput.horizontal;
+			input.z = PlayerInput.vertical;
 			input.Normalize();
 			Vector3 direction = cameraController.cameraTransform.rotation * input;
 			direction.y = 0.0f;
@@ -788,8 +785,8 @@ namespace Uxtuno
 			moveVector = transform.position - oldPosition;
 
 			// カメラ入力がされて無い時のみカメラの回転を行う
-			if (playerInput.cameraHorizontal == 0.0f &&
-				playerInput.cameraVertical == 0.0f &&
+			if (PlayerInput.cameraHorizontal == 0.0f &&
+				PlayerInput.cameraVertical == 0.0f &&
 				lockOnState != LockOnState.Manual
 				)
 			{
