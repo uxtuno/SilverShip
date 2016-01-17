@@ -168,9 +168,7 @@ namespace Uxtuno
 
 		void Update()
 		{
-			// 追尾対象からの距離を反映
-			cameraTransform.localPosition = -Vector3.forward * distance;
-
+			
 		}
 
 		void FixedUpdate()
@@ -188,6 +186,18 @@ namespace Uxtuno
 			float interpolationPosition = Interpolation();
 			transform.localRotation = Quaternion.Lerp(transform.localRotation, transformTargetRotation, interpolationPosition);
 			pivot.localRotation = Quaternion.Lerp(pivot.localRotation, pivotTargetRotation, interpolationPosition);
+
+			float finalDistance = distance; // 最終的な距離
+			RaycastHit hit;
+			Ray ray = new Ray(pivot.position, cameraTransform.position - pivot.position);
+			if (Physics.Raycast(ray, out hit, distance, LayerName.Obstacle.maskValue))
+			{
+				finalDistance = hit.distance;
+			}
+
+			// 追尾対象からの距離を反映
+			cameraTransform.localPosition = -Vector3.forward * finalDistance;
+
 		}
 
 		void LateUpdate()
