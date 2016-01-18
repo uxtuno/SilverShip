@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 using System.Linq;
-using System.Reflection;
+using System.Collections;
 using System.Collections.Generic;
-using Kuvo;
 
 //[RequireComponent(typeof(CharacterController))]
 
@@ -37,7 +36,6 @@ namespace Uxtuno
 		//private static readonly float near = 0.5f; // カメラに映る最小距離
 		//private static readonly float maxCameraRotateY = 5.0f; // プレイヤーが移動したときの最大カメラ回転量
 
-		private PlayerInput playerInput = PlayerInput.instance;
 		private CharacterController characterController; // キャラクターコントローラー
 		private CameraController cameraController; // カメラコントローラー
 												   //private PlayerTrampled playerTrampled; // 踏みつけジャンプ用クラス
@@ -68,7 +66,6 @@ namespace Uxtuno
 
 		private abstract class BaseState
 		{
-			protected PlayerInput playerInput = PlayerInput.instance;
 			protected Player player;
 			public BaseState(Player player)
 			{
@@ -117,19 +114,19 @@ namespace Uxtuno
 
 				player.attackFlow.Move();
 
-				if (playerInput.jump)
+				if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Jump))
 				{
 					player.Jumping();
 					player.isAirDashPossible = true;
 					return;
 				}
-				else if (playerInput.attack)
+				else if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Attack))
 				{
 					player.Attack();
 				}
 
 				// ハイジャンプ入力
-				if (playerInput.jumpTrampled)
+				if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.JumpTrampled))
 				{
 					player.HighJumping();
 					return;
@@ -194,22 +191,21 @@ namespace Uxtuno
 
 				player.attackFlow.Move();
 
-				if (playerInput.jump)
+				if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Jump))
 				{
 					if (player.isAirDashPossible)
 					{
-						Debug.Log(player.currentState);
 						player.currentState = new AirDashState(player);
 						return;
 					}
 				}
-				else if (playerInput.attack)
+				else if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Attack))
 				{
 					player.Attack();
 				}
 
 				// 踏みつけジャンプ入力成功
-				if (playerInput.jumpTrampled)
+				if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.JumpTrampled))
 				{
 					if (player.lockOnTarget != null)
 					{
@@ -460,6 +456,8 @@ namespace Uxtuno
 		private PlayerAttackFlow attackFlow;
 		private GameObject powerPointPrefab; // 結界ポイントエフェクト
 		private PowerPointCreator powerPointCreator; // 結界の点を生成するためのクラス
+		private static readonly int barrierPointNumber = 1; // 結界を発生させる事ができる点の数
+		private GameObject barrierPrefab;
 
 		#endregion
 
@@ -470,6 +468,7 @@ namespace Uxtuno
 			// リソースロード
 			autoLockOnIconSprite = Resources.Load<Sprite>("Sprites/AutoLockOnIcon");
 			manualLockOnIconSprite = Resources.Load<Sprite>("Sprites/ManualRockOnIcon");
+			barrierPrefab = Resources.Load<GameObject>("Prefabs/Effects/Barrier/Barrier");
 
 			characterController = GetComponent<CharacterController>();
 			cameraController = GameObject.FindGameObjectWithTag(TagName.CameraController).GetComponent<CameraController>();
@@ -517,9 +516,15 @@ namespace Uxtuno
 			if (lockOnState == LockOnState.Manual)
 			{
 				cameraController.LookAt(lockOnTarget.transform, 1.0f, CameraController.InterpolationMode.Curve);
+				// 敵とプレイヤーの中心点を求め境界球とする
+				Vector3 halfToTarget = (lockOnTarget.lockOnPoint.position - lockOnPoint.position) * 0.5f;
+                Vector3 center = lockOnPoint.position + halfToTarget;
+				float radius = halfToTarget.magnitude + 5.0f;
+				cameraController.SetPivot(center);
+				cameraController.distance = -(radius / Mathf.Sin((Camera.main.fieldOfView) * 0.5f));
 			}
 
-			if (playerInput.cameraToFront)
+			if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.CameraToFront))
 			{
 				cameraController.LookDirection(meshRoot.TransformDirection(cameraFront), 1.0f, CameraController.InterpolationMode.Curve);
 			}
@@ -533,17 +538,47 @@ namespace Uxtuno
 				// 現在の状態の動作を実行
 				currentState.Move();
 			} while (currentState != oldState);
-			// 移動後の「カメラ→プレイヤー」ベクトル
+			CommonState();
+
 			LockOn();
+
+			StartCoroutine(CameraControl());
 		}
 
-		void LateUpdate()
+		/// <summary>
+		/// 各Stateの共通処理
+		/// </summary>
+		private void CommonState()
+		{
+			if (powerPointCreator.count == barrierPointNumber &&
+                PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Barrier))
+			{
+				Vector3 powerPointCenter = Vector3.zero;
+
+				// 全ての点の位置を加算
+				foreach (Transform powerPoint in powerPointCreator.GetPowerPoints())
+				{
+					powerPointCenter += powerPoint.position;
+				}
+
+				// それを点の個数で割ることで中心点を算出
+				powerPointCenter /= powerPointCreator.count;
+
+				GameObject barrier = Instantiate(barrierPrefab);
+				barrier.transform.position = powerPointCenter;
+			}
+		}
+
+		IEnumerator CameraControl()
 		{
 			if (lockOnState == LockOnState.Manual)
 			{
 				playerCamera.LockOnCamera();
 			}
-			else
+
+			yield return new WaitForFixedUpdate();
+
+			if (lockOnState != LockOnState.Manual)
 			{
 				playerCamera.CameraInput();
 			}
@@ -566,7 +601,7 @@ namespace Uxtuno
 		private void LockOn()
 		{
 			// マニュアルロックオン
-			if (playerInput.lockOn)
+			if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.LockOn))
 			{
 				if (lockOnState != LockOnState.Manual)
 				{
@@ -689,6 +724,8 @@ namespace Uxtuno
 		private void LockOnRelease()
 		{
 			// Todo :
+			cameraController.ResetPivot();
+			cameraController.ResetDistance();
 			lockOnTarget = null;
 			lockOnIcon.Hide();
 			lockOnState = LockOnState.None;
@@ -757,11 +794,11 @@ namespace Uxtuno
 		{
 			Vector3 input = Vector3.zero;
 			// directionは進行方向を表すので上下入力はzに格納
-			input.x = playerInput.horizontal;
-			input.z = playerInput.vertical;
-			input.Normalize();
+			input.x = PlayerInput.horizontal;
+			input.z = PlayerInput.vertical;
 			Vector3 direction = cameraController.cameraTransform.rotation * input;
 			direction.y = 0.0f;
+			direction.Normalize();
 			// カメラの方向を加味して進行方向を計算
 			return direction;
 		}
@@ -790,8 +827,8 @@ namespace Uxtuno
 			moveVector = transform.position - oldPosition;
 
 			// カメラ入力がされて無い時のみカメラの回転を行う
-			if (playerInput.cameraHorizontal == 0.0f &&
-				playerInput.cameraVertical == 0.0f &&
+			if (PlayerInput.cameraHorizontal == 0.0f &&
+				PlayerInput.cameraVertical == 0.0f &&
 				lockOnState != LockOnState.Manual
 				)
 			{

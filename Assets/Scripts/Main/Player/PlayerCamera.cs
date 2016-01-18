@@ -15,7 +15,6 @@ namespace Uxtuno
 		private static readonly float playerMoveToCameraRotationSpeed = 5.0f; // プレイヤーが動いた時のカメラ回転速度
 		private readonly float horizontalRotationSpeed;
 		private readonly float verticalRotationSpeed;
-		private PlayerInput input = PlayerInput.instance;
 
 		/// <summary>
 		/// プレイヤーカメラの動作
@@ -64,8 +63,8 @@ namespace Uxtuno
 		{
 			// カメラの回転入力
 			Vector2 cameraMove = Vector3.zero;
-			cameraMove.x = input.cameraHorizontal;
-			cameraMove.y = input.cameraVertical;
+			cameraMove.x = PlayerInput.cameraHorizontal;
+			cameraMove.y = PlayerInput.cameraVertical;
 
 			// プレイヤーが移動した時のY軸カメラ回転量を計算
 			//float cameraRotateY = Mathf.Atan2(now.x * old.z - now.z * old.x, now.x * old.x + now.z * old.z) * Mathf.Rad2Deg;
@@ -73,14 +72,15 @@ namespace Uxtuno
 			Vector2 moveVectorXZ = new Vector2(moveVector.x, moveVector.z);
 			float moveAngleXZ = Mathf.Atan2(moveVectorXZ.y, moveVectorXZ.x);
 			float cameraHorizontal = Mathf.Cos(moveAngleXZ) * moveVectorXZ.magnitude;
+			float cameraVertical = -moveVector.y;
 
 			if (cameraMove != Vector2.zero)
 			{
 				controller.CameraMove(cameraMove.x * horizontalRotationSpeed * Time.deltaTime, cameraMove.y * verticalRotationSpeed * Time.deltaTime, 0.2f);
 			}
-			else if (cameraHorizontal != 0.0f)
+			else if (cameraHorizontal < float.Epsilon || cameraVertical < float.Epsilon)
 			{
-				controller.CameraMove(cameraHorizontal * playerMoveToCameraRotationSpeed, 0.0f, 0.1f);
+				controller.CameraMove(cameraHorizontal * playerMoveToCameraRotationSpeed, cameraVertical * playerMoveToCameraRotationSpeed, 0.1f);
 			}
 		}
 
@@ -91,8 +91,8 @@ namespace Uxtuno
 		{
 			// カメラの回転入力
 			Vector2 cameraMove = Vector3.zero;
-			cameraMove.x = input.cameraHorizontal;
-			cameraMove.y = input.cameraVertical;
+			cameraMove.x = PlayerInput.cameraHorizontal;
+			cameraMove.y = PlayerInput.cameraVertical;
 
 			if (cameraMove != Vector2.zero)
 			{

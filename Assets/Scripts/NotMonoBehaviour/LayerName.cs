@@ -20,6 +20,7 @@ public class LayerName
 	public static Para Water = new Para(4, 16, "Water");
 	public static Para UI = new Para(5, 32, "UI");
 	public static Para Wall = new Para(8, 256, "Wall");
+	public static Para Obstacle = new Para(9, 512, "Obstacle");
 
 	/// <summary>
 	/// <para>0. "Default"</para>
@@ -31,7 +32,7 @@ public class LayerName
 	/// <para>6. ""</para>
 	/// <para>7. ""</para>
 	/// <para>8. "Wall"</para>
-	/// <para>9. ""</para>
+	/// <para>9. "Obstacle"</para>
 	/// <para>10. ""</para>
 	/// <para>11. ""</para>
 	/// <para>12. ""</para>
@@ -55,5 +56,5 @@ public class LayerName
 	/// <para>30. ""</para>
 	/// <para>31. ""</para>
 	/// </summary>
-	public static readonly string[] names = new string[]{"Default","TransparentFX","Ignore Raycast","","Water","UI","","","Wall","","","","","","","","","","","","","","","","","","","","","","",""};
+	public static readonly string[] names = new string[]{"Default","TransparentFX","Ignore Raycast","","Water","UI","","","Wall","Obstacle","","","","","","","","","","","","","","","","","","","","","",""};
 }
