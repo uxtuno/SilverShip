@@ -28,7 +28,15 @@ namespace Uxtuno
 		[SerializeField, Tooltip("追従対象")]
 		private Transform target = null;
 		[SerializeField, Tooltip("追従対象との距離")]
-		private float distance = 2.0f;
+		private float _distance = 2.0f;
+
+		/// <summary>
+		/// カメラと注視点の距離
+		/// </summary>
+		public float distance {
+			get { return _distance; }
+			set { _distance = value; }
+		}
 
 		private float _defaultDistance;
 		/// <summary>
@@ -49,10 +57,23 @@ namespace Uxtuno
 		[SerializeField, Tooltip("カメラ回転を滑らかにするための値")]
 		private float turnSeconds = 0.2f;
 
+		private static readonly float inverseToAngleX = -40.0f; // 上下の回転を反転させる境界角
+
 		private float yAngle; // Y軸方向の回転角
 		private float xAngle; // X軸方向の回転角
 
-		private Transform pivot; // 基準位置(X軸回転に使用)
+		private Transform _pivot; // 基準位置(X軸回転に使用)
+		private Vector3 defaultPivotPosition; // 注視点の初期座標
+
+		/// <summary>
+		/// 注視点を返す
+		/// </summary>
+		public Transform pivot
+		{
+			get { return _pivot; }
+			private set { _pivot = value; }
+		}
+
 		private Vector3 pivotEulers; // 基準位置のオイラー角を保持
 		private Quaternion pivotTargetRotation; // 基準位置の回転後角度
 		private Quaternion transformTargetRotation; // 回転後角度
@@ -80,12 +101,13 @@ namespace Uxtuno
 
 		void Start()
 		{
-			pivot = cameraTransform.transform.parent;
-			pivotTargetRotation = pivot.localRotation;
-			pivotEulers = pivot.localEulerAngles;
+			_pivot = cameraTransform.transform.parent;
+			pivotTargetRotation = _pivot.localRotation;
+			pivotEulers = _pivot.localEulerAngles;
 			transformTargetRotation = transform.localRotation;
 			cameraTransform.localPosition = -Vector3.forward * distance;
 			defaultDistance = distance;
+			defaultPivotPosition = pivot.localPosition;
 		}
 
 		/// <summary>
@@ -166,11 +188,6 @@ namespace Uxtuno
 			pivotTargetRotation = Quaternion.Euler(xAngle, pivotEulers.y, pivotEulers.z);
 		}
 
-		void Update()
-		{
-			
-		}
-
 		void FixedUpdate()
 		{
 			// カメラの追従を行う
@@ -181,15 +198,18 @@ namespace Uxtuno
 		IEnumerator TargetTracking()
 		{
 			yield return new WaitForFixedUpdate();
+			// 座標を補間
 			transform.position = Vector3.Lerp(transform.position, target.position, movenSmoothing);
 
+			// 角度を補間
 			float interpolationPosition = Interpolation();
 			transform.localRotation = Quaternion.Lerp(transform.localRotation, transformTargetRotation, interpolationPosition);
-			pivot.localRotation = Quaternion.Lerp(pivot.localRotation, pivotTargetRotation, interpolationPosition);
+			_pivot.localRotation = Quaternion.Lerp(_pivot.localRotation, pivotTargetRotation, interpolationPosition);
 
-			float finalDistance = distance; // 最終的な距離
+			// 最終的な距離
+			float finalDistance = distance > defaultDistance? distance : defaultDistance; 
 			RaycastHit hit;
-			Ray ray = new Ray(pivot.position, cameraTransform.position - pivot.position);
+			Ray ray = new Ray(_pivot.position, cameraTransform.position - _pivot.position);
 			if (Physics.Raycast(ray, out hit, distance, LayerName.Obstacle.maskValue))
 			{
 				finalDistance = hit.distance;
@@ -197,12 +217,11 @@ namespace Uxtuno
 
 			// 追尾対象からの距離を反映
 			cameraTransform.localPosition = -Vector3.forward * finalDistance;
-
 		}
 
 		void LateUpdate()
-		{ 
-			
+		{
+
 		}
 
 		#region - LookAt
@@ -261,17 +280,49 @@ namespace Uxtuno
 
 			// 角度を360度でループさせる
 			toTargetAngleY = Mathf.Repeat(toTargetAngleY, 360);
-			HorizontalRotation(-(yAngle - toTargetAngleY));
+			if (xAngle < 30.0f)
+			{
+				HorizontalRotation(-(yAngle - toTargetAngleY));
+			}
 
 			// XZ座標の距離と高さの差からX軸回転量を求める
 			float toTargetDistanceXZ = toTargetXZ.magnitude;
 			float toTargetHeightDiff = targetPosition.y - transform.position.y;
 			float toTargetAngleX = Mathf.Atan2(toTargetDistanceXZ, toTargetHeightDiff) * Mathf.Rad2Deg - 90.0f;
-			toTargetAngleX = Mathf.Abs(toTargetAngleX);
+			if(toTargetAngleX < inverseToAngleX)
+			{
+				toTargetAngleX = Mathf.Abs(toTargetAngleX);
+			}
+
 			VerticalRotation((xAngle - toTargetAngleX));
 
 			InterpolationStart(interpolationSeconds, mode);
 		}
 		#endregion
+
+		/// <summary>
+		/// カメラと注視点の距離を初期状態に戻す
+		/// </summary>
+		public void ResetDistance()
+		{
+			distance = defaultDistance;
+		}
+
+		/// <summary>
+		/// 注視点を設定
+		/// </summary>
+		/// <param name="position"></param>
+		public void SetPivot(Vector3 position)
+		{
+			pivot.position = position;
+		}
+
+		/// <summary>
+		/// 注視点の座標を初期状態に戻す
+		/// </summary>
+		public void ResetPivot()
+		{
+			pivot.localPosition = defaultPivotPosition;
+		}
 	}
 }

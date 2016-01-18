@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 public class PowerPointCreator : MonoBehaviour
 {
@@ -8,7 +9,7 @@ public class PowerPointCreator : MonoBehaviour
 	private LinkedList<Transform> powerPointList = new LinkedList<Transform>();
 	private static readonly int powerPointMax = 5; // 結界点の同時設置可能数
 
-	void Start()
+	void Awake()
 	{
 		powerPointPrefab = Resources.Load<GameObject>("Prefabs/Effects/PowerPoint");
 		powerPointParent = new GameObject("PowerPointCollecter").transform;
@@ -43,7 +44,20 @@ public class PowerPointCreator : MonoBehaviour
 	public int count
 	{
 		// リスト上にnullのまま残っている可能性もあるのでここでは実際のシーン上の数を返す
-		// nullのまま残っていても5つ以上にはならないので問題ないと考える
 		get { return powerPointParent.childCount; }
+	}
+
+	/// <summary>
+	/// シーン上に存在する結界の点を返す
+	/// </summary>
+	/// <returns></returns>
+	public ICollection<Transform> GetPowerPoints()
+	{
+		List<Transform> powerPoints = new List<Transform>();
+		foreach(Transform powerPoint in powerPointParent)
+		{
+			powerPoints.Add(powerPoint);
+		}
+		return powerPoints;
 	}
 }

@@ -456,6 +456,8 @@ namespace Uxtuno
 		private PlayerAttackFlow attackFlow;
 		private GameObject powerPointPrefab; // 結界ポイントエフェクト
 		private PowerPointCreator powerPointCreator; // 結界の点を生成するためのクラス
+		private static readonly int barrierPointNumber = 1; // 結界を発生させる事ができる点の数
+		private GameObject barrierPrefab;
 
 		#endregion
 
@@ -466,6 +468,7 @@ namespace Uxtuno
 			// リソースロード
 			autoLockOnIconSprite = Resources.Load<Sprite>("Sprites/AutoLockOnIcon");
 			manualLockOnIconSprite = Resources.Load<Sprite>("Sprites/ManualRockOnIcon");
+			barrierPrefab = Resources.Load<GameObject>("Prefabs/Effects/Barrier/Barrier");
 
 			characterController = GetComponent<CharacterController>();
 			cameraController = GameObject.FindGameObjectWithTag(TagName.CameraController).GetComponent<CameraController>();
@@ -513,6 +516,12 @@ namespace Uxtuno
 			if (lockOnState == LockOnState.Manual)
 			{
 				cameraController.LookAt(lockOnTarget.transform, 1.0f, CameraController.InterpolationMode.Curve);
+				// 敵とプレイヤーの中心点を求め境界球とする
+				Vector3 halfToTarget = (lockOnTarget.lockOnPoint.position - lockOnPoint.position) * 0.5f;
+                Vector3 center = lockOnPoint.position + halfToTarget;
+				float radius = halfToTarget.magnitude + 5.0f;
+				cameraController.SetPivot(center);
+				cameraController.distance = -(radius / Mathf.Sin((Camera.main.fieldOfView) * 0.5f));
 			}
 
 			if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.CameraToFront))
@@ -529,10 +538,35 @@ namespace Uxtuno
 				// 現在の状態の動作を実行
 				currentState.Move();
 			} while (currentState != oldState);
-			// 移動後の「カメラ→プレイヤー」ベクトル
+			CommonState();
+
 			LockOn();
 
 			StartCoroutine(CameraControl());
+		}
+
+		/// <summary>
+		/// 各Stateの共通処理
+		/// </summary>
+		private void CommonState()
+		{
+			if (powerPointCreator.count == barrierPointNumber &&
+                PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Barrier))
+			{
+				Vector3 powerPointCenter = Vector3.zero;
+
+				// 全ての点の位置を加算
+				foreach (Transform powerPoint in powerPointCreator.GetPowerPoints())
+				{
+					powerPointCenter += powerPoint.position;
+				}
+
+				// それを点の個数で割ることで中心点を算出
+				powerPointCenter /= powerPointCreator.count;
+
+				GameObject barrier = Instantiate(barrierPrefab);
+				barrier.transform.position = powerPointCenter;
+			}
 		}
 
 		IEnumerator CameraControl()
@@ -548,11 +582,6 @@ namespace Uxtuno
 			{
 				playerCamera.CameraInput();
 			}
-		}
-
-		void LateUpdate()
-		{
-			
 		}
 
 		/// <summary>
@@ -695,6 +724,8 @@ namespace Uxtuno
 		private void LockOnRelease()
 		{
 			// Todo :
+			cameraController.ResetPivot();
+			cameraController.ResetDistance();
 			lockOnTarget = null;
 			lockOnIcon.Hide();
 			lockOnState = LockOnState.None;
