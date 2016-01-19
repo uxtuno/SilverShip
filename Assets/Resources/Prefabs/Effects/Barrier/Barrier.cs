@@ -32,25 +32,6 @@ namespace Uxtuno
 				.Where((obj) => obj.tag == TagName.Enemy)
 				.Select((obj) => obj.GetComponent<Kuvo.BaseEnemy>());
 
-			foreach (Kuvo.BaseEnemy enemy in inBarrierEnemies)
-			{
-				//// 物理演算を有効に
-				//Rigidbody enemyRigidbody = enemy.gameObject.GetSafeComponent<Rigidbody>();
-				//enemyRigidbody.isKinematic = false;
-
-				//// 敵の動作を一時無効
-				//enemy.enabled = false;
-
-				//// 爆発
-				//enemyRigidbody.AddExplosionForce(explosionPower, transform.position, radius, 0.0f, ForceMode.Acceleration);
-				//enemyRigidbody.AddForce(Physics.gravity);
-			}
-
-			foreach (Kuvo.BaseEnemy enemy in inBarrierEnemies)
-			{
-				//// 敵の動作を再開
-				//enemy.enabled = true;
-			}
 			Destroy(gameObject, lifeTime);
 		}
 

@@ -124,6 +124,8 @@ namespace Uxtuno
 		private PowerPointCreator powerPointCreator; // 結界の点を生成するためのクラス
 		private static readonly int barrierPointNumber = 1; // 結界を発生させる事ができる点の数
 		private GameObject barrierPrefab;
+		[SerializeField, Tooltip("足のCollider")]
+		private ContainedObjects __footContained; // 足付近の壁を検知
 
 		#endregion
 
@@ -551,7 +553,21 @@ namespace Uxtuno
 		/// </summary>
 		private void JumpTrampledInput()
 		{
-			currentState = new DashToTargetState(this);
+			currentState = new DashToTargetState(this, lockOnTarget.lockOnPoint.position);
+		}
+
+		/// <summary>
+		/// 踏みつけジャンプを実行
+		/// 点作成攻撃
+		/// </summary>
+		private void JumpTrampled()
+		{
+			Jumping();
+			isAirDashPossible = true;
+			animator.SetBool(isTrampledID, true);
+			currentState = new DepressionState(this);
+			powerPointCreator.Create(transform.position);
+			LockOnRelease();
 		}
 
 		// プレーヤーの各状態をそれぞれクラスとして表す
@@ -632,14 +648,6 @@ namespace Uxtuno
 		/// </summary>
 		private class AirState : BaseState
 		{
-			private enum TrampledJumpInput
-			{
-				None,
-				Jump,
-				Attack,
-				TrampledJump = Jump | Attack,
-			}
-			TrampledJumpInput trampledJumpInput = TrampledJumpInput.None; // 踏みつけジャンプ入力検知用
 			private static readonly float trampledJumpInputSeconds = 0.1f; // 踏みつけジャンプ入力同時押し猶予時間
 			private float trampledJumpInputCount; // 踏みつけジャンプ入力受付カウンタ
 
@@ -687,7 +695,19 @@ namespace Uxtuno
 						// そのうち整理するだろう(希望的観測
 						if (airDashPossibleCount > airDashPossibleSeconds && airDashPossibleCount < airDashDisableSeconds)
 						{
-							player.currentState = new DashToTargetState(player);
+							player.currentState = new DashToTargetState(player, player.lockOnTarget.lockOnPoint.position);
+						}
+					}
+					else
+					{
+						// todo : 空中ダッシュ入力受付時間をそのまま踏みつけジャンプの受付時間に利用している
+						// そのうち整理するだろう(希望的観測
+						if (airDashPossibleCount > airDashPossibleSeconds && airDashPossibleCount < airDashDisableSeconds)
+						{
+							Vector3 dashToPosition = player.transform.position;
+							// todo : 10m前方 マジックナンバー
+							dashToPosition += player.meshRoot.forward * 10.0f;
+							player.currentState = new DashToTargetState(player, dashToPosition);
 						}
 					}
 					return;
@@ -815,32 +835,48 @@ namespace Uxtuno
 			private static readonly float contactDistance = 0.2f; // 対象に接触したとみなす距離
 			private static readonly float speed = 20.0f; // 対象へ向かうスピード
 			private Vector3 moveVector;
-			private Transform target;
-			public DashToTargetState(Player player)
+			private Vector3 target;
+			public DashToTargetState(Player player, Vector3 position)
 				: base(player)
 			{
-				target = player.lockOnTarget.transform;
+				target = position;
 			}
 
 			public override void Move()
 			{
 				Vector3 oldPosition = player.transform.position;
 				// 移動ベクトルを計算し、プレイヤーを移動させる
-				moveVector = target.position - player.transform.position;
+				moveVector = target - player.transform.position;
 				moveVector.Normalize();
 				moveVector *= Time.deltaTime * speed;
 				player.Move(moveVector);
 				// 対象に十分接触している、もしくは移動量がmoveVectorで指定した値よりも少なかったら(何かにぶつかって移動できなかった)
-				if ((target.position - player.transform.position).magnitude < contactDistance ||
+				if ((target - player.transform.position).magnitude < contactDistance ||
 					(player.transform.position - oldPosition).magnitude < moveVector.magnitude * 0.9f)
 				{
+						Debug.Log(player.__footContained.Count<Transform>());
 					// ジャンプさせる
-					player.Jumping();
-					player.isAirDashPossible = true;
-					player.animator.SetBool(player.isTrampledID, true);
-					player.currentState = new DepressionState(player);
-					player.powerPointCreator.Create(player.lockOnTarget.transform.position);
-					player.LockOnRelease();
+					if (player.lockOnTarget != null)
+					{
+						player.JumpTrampled();
+						return;
+					}
+
+					Ray ray = new Ray(player.transform.position, player.meshRoot.forward);
+					RaycastHit hit;
+					if(Physics.Raycast(ray, out hit, moveVector.magnitude))
+					{
+						// 壁付近ならジャンプ
+						if(hit.transform.tag == "Wall")
+						{
+							player.Jumping();
+						}
+					}
+					else
+					{
+						// それ以外なら落下
+						player.currentState = new AirState(player);
+					}
 					return;
 				}
 			}

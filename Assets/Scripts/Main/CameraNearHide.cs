@@ -11,11 +11,6 @@ namespace Uxtuno
 		[SerializeField, Tooltip("非表示にする対象オブジェクト")]
 		private MyMonoBehaviour hideTarget;
 
-		// Update is called once per frame
-		void Update()
-		{
-		}
-
 		void OnTriggerEnter(Collider other)
 		{
 			if(other.tag == TagName.MainCamera)

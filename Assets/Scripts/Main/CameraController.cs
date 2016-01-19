@@ -222,11 +222,6 @@ namespace Uxtuno
 			cameraTransform.localPosition = -Vector3.forward * finalDistance;
 		}
 
-		void LateUpdate()
-		{
-
-		}
-
 		#region - LookAt
 
 		/// <summary>

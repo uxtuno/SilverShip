@@ -188,6 +188,38 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1893303706}
   m_RootOrder: 0
+--- !u!1 &81279055 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 160436, guid: 63d5a08191beee044abca411d87bd242, type: 2}
+  m_PrefabInternal: {fileID: 1266806355}
+--- !u!114 &81279059
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 81279055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13e20d82e1a632646b4a59708b5f19dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tagNames:
+  - Wall
+--- !u!54 &81279060
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 81279055}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: .0500000007
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!4 &211926912 stripped
 Transform:
   m_PrefabParentObject: {fileID: 489650, guid: 2c26b485745441540856e3bebce15c86, type: 2}
@@ -205,7 +237,7 @@ GameObject:
   - 23: {fileID: 219183745}
   m_Layer: 9
   m_Name: Wall
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -383,7 +415,7 @@ GameObject:
   - 23: {fileID: 952899026}
   m_Layer: 9
   m_Name: Wall
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -554,7 +586,7 @@ GameObject:
   - 23: {fileID: 1123259479}
   m_Layer: 9
   m_Name: Wall
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -629,7 +661,7 @@ Rigidbody:
   m_Drag: 0
   m_AngularDrag: .0500000007
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
@@ -676,6 +708,10 @@ Prefab:
       propertyPath: m_Radius
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 11413070, guid: 63d5a08191beee044abca411d87bd242, type: 2}
+      propertyPath: __footContained
+      value: 
+      objectReference: {fileID: 81279059}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 63d5a08191beee044abca411d87bd242, type: 2}
   m_IsPrefabParent: 0
@@ -772,7 +808,7 @@ GameObject:
   - 23: {fileID: 1299241898}
   m_Layer: 9
   m_Name: Wall
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -1029,6 +1065,25 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ee5d5e9e34c4c2a4e930e76fa9a7a808, type: 2}
   m_IsPrefabParent: 0
+--- !u!1 &1672483900 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 129280, guid: ee5d5e9e34c4c2a4e930e76fa9a7a808, type: 2}
+  m_PrefabInternal: {fileID: 1543209832}
+--- !u!54 &1672483903
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1672483900}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: .0500000007
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0
 --- !u!1 &1695589839
 GameObject:
   m_ObjectHideFlags: 0
