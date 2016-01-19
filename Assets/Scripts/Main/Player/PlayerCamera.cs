@@ -67,11 +67,11 @@ namespace Uxtuno
 			cameraMove.y = PlayerInput.cameraVertical;
 
 			// プレイヤーが移動した時のY軸カメラ回転量を計算
-			//float cameraRotateY = Mathf.Atan2(now.x * old.z - now.z * old.x, now.x * old.x + now.z * old.z) * Mathf.Rad2Deg;
 			moveVector = controller.cameraTransform.InverseTransformDirection(moveVector);
 			Vector2 moveVectorXZ = new Vector2(moveVector.x, moveVector.z);
 			float moveAngleXZ = Mathf.Atan2(moveVectorXZ.y, moveVectorXZ.x);
 			float cameraHorizontal = Mathf.Cos(moveAngleXZ) * moveVectorXZ.magnitude;
+			// これは適当な値
 			float cameraVertical = -moveVector.y;
 
 			if (cameraMove != Vector2.zero)

@@ -614,6 +614,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1045408536}
   m_RootOrder: 4
+--- !u!1 &1139214085 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 150416, guid: ee5d5e9e34c4c2a4e930e76fa9a7a808, type: 2}
+  m_PrefabInternal: {fileID: 1543209832}
+--- !u!54 &1139214086
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1139214085}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: .0500000007
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 112
+  m_CollisionDetection: 0
 --- !u!1001 &1266806355
 Prefab:
   m_ObjectHideFlags: 0
@@ -652,6 +671,10 @@ Prefab:
     - target: {fileID: 451632, guid: 63d5a08191beee044abca411d87bd242, type: 2}
       propertyPath: m_RootOrder
       value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 13652974, guid: 63d5a08191beee044abca411d87bd242, type: 2}
+      propertyPath: m_Radius
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 63d5a08191beee044abca411d87bd242, type: 2}
@@ -994,6 +1017,14 @@ Prefab:
     - target: {fileID: 11468570, guid: ee5d5e9e34c4c2a4e930e76fa9a7a808, type: 2}
       propertyPath: xAngleMax
       value: 75
+      objectReference: {fileID: 0}
+    - target: {fileID: 13548492, guid: ee5d5e9e34c4c2a4e930e76fa9a7a808, type: 2}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 13548492, guid: ee5d5e9e34c4c2a4e930e76fa9a7a808, type: 2}
+      propertyPath: m_Radius
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ee5d5e9e34c4c2a4e930e76fa9a7a808, type: 2}

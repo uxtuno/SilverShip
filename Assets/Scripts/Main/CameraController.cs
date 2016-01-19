@@ -208,11 +208,14 @@ namespace Uxtuno
 
 			// 最終的な距離
 			float finalDistance = distance > defaultDistance? distance : defaultDistance; 
+			cameraTransform.localPosition = -Vector3.forward * finalDistance;
+
+			// 障害物を考慮して最終的なカメラの距離を計算
 			RaycastHit hit;
-			Ray ray = new Ray(_pivot.position, cameraTransform.position - _pivot.position);
+			Ray ray = new Ray(transform.position, cameraTransform.position - transform.position);
 			if (Physics.Raycast(ray, out hit, distance, LayerName.Obstacle.maskValue))
 			{
-				finalDistance = hit.distance;
+				finalDistance = Vector3.Distance(hit.point, pivot.position);
 			}
 
 			// 追尾対象からの距離を反映
@@ -291,7 +294,7 @@ namespace Uxtuno
 			float toTargetAngleX = Mathf.Atan2(toTargetDistanceXZ, toTargetHeightDiff) * Mathf.Rad2Deg - 90.0f;
 			if(toTargetAngleX < inverseToAngleX)
 			{
-				toTargetAngleX = Mathf.Abs(toTargetAngleX);
+				//toTargetAngleX = Mathf.Abs(toTargetAngleX);
 			}
 
 			VerticalRotation((xAngle - toTargetAngleX));
