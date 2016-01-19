@@ -700,14 +700,20 @@ namespace Uxtuno
 					}
 					else
 					{
-						// todo : 空中ダッシュ入力受付時間をそのまま踏みつけジャンプの受付時間に利用している
-						// そのうち整理するだろう(希望的観測
-						if (airDashPossibleCount > airDashPossibleSeconds && airDashPossibleCount < airDashDisableSeconds)
+						Ray ray = new Ray(player.transform.position, player.meshRoot.forward);
+						RaycastHit hit;
+						//if (player.__footContained.GetContainedObjects().Count != 0)
+						if (Physics.Raycast(ray, out hit, 0.5f))
 						{
-							Vector3 dashToPosition = player.transform.position;
-							// todo : 10m前方 マジックナンバー
-							dashToPosition += player.meshRoot.forward * 10.0f;
-							player.currentState = new DashToTargetState(player, dashToPosition);
+							// 壁付近ならジャンプ
+							if (hit.transform.tag == "Wall")
+							{
+								player.Jumping();
+								player.currentState = new WallKick(player);
+								Vector3 angles = Vector3.zero;
+								angles.y = Mathf.Atan2(hit.normal.x, hit.normal.z) * Mathf.Rad2Deg;
+								player.meshRoot.eulerAngles = angles;
+							}
 						}
 					}
 					return;
@@ -854,7 +860,6 @@ namespace Uxtuno
 				if ((target - player.transform.position).magnitude < contactDistance ||
 					(player.transform.position - oldPosition).magnitude < moveVector.magnitude * 0.9f)
 				{
-						Debug.Log(player.__footContained.Count<Transform>());
 					// ジャンプさせる
 					if (player.lockOnTarget != null)
 					{
@@ -864,10 +869,11 @@ namespace Uxtuno
 
 					Ray ray = new Ray(player.transform.position, player.meshRoot.forward);
 					RaycastHit hit;
-					if(Physics.Raycast(ray, out hit, moveVector.magnitude))
+					if(player.__footContained.GetContainedObjects().Count != 0)
+					//if(Physics.Raycast(ray, out hit, moveVector.magnitude))
 					{
 						// 壁付近ならジャンプ
-						if(hit.transform.tag == "Wall")
+						//if (hit.transform.tag == "Wall")
 						{
 							player.Jumping();
 						}
@@ -914,6 +920,41 @@ namespace Uxtuno
 				// 攻撃中の落下速度調整用数値
 				moveVector.y = player.jumpVY * 0.15f * Time.deltaTime;
 				player.Move(moveVector);
+			}
+		}
+
+		/// <summary>
+		/// 壁キック
+		/// </summary>
+		private class WallKick : BaseState
+		{
+			// 初速
+			private static readonly float primarySpeed = 6.0f;
+			private float speed;
+			private float wallKickCount;
+			private static readonly float wallKickSeconds = 0.8f;
+			private static readonly float deceleration = 0.09f; // 減速量
+            public WallKick(Player player)
+				: base(player)
+			{
+				speed = primarySpeed;
+				player.isAirDashPossible = true;
+				player.animator.SetBool(player.isTrampledID, true);
+			}
+
+			public override void Move()
+			{
+				player.Gravity();
+				Vector3 moveVector = player.meshRoot.forward * speed;
+				moveVector.y = player.jumpVY;
+				player.Move(moveVector * Time.deltaTime);
+				speed -= deceleration;
+
+				wallKickCount += Time.deltaTime;
+				if(wallKickCount >= wallKickSeconds)
+				{
+					player.currentState = new AirState(player);
+				}
 			}
 		}
 
