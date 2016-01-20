@@ -10,7 +10,9 @@ namespace Uxtuno
 	public class Player : Actor
 	{
 		[Tooltip("歩く速さ(単位:m/s)"), SerializeField]
-		private float maxSpeed = 5.0f; // 移動速度
+		private float _maxSpeed = 5.0f; // 移動速度
+		public float maxSpeed { get { return _maxSpeed; } }
+
 		[Tooltip("ジャンプの高さ(単位:m)"), SerializeField]
 		private float jumpHeight = 5.0f;
 		[Tooltip("ハイジャンプの高さ(単位:m)"), SerializeField]
@@ -90,7 +92,7 @@ namespace Uxtuno
 			private set { _lockOnTarget = value; }
 		}
 
-		private bool isAirDashPossible = false; // 空中ダッシュができるか
+		public bool isAirDashPossible { get; private set; } // 空中ダッシュができるか
 
 		/// <summary>
 		/// ロックオンの状態
@@ -120,7 +122,8 @@ namespace Uxtuno
 		private static readonly float autoLockOnLimitDistance = 12.0f; // オートロックオン限界距離
 		private static readonly float manualLockOnLimitDistance = 30.0f; // マニュアルロックオン限界距離
 
-		private PlayerAttackFlow attackFlow;
+		public PlayerAttackFlow attackFlow { get; private set; }
+
 		private GameObject powerPointPrefab; // 結界ポイントエフェクト
 		private PowerPointCreator powerPointCreator; // 結界の点を生成するためのクラス
 		private static readonly int barrierPointNumber = 1; // 結界を発生させる事ができる点の数
@@ -140,7 +143,7 @@ namespace Uxtuno
 
 			characterController = GetComponent<CharacterController>();
 			GameObject cameraRig = GameObject.FindGameObjectWithTag(TagName.CameraController);
-			if(cameraRig == null)
+			if (cameraRig == null)
 			{
 				cameraRig = Instantiate(cameraRigPrefab);
 			}
@@ -193,7 +196,7 @@ namespace Uxtuno
 				cameraController.LookAt(lockOnTarget.transform, 1.0f, CameraController.InterpolationMode.Curve);
 				// 敵とプレイヤーの中心点を求め境界球とする
 				Vector3 halfToTarget = (lockOnTarget.lockOnPoint.position - lockOnPoint.position) * 0.5f;
-                Vector3 center = lockOnPoint.position + halfToTarget;
+				Vector3 center = lockOnPoint.position + halfToTarget;
 				float adjustment = 5.0f; // プレイヤーが視界に入るように適切な値を調整
 				float radius = halfToTarget.magnitude + adjustment;
 				cameraController.SetPivot(center);
@@ -228,7 +231,7 @@ namespace Uxtuno
 		private void CommonState()
 		{
 			if (powerPointCreator.count == barrierPointNumber &&
-                PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Barrier))
+				PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Barrier))
 			{
 				Vector3 powerPointCenter = Vector3.zero;
 
@@ -411,7 +414,11 @@ namespace Uxtuno
 
 		private const float unGroundedSeconds = 0.08f; // 地面から離れたとみなす時間
 		private float ungroundedCount = 0.0f; // characterController.isGroundedがfalseを返してからの時間
-		private bool isGrounded; // 実際に地面に接触しているか
+
+		/// <summary>
+		/// 実際に地面に接触しているか
+		/// </summary>
+		public bool isGrounded { get; set; }
 
 		/// <summary>
 		/// 実際に地面に接触しているかを調べる
@@ -436,6 +443,10 @@ namespace Uxtuno
 			}
 
 			animator.SetBool(isGroundedID, isGrounded);
+		}
+
+		public void ChangeState(PlayerState.BaseState state)
+		{
 		}
 
 		/// <summary>
@@ -469,7 +480,7 @@ namespace Uxtuno
 		/// 入力方向とカメラの向きから進行方向ベクトルを計算
 		/// </summary>
 		/// <returns>進行方向</returns>
-		private Vector3 calclateMoveDirection()
+		public Vector3 calclateMoveDirection()
 		{
 			Vector3 input = Vector3.zero;
 			// directionは進行方向を表すので上下入力はzに格納
@@ -535,9 +546,44 @@ namespace Uxtuno
 		}
 
 		/// <summary>
+		/// 地上の移動処理
+		/// </summary>
+		public void GroundMove()
+		{
+			// 地上にいるので重力による落下量は0から計算
+			jumpVY = 0.0f;
+			Gravity();
+			Vector3 moveDirection = calclateMoveDirection();
+			float speed = maxSpeed;
+			Vector3 moveVector = moveDirection * speed;
+			moveVector.y = jumpVY;
+
+			Move(moveVector * Time.deltaTime);
+			if (moveDirection != Vector3.zero)
+			{
+				Vector3 newAngles = Vector3.zero;
+				newAngles.y = Mathf.Atan2(moveVector.x, moveVector.z) * Mathf.Rad2Deg;
+				meshRoot.eulerAngles = newAngles;
+				animator.SetFloat(speedID, speed);
+			}
+			else
+			{
+				animator.SetFloat(speedID, 0.0f);
+			}
+		}
+
+		/// <summary>
+		/// 落下中の動作
+		/// </summary>
+		public void FallMove()
+		{
+
+		}
+
+		/// <summary>
 		/// プレイヤーにジャンプさせる
 		/// </summary>
-		private void Jumping()
+		public void Jumping()
 		{
 			jumpVY = jumpPower;
 			currentJumpState = JumpState.Jumping;
@@ -549,7 +595,7 @@ namespace Uxtuno
 		/// <summary>
 		/// プレイヤーにハイジャンプさせる
 		/// </summary>
-		private void HighJumping()
+		public void HighJumping()
 		{
 			jumpVY = highJumpPower;
 			currentJumpState = JumpState.HighJumping;
@@ -880,7 +926,7 @@ namespace Uxtuno
 
 					Ray ray = new Ray(player.transform.position, player.meshRoot.forward);
 					RaycastHit hit;
-					if(player.__footContained.GetContainedObjects().Count != 0)
+					if (player.__footContained.GetContainedObjects().Count != 0)
 					//if(Physics.Raycast(ray, out hit, moveVector.magnitude))
 					{
 						// 壁付近ならジャンプ
@@ -945,7 +991,7 @@ namespace Uxtuno
 			private float wallKickCount;
 			private static readonly float wallKickSeconds = 0.4f;
 			private static readonly float deceleration = 0.36f; // 減速量
-            public WallKick(Player player)
+			public WallKick(Player player)
 				: base(player)
 			{
 				speed = primarySpeed;
@@ -962,7 +1008,7 @@ namespace Uxtuno
 				speed -= deceleration;
 
 				wallKickCount += Time.deltaTime;
-				if(wallKickCount >= wallKickSeconds)
+				if (wallKickCount >= wallKickSeconds)
 				{
 					player.currentState = new AirState(player);
 				}
