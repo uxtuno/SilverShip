@@ -9,6 +9,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 423052}
   - 114: {fileID: 11468570}
+  - 54: {fileID: 5423536}
   m_Layer: 0
   m_Name: CameraRig
   m_TagString: CameraController
@@ -29,6 +30,7 @@ GameObject:
   - 124: {fileID: 12426060}
   - 81: {fileID: 8165142}
   - 135: {fileID: 13548492}
+  - 54: {fileID: 5482686}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -123,6 +125,36 @@ Camera:
   m_StereoConvergence: 10
   m_StereoSeparation: .0219999999
   m_StereoMirrorMode: 0
+--- !u!54 &5423536
+Rigidbody:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 129280}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: .0500000007
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0
+--- !u!54 &5482686
+Rigidbody:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 150416}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: .0500000007
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 112
+  m_CollisionDetection: 0
 --- !u!81 &8165142
 AudioListener:
   m_ObjectHideFlags: 1
@@ -149,10 +181,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _target: {fileID: 0}
-  _distance: 2
+  _distance: 5
   movenSmoothing: .200000003
   xAngleMin: 5
-  xAngleMax: 60
+  xAngleMax: 75
   turnSeconds: .200000003
 --- !u!124 &12426060
 Behaviour:
@@ -168,10 +200,10 @@ SphereCollider:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 150416}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: .5
+  m_Radius: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &100100000
 Prefab:
