@@ -8,7 +8,7 @@ using Uxtuno;
 /// </summary>
 public class Actor : MyMonoBehaviour
 {
-	protected virtual float hp { get; set; }
+	public virtual float hp { get; protected set; }
 	protected virtual int attack { get; set; }
 	protected virtual int defence { get; set; }
 	private Transform _lockOnPoint;

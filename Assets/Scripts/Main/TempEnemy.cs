@@ -3,14 +3,15 @@ using System.Collections;
 using Kuvo;
 using System;
 
-public class TempEnemy : BaseEnemy {
+public class TempEnemy : BaseEnemy
+{
 	protected override float sight { get; set; }
 
-	protected override void Start()
+	protected override void Awake()
 	{
-		base.Start();
+		base.Awake();
 		sight = 2f;
-		hp = 1;
+		hp = 100;
 	}
 
 	protected override IEnumerator AirStagger()
