@@ -34,6 +34,7 @@ namespace Uxtuno
 		}
 
 		private CharacterController characterController; // キャラクターコントローラー
+		private GameObject cameraRigPrefab; // カメラコントローラー
 		private CameraController cameraController; // カメラコントローラー
 		private Transform meshRoot; // プレイヤーメッシュのルート
 		private Animator animator; // アニメーションのコントロール用
@@ -116,7 +117,7 @@ namespace Uxtuno
 		private Sprite autoLockOnIconSprite;
 		private Sprite manualLockOnIconSprite;
 
-		private static readonly float autoLockOnLimitDistance = 6.0f; // オートロックオン限界距離
+		private static readonly float autoLockOnLimitDistance = 12.0f; // オートロックオン限界距離
 		private static readonly float manualLockOnLimitDistance = 30.0f; // マニュアルロックオン限界距離
 
 		private PlayerAttackFlow attackFlow;
@@ -135,9 +136,17 @@ namespace Uxtuno
 			autoLockOnIconSprite = Resources.Load<Sprite>("Sprites/AutoLockOnIcon");
 			manualLockOnIconSprite = Resources.Load<Sprite>("Sprites/ManualRockOnIcon");
 			barrierPrefab = Resources.Load<GameObject>("Prefabs/Effects/Barrier/Barrier");
+			cameraRigPrefab = Resources.Load<GameObject>("Prefabs/Player/CameraRig");
 
 			characterController = GetComponent<CharacterController>();
-			cameraController = GameObject.FindGameObjectWithTag(TagName.CameraController).GetComponent<CameraController>();
+			GameObject cameraRig = GameObject.FindGameObjectWithTag(TagName.CameraController);
+			if(cameraRig == null)
+			{
+				cameraRig = Instantiate(cameraRigPrefab);
+			}
+			cameraController = cameraRig.GetComponent<CameraController>();
+			cameraController.target = transform;
+
 			//playerTrampled = GetComponentInChildren<PlayerTrampled>();
 			playerCamera = new PlayerCamera(cameraController, horizontalRotationSpeed, verticalRotationSpeed);
 			animator = GetComponentInChildren<Animator>(); // アニメーションをコントロールするためのAnimatorを子から取得
@@ -425,6 +434,8 @@ namespace Uxtuno
 				isGrounded = true;
 				ungroundedCount = 0.0f;
 			}
+
+			animator.SetBool(isGroundedID, isGrounded);
 		}
 
 		/// <summary>
@@ -929,11 +940,11 @@ namespace Uxtuno
 		private class WallKick : BaseState
 		{
 			// 初速
-			private static readonly float primarySpeed = 6.0f;
+			private static readonly float primarySpeed = 12.0f;
 			private float speed;
 			private float wallKickCount;
-			private static readonly float wallKickSeconds = 0.8f;
-			private static readonly float deceleration = 0.09f; // 減速量
+			private static readonly float wallKickSeconds = 0.4f;
+			private static readonly float deceleration = 0.36f; // 減速量
             public WallKick(Player player)
 				: base(player)
 			{

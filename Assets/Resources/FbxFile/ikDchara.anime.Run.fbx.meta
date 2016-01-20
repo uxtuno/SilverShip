@@ -272,11 +272,219 @@ ModelImporter:
     animationScaleError: .5
     animationWrapMode: 0
     extraExposedTransformPaths: []
-    clipAnimations: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Take 001
+      takeName: Take 001
+      firstFrame: 1
+      lastFrame: 25
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Character1_Hips2
+        weight: 1
+      - path: Character1_Reference
+        weight: 1
+      - path: Character1_Reference/Character1_lower
+        weight: 1
+      - path: Character1_Reference/Character1_lower/Character1_Lower
+        weight: 1
+      - path: Character1_Reference/Character1_lower/Character1_Lower/Character1_LeftUpLeg
+        weight: 1
+      - path: Character1_Reference/Character1_lower/Character1_Lower/Character1_LeftUpLeg/Character1_LeftLeg
+        weight: 1
+      - path: Character1_Reference/Character1_lower/Character1_Lower/Character1_LeftUpLeg/Character1_LeftLeg/Character1_LeftFoot
+        weight: 1
+      - path: Character1_Reference/Character1_lower/Character1_Lower/Character1_LeftUpLeg/Character1_LeftLeg/Character1_LeftFoot/Character1_LeftFoot1
+        weight: 1
+      - path: Character1_Reference/Character1_lower/Character1_Lower/Character1_LeftUpLeg/Character1_LeftLeg/Character1_LeftFoot/Character1_LeftFoot1/Character1_LeftToeBase
+        weight: 1
+      - path: Character1_Reference/Character1_lower/Character1_Lower/Character1_LeftUpLeg/Character1_LeftLeg/Character1_LeftFoot/Character1_LeftFoot1/pCube16
+        weight: 1
+      - path: Character1_Reference/Character1_lower/Character1_Lower/Character1_LeftUpLeg/Character1_LeftLeg/pCube17
+        weight: 1
+      - path: Character1_Reference/Character1_lower/Character1_Lower/Character1_LeftUpLeg/pCube18
+        weight: 1
+      - path: Character1_Reference/Character1_lower/Character1_Lower/Character1_RightUpLeg
+        weight: 1
+      - path: Character1_Reference/Character1_lower/Character1_Lower/Character1_RightUpLeg/Character1_RightLeg
+        weight: 1
+      - path: Character1_Reference/Character1_lower/Character1_Lower/Character1_RightUpLeg/Character1_RightLeg/Character1_RightFoot1
+        weight: 1
+      - path: Character1_Reference/Character1_lower/Character1_Lower/Character1_RightUpLeg/Character1_RightLeg/Character1_RightFoot1/Character1_RightFoot
+        weight: 1
+      - path: Character1_Reference/Character1_lower/Character1_Lower/Character1_RightUpLeg/Character1_RightLeg/Character1_RightFoot1/Character1_RightFoot/Character1_RightToeBase
+        weight: 1
+      - path: Character1_Reference/Character1_lower/Character1_Lower/Character1_RightUpLeg/Character1_RightLeg/Character1_RightFoot1/Character1_RightFoot/pCube1
+        weight: 1
+      - path: Character1_Reference/Character1_lower/Character1_Lower/Character1_RightUpLeg/Character1_RightLeg/pCube2
+        weight: 1
+      - path: Character1_Reference/Character1_lower/Character1_Lower/Character1_RightUpLeg/pCube3
+        weight: 1
+      - path: Character1_Reference/Character1_lower/pCube4
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/Character1_LeftArm
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/Character1_LeftArm/Character1_LeftForeArm
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/Character1_LeftArm/Character1_LeftForeArm/Character1_LeftHand
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/Character1_LeftArm/Character1_LeftForeArm/Character1_LeftHand/Character1_LeftHand1
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/Character1_LeftArm/Character1_LeftForeArm/Character1_LeftHand/Character1_LeftHand1/joint1
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/Character1_LeftArm/Character1_LeftForeArm/Character1_LeftHand/Character1_LeftHand1/pCube21
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/Character1_LeftArm/Character1_LeftForeArm/Character1_LeftHand/pCube20
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/Character1_LeftArm/pCube19
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/Character1_Neck
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/Character1_Neck/Character1_Head
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/Character1_Neck/polySurface1
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/Character1_RightArm
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/Character1_RightArm/Character1_RightForeArm
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/Character1_RightArm/Character1_RightForeArm/Character1_RightHand
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/Character1_RightArm/Character1_RightForeArm/Character1_RightHand/Character1_RightHand1
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/Character1_RightArm/Character1_RightForeArm/Character1_RightHand/Character1_RightHand1/joint1
+          1
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/Character1_RightArm/Character1_RightForeArm/Character1_RightHand/Character1_RightHand1/pCube11
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/Character1_RightArm/Character1_RightForeArm/pCube8
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/Character1_RightArm/pCube7
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/Character1_SpineB/pCube6
+        weight: 1
+      - path: Character1_Reference/Character1_SpineA/pCube5
+        weight: 1
+      - path: Ctrl
+        weight: 1
+      - path: Ctrl/Body_Ctrl
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/Hip_FK_Ctrl
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/Hip_FK_Ctrl/Hip_FK_Ctrl1
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/LeftArm_Vec
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/LeftArm_Vec/LeftArm_Vec 1
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/Leftfoot_Vec1
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/LeftHand_IK_Ctrl
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/LeftHand_IK_Ctrl/LeftHand_IK_Ctrl 1
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/LeftHand_IK_Ctrl/LeftHand_IK_Ctrl 1/LeftHand_FK_Ctrl
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/LeftHand_IK_Ctrl/LeftHand_IK_Ctrl 1/LeftHand_FK_Ctrl/LeftHand_FK_Ctrl
+          1
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/RightArm_Vec
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/RightArm_Vec/RightArm_Vec 1
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/Rightfoot_Vec
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/RightHand_IK_Ctrl
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/RightHand_IK_Ctrl/RightHand_IK_Ctrl 1
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/RightHand_IK_Ctrl/RightHand_IK_Ctrl 1/RightHand_FK_Ctrl
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/RightHand_IK_Ctrl/RightHand_IK_Ctrl 1/RightHand_FK_Ctrl/RightHand_FK_Ctrl
+          1
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/SpineA_FK_Ctlr
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/SpineA_FK_Ctlr/SpineA_FK_Ctlr 1
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/SpineA_FK_Ctlr/SpineA_FK_Ctlr 1/SpineB_FK_Ctlr
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/SpineA_FK_Ctlr/SpineA_FK_Ctlr 1/SpineB_FK_Ctlr/SpineB_FK_Ctlr
+          1
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/SpineA_FK_Ctlr/SpineA_FK_Ctlr 1/SpineB_FK_Ctlr/SpineB_FK_Ctlr
+          1/Haed_FK_Ctrl
+        weight: 1
+      - path: Ctrl/Body_Ctrl/Body_Ctrl 1/SpineA_FK_Ctlr/SpineA_FK_Ctlr 1/SpineB_FK_Ctlr/SpineB_FK_Ctlr
+          1/Haed_FK_Ctrl/Haed__FK_Ctrl
+        weight: 1
+      - path: Ctrl/Lower_Ctrl
+        weight: 1
+      - path: Ctrl/Lower_Ctrl/LeftFoot_IK_Ctrl
+        weight: 1
+      - path: Ctrl/Lower_Ctrl/LeftFoot_IK_Ctrl/LeftFoot_IK_Ctrl 1
+        weight: 1
+      - path: Ctrl/Lower_Ctrl/LeftFoot_IK_Ctrl/LeftFoot_IK_Ctrl 1/Leftfoot_FK_Ctrl
+        weight: 1
+      - path: Ctrl/Lower_Ctrl/LeftFoot_IK_Ctrl/LeftFoot_IK_Ctrl 1/Leftfoot_FK_Ctrl/Leftfoot_FK_Ctrl
+          1
+        weight: 1
+      - path: Ctrl/Lower_Ctrl/RightFoot_IK_Ctrl
+        weight: 1
+      - path: Ctrl/Lower_Ctrl/RightFoot_IK_Ctrl/Rightfoot_IK_Ctrl
+        weight: 1
+      - path: Ctrl/Lower_Ctrl/RightFoot_IK_Ctrl/Rightfoot_IK_Ctrl/Rightfoot_FK_Ctrl
+        weight: 1
+      - path: Ctrl/Lower_Ctrl/RightFoot_IK_Ctrl/Rightfoot_IK_Ctrl/Rightfoot_FK_Ctrl/Rightfoot_FK_Ctrl
+          1
+        weight: 1
+      - path: ikHandle4
+        weight: 1
+      - path: Leftarm_ikHandle
+        weight: 1
+      - path: Leftleg_ikHandle
+        weight: 1
+      - path: pCylinder5
+        weight: 1
+      - path: pCylinder5/transform3
+        weight: 1
+      - path: pSphere1
+        weight: 1
+      - path: pSphere1/transform4
+        weight: 1
+      - path: Rightarm_ikHandle
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 1
+    globalScale: 8
     meshCompression: 0
     addColliders: 0
     importBlendShapes: 1

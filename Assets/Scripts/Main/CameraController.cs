@@ -26,14 +26,24 @@ namespace Uxtuno
 		}
 
 		[SerializeField, Tooltip("追従対象")]
-		private Transform target = null;
+		private Transform _target = null;
+		/// <summary>
+		/// 追従対象
+		/// </summary>
+		public Transform target
+		{
+			get { return _target; }
+			set { _target = value; }
+		}
+
 		[SerializeField, Tooltip("追従対象との距離")]
 		private float _distance = 2.0f;
 
 		/// <summary>
 		/// カメラと注視点の距離
 		/// </summary>
-		public float distance {
+		public float distance
+		{
 			get { return _distance; }
 			set { _distance = value; }
 		}
@@ -75,6 +85,7 @@ namespace Uxtuno
 		}
 
 		private Vector3 pivotEulers; // 基準位置のオイラー角を保持
+		private Vector3 pivotTargetPosition;
 		private Quaternion pivotTargetRotation; // 基準位置の回転後角度
 		private Quaternion transformTargetRotation; // 回転後角度
 
@@ -102,6 +113,7 @@ namespace Uxtuno
 		void Start()
 		{
 			_pivot = cameraTransform.transform.parent;
+			pivotTargetPosition = pivot.position;
 			pivotTargetRotation = _pivot.localRotation;
 			pivotEulers = _pivot.localEulerAngles;
 			transformTargetRotation = transform.localRotation;
@@ -194,6 +206,7 @@ namespace Uxtuno
 			StartCoroutine(TargetTracking());
 		}
 
+		private float oldDistance; // 前フレームのカメラ距離
 		// このコードにより、すべてのFixedUpdate終了後に呼び出される
 		IEnumerator TargetTracking()
 		{
@@ -203,11 +216,12 @@ namespace Uxtuno
 
 			// 角度を補間
 			float interpolationPosition = Interpolation();
+			pivot.localPosition = Vector3.Lerp(pivot.localPosition, pivotTargetPosition, interpolationPosition);
 			transform.localRotation = Quaternion.Lerp(transform.localRotation, transformTargetRotation, interpolationPosition);
 			_pivot.localRotation = Quaternion.Lerp(_pivot.localRotation, pivotTargetRotation, interpolationPosition);
 
 			// 最終的な距離
-			float finalDistance = distance > defaultDistance? distance : defaultDistance; 
+			float finalDistance = distance > defaultDistance ? distance : defaultDistance;
 			cameraTransform.localPosition = -Vector3.forward * finalDistance;
 
 			// 障害物を考慮して最終的なカメラの距離を計算
@@ -217,9 +231,9 @@ namespace Uxtuno
 			{
 				finalDistance = Vector3.Distance(hit.point, pivot.position);
 			}
-
+			oldDistance = Mathf.Lerp(oldDistance, finalDistance, interpolationPosition);
 			// 追尾対象からの距離を反映
-			cameraTransform.localPosition = -Vector3.forward * finalDistance;
+			cameraTransform.localPosition = -Vector3.forward * oldDistance;
 		}
 
 		#region - LookAt
@@ -287,7 +301,7 @@ namespace Uxtuno
 			float toTargetDistanceXZ = toTargetXZ.magnitude;
 			float toTargetHeightDiff = targetPosition.y - transform.position.y;
 			float toTargetAngleX = Mathf.Atan2(toTargetDistanceXZ, toTargetHeightDiff) * Mathf.Rad2Deg - 90.0f;
-			if(toTargetAngleX < inverseToAngleX)
+			if (toTargetAngleX < inverseToAngleX)
 			{
 				//toTargetAngleX = Mathf.Abs(toTargetAngleX);
 			}
@@ -312,7 +326,7 @@ namespace Uxtuno
 		/// <param name="position"></param>
 		public void SetPivot(Vector3 position)
 		{
-			pivot.position = position;
+			pivotTargetPosition = transform.InverseTransformPoint(position);
 		}
 
 		/// <summary>
@@ -320,7 +334,7 @@ namespace Uxtuno
 		/// </summary>
 		public void ResetPivot()
 		{
-			pivot.localPosition = defaultPivotPosition;
+			pivotTargetPosition = defaultPivotPosition;
 		}
 	}
 }

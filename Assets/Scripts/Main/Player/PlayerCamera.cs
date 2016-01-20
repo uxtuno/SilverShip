@@ -12,9 +12,10 @@ namespace Uxtuno
 		private Transform cameraTransform;
 		private Transform target; // ロックオン対象
 		private Player player;
-		private static readonly float playerMoveToCameraRotationSpeed = 5.0f; // プレイヤーが動いた時のカメラ回転速度
+		private static readonly float playerMoveToCameraRotationSpeed = 10.0f; // プレイヤーが動いた時のカメラ回転速度
 		private readonly float horizontalRotationSpeed;
 		private readonly float verticalRotationSpeed;
+		private static readonly float verticalMoveRotationSpeed = 0.5f; // 上下移動時のカメラ回転補正値
 
 		/// <summary>
 		/// プレイヤーカメラの動作
@@ -66,14 +67,16 @@ namespace Uxtuno
 			cameraMove.x = PlayerInput.cameraHorizontal;
 			cameraMove.y = PlayerInput.cameraVertical;
 
+			// これは適当な値
+			// また、moveVectorを変換する前の値が必要なのでここで取得
+			float cameraVertical = -moveVector.y * verticalMoveRotationSpeed;
+			
 			// プレイヤーが移動した時のY軸カメラ回転量を計算
 			moveVector = controller.cameraTransform.InverseTransformDirection(moveVector);
 			Vector2 moveVectorXZ = new Vector2(moveVector.x, moveVector.z);
 			float moveAngleXZ = Mathf.Atan2(moveVectorXZ.y, moveVectorXZ.x);
 			float cameraHorizontal = Mathf.Cos(moveAngleXZ) * moveVectorXZ.magnitude;
-			// これは適当な値
-			float cameraVertical = -moveVector.y;
-
+			
 			if (cameraMove != Vector2.zero)
 			{
 				controller.CameraMove(cameraMove.x * horizontalRotationSpeed * Time.deltaTime, cameraMove.y * verticalRotationSpeed * Time.deltaTime, 0.2f);
