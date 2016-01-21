@@ -308,7 +308,7 @@ namespace Uxtuno
 
 			VerticalRotation((xAngle - toTargetAngleX));
 
-			InterpolationStart(interpolationSeconds, mode);
+			InterpolationStart(0.2f, mode);
 		}
 		#endregion
 

@@ -45,6 +45,7 @@ namespace Uxtuno
 		private int isJumpID;
 		private int isGroundedID;
 		private int isTrampledID;
+		private int isFallID;
 
 		/// <summary>
 		/// ジャンプ状態
@@ -123,7 +124,7 @@ namespace Uxtuno
 		private PlayerAttackFlow attackFlow;
 		private GameObject powerPointPrefab; // 結界ポイントエフェクト
 		private PowerPointCreator powerPointCreator; // 結界の点を生成するためのクラス
-		private static readonly int barrierPointNumber = 1; // 結界を発生させる事ができる点の数
+		private static readonly int barrierPointNumber = 3; // 結界を発生させる事ができる点の数
 		private GameObject barrierPrefab;
 		[SerializeField, Tooltip("足のCollider")]
 		private ContainedObjects __footContained; // 足付近の壁を検知
@@ -166,6 +167,7 @@ namespace Uxtuno
 			isJumpID = Animator.StringToHash("IsJump");
 			isGroundedID = Animator.StringToHash("IsGrounded");
 			isTrampledID = Animator.StringToHash("IsTrampled");
+			isFallID = Animator.StringToHash("IsFall");
 
 			attackFlow = new PlayerAttackFlow(animator);
 
@@ -188,17 +190,18 @@ namespace Uxtuno
 
 		void FixedUpdate()
 		{
-			if (lockOnState == LockOnState.Manual)
+			if (lockOnState == LockOnState.Manual && lockOnTarget)
 			{
-				cameraController.LookAt(lockOnTarget.transform, 1.0f, CameraController.InterpolationMode.Curve);
 				// 敵とプレイヤーの中心点を求め境界球とする
 				Vector3 halfToTarget = (lockOnTarget.lockOnPoint.position - lockOnPoint.position) * 0.5f;
                 Vector3 center = lockOnPoint.position + halfToTarget;
+				halfToTarget.y *= 1.8f;
 				float adjustment = 5.0f; // プレイヤーが視界に入るように適切な値を調整
 				float radius = halfToTarget.magnitude + adjustment;
 				cameraController.SetPivot(center);
 				// d = r / sinθ : ※θはfieldOfView
-				cameraController.distance = -(radius / Mathf.Sin((Camera.main.fieldOfView) * 0.5f));
+				cameraController.distance = -(radius / Mathf.Sin(Camera.main.fieldOfView * 0.5f));
+				cameraController.LookAt(center, 1.0f, CameraController.InterpolationMode.Curve);
 			}
 
 			if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.CameraToFront))
@@ -740,6 +743,7 @@ namespace Uxtuno
 				if (player.isGrounded && player.jumpVY <= 0.0f)
 				{
 					player.currentState = new NormalState(player);
+					player.animator.SetBool(player.isFallID, false);
 					return;
 				}
 
@@ -753,8 +757,9 @@ namespace Uxtuno
 
 				if (player.jumpVY < 0.0f)
 				{
+					player.animator.SetBool(player.isFallID, true);
 					// 落下中は速度を落とす
-					player.FallGravity();
+					player.Gravity();
 				}
 				else
 				{
