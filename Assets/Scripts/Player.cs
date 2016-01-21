@@ -304,6 +304,11 @@ namespace Uxtuno
 			else if (lockOnState == LockOnState.Manual)
 			{
 				limitDistance = manualLockOnLimitDistance;
+				// ロックオン対象がいなくなったので解除
+				if(lockOnTarget == null)
+				{
+					LockOnRelease();
+				}
 			}
 
 			// ロックオン対象から離れすぎると解除
@@ -543,6 +548,7 @@ namespace Uxtuno
 			currentJumpState = JumpState.Jumping;
 			// 正しくアニメーションを遷移させるために接地フラグをfalseに
 			animator.SetBool(isGroundedID, false);
+			animator.SetTrigger(isJumpID);
 			currentState = new DepressionState(this);
 		}
 
@@ -827,7 +833,7 @@ namespace Uxtuno
 		private class DepressionState : BaseState
 		{
 			private float transitionCount; // 次の状態へ遷移するまでの時間をカウント
-			private static readonly float transitionSeconds = 0.1f; // 次の状態へ遷移するまでの時間
+			private static readonly float transitionSeconds = 0.3f; // 次の状態へ遷移するまでの時間
 			public DepressionState(Player player)
 				: base(player)
 			{
