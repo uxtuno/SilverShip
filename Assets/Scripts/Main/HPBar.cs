@@ -6,12 +6,16 @@ public class HPBar : MonoBehaviour
 {
 	[Tooltip("true:Player / false:ロックオン対象"), SerializeField]
 	private bool usePlayerHp = false;
-	private Actor target = null;		// HP表示対象のActor
-	private Actor oldTarget = null;		// 前フレーム時のTarget
-	private float oldHp = 0f;           // 前フレーム時のHP
-	private Vector3 initialPosition;	// hpRectTransform.positionの初期化用
-	private float maxWidth;				// HPバーの最大幅
-	private float oneHpWidth;           // HP1当たりの幅
+	[Tooltip("targetの名前を表示するText(指定しなければ表示しない)"), SerializeField]
+	private Text nameDisplayObjct = null;
+	[Tooltip("Levelを表示するText(指定しなければ表示しない)"), SerializeField]
+	private Text levelDisplayObjct = null;
+	private Actor target = null;			// HP表示対象のActor
+	private Actor oldTarget = null;			// 前フレーム時のTarget
+	private float oldHp = 0f;				// 前フレーム時のHP
+	private Vector3 initialPosition;		// hpRectTransform.positionの初期化用
+	private float maxWidth;					// HPバーの最大幅
+	private float oneHpWidth;				// HP1当たりの幅
 
 	private RectTransform _hpRectTransform;       // hpRectTransformプロパティの実体
 
@@ -83,9 +87,21 @@ public class HPBar : MonoBehaviour
 		if (usePlayerHp)
 		{
 			target = GameManager.instance.player;	// HP表示対象をプレイヤーに
+			if (nameDisplayObjct)
+			{
+				nameDisplayObjct.text = target ? target.actorName : "";
+			}
+			if (levelDisplayObjct)
+			{
+				levelDisplayObjct.text = target ? "Lv." + target.level : "";
+			}
 			oldTarget = target;
 			oneHpWidth = maxWidth / target.hp;
-			oldHp = target.hp;
+			oldHp = target.maxHp;
+		}
+		else
+		{
+			Initialize();
 		}
 	}
 
@@ -109,35 +125,42 @@ public class HPBar : MonoBehaviour
 			if (target != GameManager.instance.player.lockOnTarget)
 			{
 				target = GameManager.instance.player.lockOnTarget;
+				if (nameDisplayObjct)
+				{
+					nameDisplayObjct.text = target ? target.actorName : "";
+				}
 			}
 
 			if (target != oldTarget)
 			{
+				Initialize();
+
 				if (target)
 				{
 					oldTarget = target;
-					oneHpWidth = maxWidth / target.hp;
+					oneHpWidth = maxWidth / target.maxHp;
 					oldHp = target.hp;
-					// float damage =target.maxHp - target.hp;
-					// float damageWidth = oneHpWidth * damage;
-					hpRectTransform.sizeDelta = new Vector2(maxWidth/* - damageWidth*/, hpRectTransform.sizeDelta.y);
-					hpRectTransform.position = initialPosition/* + new Vector3(damageWidth / 2f, 0, 0)*/;
+					float damage = target.maxHp - target.hp;
+					float damageWidth = oneHpWidth * damage;
 
-					// 非表示状態の場合、表示に戻す
-					if (!hpImage.enabled)
+					hpRectTransform.sizeDelta -= new Vector2(damageWidth, 0);
+					Debug.Log(hpRectTransform.sizeDelta);
+					hpRectTransform.localPosition += new Vector3(damageWidth / 2f, 0, 0);
+
+					// Actor名が非表示状態の場合、表示に戻す
+					if (!nameDisplayObjct.enabled)
 					{
-						hpImage.enabled = true;
+						nameDisplayObjct.enabled = true;
 					}
-				}
-				else
-				{
-					// 各変数・プロパティを初期状態に
-					hpRectTransform.position = initialPosition;
-					hpRectTransform.sizeDelta = new Vector2(maxWidth, hpRectTransform.sizeDelta.y);
-					oldTarget = target;
-					oneHpWidth = 0f;
-					oldHp = 0f;
-					hpImage.enabled = false;
+
+					foreach (Image current in GetComponentsInChildren<Image>())
+					{
+						// バーが非表示状態の場合、表示に戻す
+						if (!current.enabled)
+						{
+							current.enabled = true;
+						}
+					}
 				}
 			}
 
@@ -150,6 +173,24 @@ public class HPBar : MonoBehaviour
 			{
 				CalcBarLength();
 			}
+		}
+	}
+
+	/// <summary>
+	/// 初期化(しかしinitialPosition及びmaxWidthに値が入っていることを前提とする)
+	/// </summary>
+	private void Initialize()
+	{
+		// 各変数・プロパティを初期状態に
+		hpRectTransform.position = initialPosition;
+		hpRectTransform.sizeDelta = new Vector2(maxWidth, hpRectTransform.sizeDelta.y);
+		nameDisplayObjct.enabled = false;
+		oldTarget = null;
+		oneHpWidth = 0f;
+		oldHp = 0f;
+		foreach (Image current in GetComponentsInChildren<Image>())
+		{
+			current.enabled = false;
 		}
 	}
 

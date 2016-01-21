@@ -12,29 +12,29 @@ namespace Kuvo
 	/// インスタンスの自動生成は行わないので
 	/// ヒエラルキーに手動で配置してください
 	/// </summary>
-	public class EnemyCreatorSingleton : MyMonoBehaviour
+	public class EnemyManagerSingleton : MyMonoBehaviour
 	{
 		#region - シングルトンを実現させるための処理 -
 		// 唯一のインスタンス
-		private static EnemyCreatorSingleton _instance;
+		private static EnemyManagerSingleton _instance;
 
 		/// <summary>
 		/// プライベートコンストラクタ―
 		/// </summary>
-		private EnemyCreatorSingleton()
+		private EnemyManagerSingleton()
 		{
 		}
 
 		/// <summary>
 		/// インスタンス(ヒエラルキー内に配置されていない場合nullが返る)
 		/// </summary>
-		public static EnemyCreatorSingleton instance
+		public static EnemyManagerSingleton instance
 		{
 			get
 			{
 				if (!_instance)
 				{
-					if (!(_instance = FindObjectOfType<EnemyCreatorSingleton>()))
+					if (!(_instance = FindObjectOfType<EnemyManagerSingleton>()))
 					{
 						Debug.LogError("EnemyCreatorSingletonが存在しませんでした\n規定値としてnullを使用します。");
 					}
@@ -45,12 +45,24 @@ namespace Kuvo
 		}
 		#endregion
 
-		[Tooltip("生成するエネミーのプレハブ"), SerializeField]
-		private GameObject enemyPrefab = null;
-		private float fieldDepth = 10.0f; // フィールドの奥行
-		private float fieldWidth = 10.0f; // フィールドの幅
-		[Tooltip("生成数"), SerializeField]
-		private int generateNumber = 50; // 生成数
+		[System.Serializable]
+		private class CreateEnemyInformation
+		{
+			[Tooltip("生成するエネミーのプレハブ")]
+			public List<GameObject> enemyPrefabs = new List<GameObject>();
+			[Tooltip("生成数")]
+			public int createNumber = 50; // 生成数
+
+			[Tooltip("生成地点の中心")]
+			public Transform transformPosition = null;
+			[Tooltip("生成範囲")]
+			public float range = 10.0f;
+
+		}
+
+		[Tooltip("エネミーの生成情報"), SerializeField]
+		private List<CreateEnemyInformation> createEnemyInformations = new List<CreateEnemyInformation>();
+		private GameObject enemyFolder = null;		// エネミーを格納する入れ物
 
 		/// <summary>
 		/// 現在使用している攻撃コストを格納する
@@ -124,17 +136,58 @@ namespace Kuvo
 
 		private void Start()
 		{
-			GameObject enemyFolder = new GameObject("Enemies");
+			// エネミーをまとめるGameObjectを探し、無ければ生成
+			if (!enemyFolder)
+			{
+				if (!(enemyFolder = GameObject.Find("Enemies")))
+				{
+					enemyFolder = new GameObject("Enemies");
+				}
+			}
+
 			enemies = new List<BaseEnemy>();
 
-			for (int i = 0; i < generateNumber; i++)
+			foreach (CreateEnemyInformation createEnemyInformation in createEnemyInformations)
 			{
-				Quaternion rotate = new Quaternion();
-				rotate.eulerAngles = new Vector3(0, Random.Range(0, 359));
-				GameObject enemy = Instantiate(enemyPrefab, new Vector3(Random.Range(-(fieldWidth / 2), fieldWidth / 2), 2f, Random.Range(-(fieldDepth / 2), fieldDepth / 2)), rotate) as GameObject;
+				// コードの可読性のために値を変数に格納
+				List<GameObject> enemyPrefabs = createEnemyInformation.enemyPrefabs;
+				Vector3 centerPosition = createEnemyInformation.transformPosition.position;
+				float range = createEnemyInformation.range;
+				int createNumber = createEnemyInformation.createNumber;
 
+				Create(enemyPrefabs, centerPosition, range, createNumber);
+			}
+		}
+
+		/// <summary>
+		/// エネミーを生成する
+		/// </summary>
+		/// <param name="enemyPrefabs"> エネミーのプレハブ</param>
+		/// <param name="centerPosition"> 生成範囲の中心</param>
+		/// <param name="range"> 範囲</param>
+		/// <param name="createNumber"> 生成数</param>
+		private void Create(List<GameObject> enemyPrefabs, Vector3 centerPosition, float range, int createNumber)
+		{
+			for (int i = 0; i < createNumber; i++)
+			{
+				Quaternion rotation = new Quaternion();
+				rotation.eulerAngles = new Vector3(0, Random.Range(0, 359));
+				float randamX = Random.Range(-(range / 2), range / 2);
+				float randamY = Random.Range(-(range / 2), range / 2);
+				float randamZ = Random.Range(-(range / 2), range / 2);
+				Vector3 position = centerPosition + new Vector3(randamX, randamY, randamZ);
+
+				int selectIndex = Random.Range(0, enemyPrefabs.Count);
+
+				GameObject enemy = Instantiate(enemyPrefabs[selectIndex], position, rotation) as GameObject;
 				enemy.transform.SetParent(enemyFolder.transform);
-				enemies.Add(enemy.GetComponent<BaseEnemy>());
+
+				if (enemies == null)
+				{
+					enemies = new List<BaseEnemy>();
+				}
+
+				enemies.Add(enemy.GetSafeComponent<BaseEnemy>());
 			}
 		}
 

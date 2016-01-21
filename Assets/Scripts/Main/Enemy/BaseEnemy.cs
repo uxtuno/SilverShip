@@ -224,8 +224,21 @@ namespace Kuvo
 		{
 			base.Damage(attackPower, magnification);
 
-			if (hp <= 0 && currentState != EnemyState.Death && !isAttack)
+			if (hp <= 0 && currentState != EnemyState.Death)
 			{
+				if(isAttack)
+				{
+					if (baseEnemyAI.isCaptain)
+					{
+						EnemyManagerSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.lAttackCost, 0);
+					}
+					else
+					{
+						EnemyManagerSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.sAttackCost, 0);
+					}
+					isAttack = false;
+				}
+
 				currentState = EnemyState.Death;
 				BaseEnemyAI aI = GetComponent<BaseEnemyAI>();
 				if (aI)
@@ -306,7 +319,9 @@ namespace Kuvo
 
 				yield return new WaitForEndOfFrame();
 			}
-			Debug.Log("死んだー", gameObject);
+			Debug.Log("死んだっぽい", gameObject);
+
+			EnemyManagerSingleton.instance.enemies.Remove(this);
 			Destroy(gameObject);
 		}
 

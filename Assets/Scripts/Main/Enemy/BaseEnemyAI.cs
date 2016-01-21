@@ -281,7 +281,7 @@ namespace Kuvo
 			if (!captain && members.Count <= 0)
 			{
 				// 上司をキャッシュ
-				BaseEnemyAI captainAI = EnemyCreatorSingleton.instance.captainAI;
+				BaseEnemyAI captainAI = EnemyManagerSingleton.instance.captainAI;
 
 				// 上司が存在しなければ
 				if (!captainAI)

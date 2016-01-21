@@ -20,7 +20,6 @@ namespace Kuvo
 
 		protected override void Awake()
 		{
-			hp = 5;
 			attack = 1;
 			defence = 2;
 			sight = 1.5f;
@@ -66,14 +65,14 @@ namespace Kuvo
 						break;
 
 					case EnemyState.SAttack:
-						if (!isAttack && !EnemyCreatorSingleton.instance.isCostOver)
+						if (!isAttack && !EnemyManagerSingleton.instance.isCostOver)
 						{
 							StartCoroutine(ShortRangeAttack());
 						}
 						break;
 
 					case EnemyState.LAttack:
-						if (!isAttack && !EnemyCreatorSingleton.instance.isCostOver)
+						if (!isAttack && !EnemyManagerSingleton.instance.isCostOver)
 						{
 							StartCoroutine(LongRangeAttack());
 						}
@@ -166,7 +165,7 @@ namespace Kuvo
 		public override IEnumerator ShortRangeAttack()
 		{
 			isAttack = true;
-			EnemyCreatorSingleton.instance.StartCostAddForSeconds(baseEnemyAI.attackParameters.sAttackCost, 0);
+			EnemyManagerSingleton.instance.StartCostAddForSeconds(baseEnemyAI.attackParameters.sAttackCost, 0);
 			currentState = EnemyState.Move;
 			Vector3 startPosition = transform.position;
 
@@ -202,7 +201,7 @@ namespace Kuvo
 			yield return new WaitForSeconds(1.0f);
 
 			shortRangeAttackAreaObject.SetActive(false);
-			EnemyCreatorSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.sAttackCost, CostKeepSecond);
+			EnemyManagerSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.sAttackCost, CostKeepSecond);
 			StartCoroutine(MovingPosition(startPosition, baseEnemyAI.attackParameters.sAttackPreOperatSecond));
 		}
 
@@ -212,7 +211,7 @@ namespace Kuvo
 		public override IEnumerator LongRangeAttack()
 		{
 			isAttack = true;
-			EnemyCreatorSingleton.instance.StartCostAddForSeconds(baseEnemyAI.attackParameters.lAttackCost, 0);
+			EnemyManagerSingleton.instance.StartCostAddForSeconds(baseEnemyAI.attackParameters.lAttackCost, 0);
 
 			// ここに予備動作
 			yield return new WaitForSeconds(baseEnemyAI.attackParameters.lAttackPreOperatSecond);
@@ -236,7 +235,7 @@ namespace Kuvo
 				bullet.transform.SetParent(bulletCollecter.transform);
 			}
 
-			EnemyCreatorSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.lAttackCost, CostKeepSecond);
+			EnemyManagerSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.lAttackCost, CostKeepSecond);
 			isAttack = false;
 		}
 

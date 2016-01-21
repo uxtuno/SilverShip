@@ -1194,6 +1194,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91ae1b1cacae2c348bd68b912bee05aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _actorName: "\u30C1\u30E7\u30A6\u30C6\u30A3\u30F3!!"
+  _maxHp: 10
   speed: 3
   viewAngle: 90
   viewRange: 5
@@ -1270,6 +1272,14 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: m_IsTrigger
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: _maxHp
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: _actorName
+      value: "\u30C1\u30E7\u30A6\u30C6\u30A3\u30F3!!"
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

@@ -11,7 +11,6 @@ public class TempEnemy : BaseEnemy
 	{
 		base.Awake();
 		sight = 2f;
-		hp = 100;
 	}
 
 	protected override IEnumerator AirStagger()
