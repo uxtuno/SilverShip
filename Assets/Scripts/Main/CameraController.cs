@@ -69,8 +69,15 @@ namespace Uxtuno
 
 		private static readonly float inverseToAngleX = -40.0f; // 上下の回転を反転させる境界角
 
-		private float yAngle; // Y軸方向の回転角
-		private float xAngle; // X軸方向の回転角
+		/// <summary>
+		/// Y軸方向の回転角
+		/// </summary>
+		public float yAngle { get; private set; }
+
+		/// <summary>
+		/// X軸方向の回転角
+		/// </summary>
+		public float xAngle { get; private set; }
 
 		private Transform _pivot; // 基準位置(X軸回転に使用)
 		private Vector3 defaultPivotPosition; // 注視点の初期座標
@@ -210,6 +217,7 @@ namespace Uxtuno
 		// このコードにより、すべてのFixedUpdate終了後に呼び出される
 		IEnumerator TargetTracking()
 		{
+			// xxx : この補間処理は当初の意図と異なっている
 			yield return new WaitForFixedUpdate();
 			// 座標を補間
 			transform.position = Vector3.Lerp(transform.position, target.position, movenSmoothing);
@@ -218,7 +226,7 @@ namespace Uxtuno
 			float interpolationPosition = Interpolation();
 			pivot.localPosition = Vector3.Lerp(pivot.localPosition, pivotTargetPosition, interpolationPosition);
 			transform.localRotation = Quaternion.Lerp(transform.localRotation, transformTargetRotation, interpolationPosition);
-			_pivot.localRotation = Quaternion.Lerp(_pivot.localRotation, pivotTargetRotation, interpolationPosition);
+			pivot.localRotation = Quaternion.Lerp(pivot.localRotation, pivotTargetRotation, interpolationPosition);
 
 			// 最終的な距離
 			float finalDistance = distance > defaultDistance ? distance : defaultDistance;
@@ -226,10 +234,14 @@ namespace Uxtuno
 
 			// 障害物を考慮して最終的なカメラの距離を計算
 			RaycastHit hit;
-			Ray ray = new Ray(transform.position, cameraTransform.position - transform.position);
-			if (Physics.Raycast(ray, out hit, distance, LayerName.Obstacle.maskValue))
+			// デフォルトのピボット位置を原点とする
+			Vector3 origin = transform.position + defaultPivotPosition;
+			Vector3 pivotToCamera = cameraTransform.position - origin;
+			// 原点からカメラの間に障害物がないか
+            Ray ray = new Ray(origin, pivotToCamera);
+			if (Physics.Raycast(ray, out hit, pivotToCamera.magnitude, LayerName.Obstacle.maskValue))
 			{
-				finalDistance = Vector3.Distance(hit.point, pivot.position);
+				finalDistance = Vector3.Distance(pivot.position, hit.point) - 1.0f;
 			}
 			oldDistance = Mathf.Lerp(oldDistance, finalDistance, interpolationPosition);
 			// 追尾対象からの距離を反映

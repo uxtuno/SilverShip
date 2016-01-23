@@ -9,6 +9,7 @@ namespace Uxtuno
 {
 	public class Player : Actor
 	{
+		public int a;
 		[Tooltip("歩く速さ(単位:m/s)"), SerializeField]
 		private float maxSpeed = 5.0f; // 移動速度
 		[Tooltip("ジャンプの高さ(単位:m)"), SerializeField]
@@ -19,6 +20,8 @@ namespace Uxtuno
 		private float horizontalRotationSpeed = 120.0f; // 水平方向へのカメラ移動速度
 		[Tooltip("垂直方向のカメラ移動速度"), SerializeField]
 		private float verticalRotationSpeed = 40.0f; // 垂直方向へのカメラ移動速度
+		[Tooltip("オートロックオンエリア"), SerializeField]
+		private ContainedObjects autoLockOnArea;
 		[SerializeField]
 		private int _attack = 5;
 		protected override int attack
@@ -79,7 +82,6 @@ namespace Uxtuno
 		private BaseState currentState; // 現在の状態
 
 		#region - フィールド
-		private ContainedObjects containedObjects;
 		private Actor _lockOnTarget; // ロックオン対象エネミー
 
 		/// <summary>
@@ -141,7 +143,7 @@ namespace Uxtuno
 
 			characterController = GetComponent<CharacterController>();
 			GameObject cameraRig = GameObject.FindGameObjectWithTag(TagName.CameraController);
-			if(cameraRig == null)
+			if (cameraRig == null)
 			{
 				cameraRig = Instantiate(cameraRigPrefab);
 			}
@@ -157,8 +159,7 @@ namespace Uxtuno
 			jumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * jumpHeight);
 			highJumpPower = Mathf.Sqrt(2.0f * -Physics.gravity.y * highJumpHeight);
 
-			containedObjects = GetComponentInChildren<ContainedObjects>();
-			if (containedObjects == null)
+			if (autoLockOnArea == null)
 			{
 				Debug.Log(typeof(ContainedObjects) + " が見つかりません");
 			}
@@ -193,9 +194,22 @@ namespace Uxtuno
 			if (lockOnState == LockOnState.Manual && lockOnTarget)
 			{
 				// 敵とプレイヤーの中心点を求め境界球とする
-				Vector3 halfToTarget = (lockOnTarget.lockOnPoint.position - lockOnPoint.position) * 0.5f;
-                Vector3 center = lockOnPoint.position + halfToTarget;
-				halfToTarget.y *= 1.8f;
+				Vector3 lookPosition = lockOnTarget.lockOnPoint.position;
+				// 地上に近すぎないように限界値を決める
+				float limitHeightDistance = 2.0f;
+				RaycastHit hit;
+				Ray ray = new Ray(lookPosition, Vector3.down);
+				if (Physics.Raycast(ray, out hit, 2.0f, LayerName.Obstacle.maskValue))
+				{
+					if (hit.distance < limitHeightDistance)
+					{
+						lookPosition.y = hit.point.y + limitHeightDistance;
+					}
+				}
+				Debug.Log((Camera.main.aspect));
+				Vector3 halfToTarget = (lookPosition - lockOnPoint.position) * 0.5f;
+				Vector3 center = lockOnPoint.position + halfToTarget;
+				halfToTarget.y *= Camera.main.aspect;
 				float adjustment = 5.0f; // プレイヤーが視界に入るように適切な値を調整
 				float radius = halfToTarget.magnitude + adjustment;
 				cameraController.SetPivot(center);
@@ -231,7 +245,7 @@ namespace Uxtuno
 		private void CommonState()
 		{
 			if (powerPointCreator.count == barrierPointNumber &&
-                PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Barrier))
+				PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Barrier))
 			{
 				Vector3 powerPointCenter = Vector3.zero;
 
@@ -308,7 +322,7 @@ namespace Uxtuno
 			{
 				limitDistance = manualLockOnLimitDistance;
 				// ロックオン対象がいなくなったので解除
-				if(lockOnTarget == null)
+				if (lockOnTarget == null)
 				{
 					LockOnRelease();
 				}
@@ -374,7 +388,7 @@ namespace Uxtuno
 		{
 			float minDistance2 = float.PositiveInfinity;
 			Transform tempLockOnTarget = null; // ロックオン対象候補を入れる
-			foreach (Transform enemy in containedObjects)
+			foreach (Transform enemy in autoLockOnArea)
 			{
 				if (enemy == null)
 				{
@@ -419,7 +433,11 @@ namespace Uxtuno
 
 		private const float unGroundedSeconds = 0.08f; // 地面から離れたとみなす時間
 		private float ungroundedCount = 0.0f; // characterController.isGroundedがfalseを返してからの時間
-		private bool isGrounded; // 実際に地面に接触しているか
+
+		/// <summary>
+		/// // 実際に地面に接触しているか
+		/// </summary>
+		public bool isGrounded { get; private set; }
 
 		/// <summary>
 		/// 実際に地面に接触しているかを調べる
@@ -535,7 +553,7 @@ namespace Uxtuno
 				currentState = new AttackState(this);
 			}
 
-			foreach (Transform enemy in containedObjects)
+			foreach (Transform enemy in autoLockOnArea)
 			{
 				// todo : 技倍率は仮
 				enemy.GetComponent<Actor>().Damage(attack, 1.0f);
@@ -891,7 +909,7 @@ namespace Uxtuno
 
 					Ray ray = new Ray(player.transform.position, player.meshRoot.forward);
 					RaycastHit hit;
-					if(player.__footContained.GetContainedObjects().Count != 0)
+					if (player.__footContained.GetContainedObjects().Count != 0)
 					//if(Physics.Raycast(ray, out hit, moveVector.magnitude))
 					{
 						// 壁付近ならジャンプ
@@ -956,7 +974,7 @@ namespace Uxtuno
 			private float wallKickCount;
 			private static readonly float wallKickSeconds = 0.4f;
 			private static readonly float deceleration = 0.36f; // 減速量
-            public WallKick(Player player)
+			public WallKick(Player player)
 				: base(player)
 			{
 				speed = primarySpeed;
@@ -973,7 +991,7 @@ namespace Uxtuno
 				speed -= deceleration;
 
 				wallKickCount += Time.deltaTime;
-				if(wallKickCount >= wallKickSeconds)
+				if (wallKickCount >= wallKickSeconds)
 				{
 					player.currentState = new AirState(player);
 				}
