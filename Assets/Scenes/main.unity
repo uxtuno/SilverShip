@@ -6222,7 +6222,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11468570, guid: ee5d5e9e34c4c2a4e930e76fa9a7a808, type: 2}
       propertyPath: xAngleMax
-      value: 75
+      value: 65
       objectReference: {fileID: 0}
     - target: {fileID: 13548492, guid: ee5d5e9e34c4c2a4e930e76fa9a7a808, type: 2}
       propertyPath: m_IsTrigger
