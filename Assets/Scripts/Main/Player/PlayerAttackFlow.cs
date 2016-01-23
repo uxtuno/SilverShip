@@ -170,9 +170,9 @@ namespace Uxtuno
 		{
 			this.animator = animator;
 			groundRootMotion = new Motion();
-			Motion attack1 = new Motion("GroundAttack1", 1.3f, 1, ButtonName.Attack, 0.5f);
-			Motion attack2 = new Motion("GroundAttack2", 1.3f, 2, ButtonName.Attack, 0.5f);
-			Motion attack3 = new Motion("GroundAttack3", 1.3f, 3, ButtonName.Attack, 0.5f);
+			Motion attack1 = new Motion("GroundAttack1", 0.8f, 1, ButtonName.Attack, 0.3f);
+			Motion attack2 = new Motion("GroundAttack2", 0.8f, 2, ButtonName.Attack, 0.3f);
+			Motion attack3 = new Motion("GroundAttack3", 0.8f, 3, ButtonName.Attack, 0.3f);
 			// コンボ攻撃を追加
 			groundRootMotion.AddNextMotion(attack1);
 			attack1.AddNextMotion(attack2);

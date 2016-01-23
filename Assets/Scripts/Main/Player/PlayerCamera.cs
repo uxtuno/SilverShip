@@ -70,18 +70,31 @@ namespace Uxtuno
 			// これは適当な値
 			// また、moveVectorを変換する前の値が必要なのでここで取得
 			float cameraVertical = -moveVector.y * verticalMoveRotationSpeed;
-			
+			// 下を向くのは上昇中のみなのでそれ以外は値を0に
+			if(cameraVertical > 0.0f)
+			{
+				cameraVertical = 0.0f;
+			}
+
+			// 地面に着いている状態のみ前方を向く処理
+			if (player.isGrounded &&
+				controller.xAngle > 0.0f)
+			{
+				cameraVertical = Vector3.Scale(moveVector, new Vector3(1.0f, 0.0f, 1.0f)).magnitude * verticalMoveRotationSpeed;
+			}
 			// プレイヤーが移動した時のY軸カメラ回転量を計算
 			moveVector = controller.cameraTransform.InverseTransformDirection(moveVector);
 			Vector2 moveVectorXZ = new Vector2(moveVector.x, moveVector.z);
+
+
 			float moveAngleXZ = Mathf.Atan2(moveVectorXZ.y, moveVectorXZ.x);
 			float cameraHorizontal = Mathf.Cos(moveAngleXZ) * moveVectorXZ.magnitude;
-			
+
 			if (cameraMove != Vector2.zero)
 			{
 				controller.CameraMove(cameraMove.x * horizontalRotationSpeed * Time.deltaTime, cameraMove.y * verticalRotationSpeed * Time.deltaTime, 0.2f);
 			}
-			else if (cameraHorizontal < float.Epsilon || cameraVertical < float.Epsilon)
+			else if (Mathf.Abs(cameraHorizontal) > float.Epsilon || Mathf.Abs(cameraVertical) > float.Epsilon)
 			{
 				controller.CameraMove(cameraHorizontal * playerMoveToCameraRotationSpeed, cameraVertical * playerMoveToCameraRotationSpeed, 0.1f);
 			}
@@ -105,7 +118,7 @@ namespace Uxtuno
 
 		public void LockOnCamera()
 		{
-			if(target == null)
+			if (target == null)
 			{
 				return;
 			}
