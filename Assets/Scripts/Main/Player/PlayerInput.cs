@@ -43,7 +43,6 @@ namespace Uxtuno
 		/// </summary>
 		private static void Initialize()
 		{
-
 			//buttonState.Add(ButtonName.Attack, false);
 			//buttonState.Add(ButtonName.Barrier, false);
 			//buttonState.Add(ButtonName.CameraToFront, false);
@@ -131,6 +130,9 @@ namespace Uxtuno
 				cameraHorizontal = rotationInput.x;
 				cameraVertical = rotationInput.y;
 			}
+
+			// コントローラでは同時押しだがキーボードでは辛いのでキーボード用の設定
+			buttonState[ButtonName.JumpTrampled] = Input.GetButtonDown(InputName.JumpAndAttack) ? true : buttonState[ButtonName.JumpTrampled];
 
 			buttonState[ButtonName.CameraToFront] = Input.GetButtonDown(InputName.CameraToFront) ? true : buttonState[ButtonName.CameraToFront];
 			buttonState[ButtonName.ItemGet] = Input.GetButtonDown(InputName.ItemGet) ? true : buttonState[ButtonName.ItemGet];

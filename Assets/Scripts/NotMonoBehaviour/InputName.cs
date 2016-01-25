@@ -77,6 +77,11 @@ public class InputName
 	public const string @LockOn = "LockOn";
 
 	/// <summary>
+	/// return "JumpAndAttack"
+ 	/// </summary>
+	public const string @JumpAndAttack = "JumpAndAttack";
+
+	/// <summary>
 	/// <para>0. "Horizontal"</para>
 	/// <para>1. "Vertical"</para>
 	/// <para>2. "Attack"</para>
@@ -101,6 +106,7 @@ public class InputName
 	/// <para>21. "CameraToFront"</para>
 	/// <para>22. "LockOn"</para>
 	/// <para>23. "LockOn"</para>
+	/// <para>24. "JumpAndAttack"</para>
 	/// </summary>
-	public static readonly string[] names = new string[]{"Horizontal","Vertical","Attack","Barrier","ItemGet","Jump","Mouse X","Mouse Y","Mouse ScrollWheel","Horizontal","Vertical","Attack","Barrier","ItemGet","Jump","Submit","Submit","Cancel","CameraX","CameraY","CameraToFront","CameraToFront","LockOn","LockOn"};
+	public static readonly string[] names = new string[]{"Horizontal","Vertical","Attack","Barrier","ItemGet","Jump","Mouse X","Mouse Y","Mouse ScrollWheel","Horizontal","Vertical","Attack","Barrier","ItemGet","Jump","Submit","Submit","Cancel","CameraX","CameraY","CameraToFront","CameraToFront","LockOn","LockOn","JumpAndAttack"};
 }

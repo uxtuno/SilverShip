@@ -41,7 +41,7 @@ namespace Uxtuno
 		private CameraController cameraController; // カメラコントローラー
 		private Transform meshRoot; // プレイヤーメッシュのルート
 		private Animator animator; // アニメーションのコントロール用
-		private PlayerCamera playerCamera; // カメラ動作を委譲
+		private PlayerCamera playerCamera; // カメラ動作を委譲?
 
 		// アニメーション用ID
 		private int speedID;
@@ -129,7 +129,7 @@ namespace Uxtuno
 		private static readonly int barrierPointNumber = 3; // 結界を発生させる事ができる点の数
 		private GameObject barrierPrefab;
 		[SerializeField, Tooltip("足のCollider")]
-		private ContainedObjects __footContained; // 足付近の壁を検知
+		private ContainedObjects __footContained; // 足付近の壁、敵を検知
 
 		#endregion
 
@@ -693,6 +693,7 @@ namespace Uxtuno
 			private static readonly float airDashPossibleSeconds = 0.4f; // 空中ダッシュが可能になる時間
 			private static readonly float airDashDisableSeconds = 1.4f; // 空中ダッシュが可能になる時間
 			private float airDashPossibleCount; // 空中ダッシュが可能になる時間のカウンタ
+			private static readonly float airCommandLimitHeight = 3.0f; // 空中動作が可能な高度
 			public AirState(Player player)
 				: base(player)
 			{
@@ -713,7 +714,9 @@ namespace Uxtuno
 
 				if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Jump))
 				{
-					if (player.isAirDashPossible)
+					if (player.isAirDashPossible&&
+						airDashPossibleCount > airDashPossibleSeconds &&
+						airDashPossibleCount < airDashDisableSeconds)
 					{
 						player.currentState = new AirDashState(player);
 						return;
@@ -727,31 +730,29 @@ namespace Uxtuno
 				// 踏みつけジャンプ入力成功
 				if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.JumpTrampled))
 				{
-					if (player.lockOnTarget != null)
+					RaycastHit hit;
+					Ray ray = new Ray(player.transform.position, player.meshRoot.forward);
+					//if (player.__footContained.GetContainedObjects().Count != 0)
+					if (Physics.Raycast(ray, out hit, 0.5f))
 					{
-						// todo : 空中ダッシュ入力受付時間をそのまま踏みつけジャンプの受付時間に利用している
-						// そのうち整理するだろう(希望的観測
-						if (airDashPossibleCount > airDashPossibleSeconds && airDashPossibleCount < airDashDisableSeconds)
+						// 壁付近ならジャンプ
+						if (hit.transform.tag == "Wall")
 						{
-							player.currentState = new DashToTargetState(player, player.lockOnTarget.lockOnPoint.position);
+							player.Jumping();
+							player.currentState = new WallKick(player);
+							Vector3 angles = Vector3.zero;
+							angles.y = Mathf.Atan2(hit.normal.x, hit.normal.z) * Mathf.Rad2Deg;
+							player.meshRoot.eulerAngles = angles;
+							return;
 						}
 					}
-					else
+
+					if (player.lockOnTarget != null)
 					{
-						Ray ray = new Ray(player.transform.position, player.meshRoot.forward);
-						RaycastHit hit;
-						//if (player.__footContained.GetContainedObjects().Count != 0)
-						if (Physics.Raycast(ray, out hit, 0.5f))
+						ray = new Ray(player.transform.position, Vector3.down);
+						if (!Physics.Raycast(ray, out hit, airCommandLimitHeight, LayerName.Obstacle.maskValue))
 						{
-							// 壁付近ならジャンプ
-							if (hit.transform.tag == "Wall")
-							{
-								player.Jumping();
-								player.currentState = new WallKick(player);
-								Vector3 angles = Vector3.zero;
-								angles.y = Mathf.Atan2(hit.normal.x, hit.normal.z) * Mathf.Rad2Deg;
-								player.meshRoot.eulerAngles = angles;
-							}
+							player.currentState = new DashToTargetState(player, player.lockOnTarget.lockOnPoint.position);
 						}
 					}
 					return;
@@ -900,29 +901,17 @@ namespace Uxtuno
 				if ((target - player.transform.position).magnitude < contactDistance ||
 					(player.transform.position - oldPosition).magnitude < moveVector.magnitude * 0.9f)
 				{
-					// ジャンプさせる
-					if (player.lockOnTarget != null)
+					foreach (var enemy in player.__footContained)
 					{
-						player.JumpTrampled();
-						return;
-					}
-
-					Ray ray = new Ray(player.transform.position, player.meshRoot.forward);
-					RaycastHit hit;
-					if (player.__footContained.GetContainedObjects().Count != 0)
-					//if(Physics.Raycast(ray, out hit, moveVector.magnitude))
-					{
-						// 壁付近ならジャンプ
-						//if (hit.transform.tag == "Wall")
+						// 踏みつけジャンプさせる
+						if (enemy.tag == TagName.Enemy || player.lockOnTarget != null)
 						{
-							player.Jumping();
+							player.JumpTrampled();
+							return;
 						}
 					}
-					else
-					{
-						// それ以外なら落下
-						player.currentState = new AirState(player);
-					}
+					// それ以外なら落下
+					player.currentState = new AirState(player);
 					return;
 				}
 			}
