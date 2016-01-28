@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Kuvo
@@ -8,6 +9,18 @@ namespace Kuvo
 	/// </summary>
 	public class CannibalLantern : BaseEnemy
 	{
+
+		private struct AnimatorID
+		{
+			public static readonly int isPlayerLocate = Animator.StringToHash("isPlayerLocate");
+			public static readonly int moveInTrigger = Animator.StringToHash("moveInTrigger");
+			public static readonly int moveOutTrigger = Animator.StringToHash("moveOutTrigger");
+			public static readonly int damageTrigger = Animator.StringToHash("damageTrigger");
+			public static readonly int sAttackTrigger = Animator.StringToHash("sAttackTrigger");
+			public static readonly int lAttackTrigger = Animator.StringToHash("lAttackTrigger");
+			public static readonly int dieTrigger = Animator.StringToHash("dieTrigger");
+		}
+
 		[Tooltip("弾のプレハブ"), SerializeField]
 		private GameObject bulletPrafab = null;
 		private GameObject bulletCollecter = null;
@@ -45,48 +58,7 @@ namespace Kuvo
 				Damage(int.MaxValue, Mathf.Infinity);
 			}
 
-			if (currentState != oldState)
-			{
-				switch (currentState)
-				{
-					case EnemyState.Idle:
-						break;
-
-					case EnemyState.Move:
-						break;
-
-					case EnemyState.GoBack:
-						break;
-
-					case EnemyState.Bone:
-						break;
-
-					case EnemyState.Search:
-						break;
-
-					case EnemyState.SAttack:
-						if (!isAttack && !EnemyManagerSingleton.instance.isCostOver)
-						{
-							StartCoroutine(ShortRangeAttack());
-						}
-						break;
-
-					case EnemyState.LAttack:
-						if (!isAttack && !EnemyManagerSingleton.instance.isCostOver)
-						{
-							StartCoroutine(LongRangeAttack());
-						}
-						break;
-
-					case EnemyState.Stagger:
-						break;
-
-					case EnemyState.Death:
-						break;
-				}
-
-				oldState = currentState;
-			}
+			UpdateState();
 		}
 
 		private void FixedUpdate()
@@ -133,6 +105,60 @@ namespace Kuvo
 				{
 					rigidbody.velocity = Vector3.zero;
 				}
+			}
+		}
+
+		/// <summary>
+		/// currentStateに応じたUpdate処理
+		/// アニメーション遷移等に使用
+		/// </summary>
+		private void UpdateState()
+		{
+			if (currentState != oldState)
+			{
+				switch (currentState)
+				{
+					case EnemyState.Idle:
+						animator.SetBool(AnimatorID.isPlayerLocate, isPlayerLocate);
+						break;
+
+					case EnemyState.Move:
+							animator.SetTrigger(AnimatorID.moveInTrigger);
+						break;
+
+					case EnemyState.GoBack:
+						break;
+
+					case EnemyState.SAttack:
+						if (!isAttack && !EnemyManagerSingleton.instance.isCostOver)
+						{
+							animator.SetTrigger(AnimatorID.sAttackTrigger);
+							StartCoroutine(ShortRangeAttack());
+						}
+						break;
+
+					case EnemyState.LAttack:
+						if (!isAttack && !EnemyManagerSingleton.instance.isCostOver)
+						{
+							animator.SetTrigger(AnimatorID.lAttackTrigger);
+							StartCoroutine(LongRangeAttack());
+						}
+						break;
+
+					case EnemyState.Stagger:
+						animator.SetTrigger(AnimatorID.damageTrigger);
+						break;
+
+					case EnemyState.Death:
+						break;
+				}
+
+				if (currentState != EnemyState.Move && oldState == EnemyState.Move)
+				{
+					animator.SetTrigger(AnimatorID.moveOutTrigger);
+				}
+
+				oldState = currentState;
 			}
 		}
 
@@ -279,6 +305,12 @@ namespace Kuvo
 			{
 				isAttack = false;
 			}
+		}
+
+		protected override void OnDie()
+		{
+			animator.SetTrigger(AnimatorID.dieTrigger);
+			base.OnDie();
 		}
 	}
 }
