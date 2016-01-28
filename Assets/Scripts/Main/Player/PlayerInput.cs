@@ -16,6 +16,8 @@ public enum ButtonName
 	LockOn,
 	CameraToFront,
 	JumpTrampled,
+	LeftLockOnChanged,
+	RightLockOnChanged,
 }
 
 namespace Uxtuno
@@ -28,6 +30,9 @@ namespace Uxtuno
 	/// </summary>
 	public static class PlayerInput
 	{
+		private static readonly float lockOnChangeThreshold = 0.7f; // これ以上スティックが倒されたら入力したことにする
+		private static int lockOnChangedInputFrameCount; // ロックオン対象変更入力フレーム(右スティック水平入力)
+
 		private static Dictionary<ButtonName, bool> buttonState = new Dictionary<ButtonName, bool>(); // 各ボタンの状態
 
 		static PlayerInput()
@@ -43,13 +48,6 @@ namespace Uxtuno
 		/// </summary>
 		private static void Initialize()
 		{
-			//buttonState.Add(ButtonName.Attack, false);
-			//buttonState.Add(ButtonName.Barrier, false);
-			//buttonState.Add(ButtonName.CameraToFront, false);
-			//buttonState.Add(ButtonName.ItemGet, false);
-			//buttonState.Add(ButtonName.Jump, false);
-			//buttonState.Add(ButtonName.JumpTrampled, false);
-			//buttonState.Add(ButtonName.LockOn, false);
 		}
 
 		/// <summary>
@@ -77,7 +75,8 @@ namespace Uxtuno
 		/// </summary>
 		public static bool attackAndJump
 		{
-			get; private set;
+			get;
+			private set;
 		}
 
 		private enum JumpTrampledInput
@@ -137,6 +136,29 @@ namespace Uxtuno
 			buttonState[ButtonName.CameraToFront] = Input.GetButtonDown(InputName.CameraToFront) ? true : buttonState[ButtonName.CameraToFront];
 			buttonState[ButtonName.ItemGet] = Input.GetButtonDown(InputName.ItemGet) ? true : buttonState[ButtonName.ItemGet];
 			buttonState[ButtonName.Barrier] = Input.GetButtonDown(InputName.Barrier) ? true : buttonState[ButtonName.Barrier];
+
+			if (Input.GetAxis(InputName.RightStickHorizontal) < -lockOnChangeThreshold)
+			{
+				if (!buttonState[ButtonName.LeftLockOnChanged]
+					&& lockOnChangedInputFrameCount == 0)
+				{
+					buttonState[ButtonName.LeftLockOnChanged] = true;
+				}
+				++lockOnChangedInputFrameCount;
+			}
+			else if (Input.GetAxis(InputName.RightStickHorizontal) > lockOnChangeThreshold)
+			{
+				if (!buttonState[ButtonName.RightLockOnChanged]
+					&& lockOnChangedInputFrameCount == 0)
+				{
+					buttonState[ButtonName.RightLockOnChanged] = true;
+				}
+				++lockOnChangedInputFrameCount;
+			}
+			else
+			{
+				lockOnChangedInputFrameCount = 0;
+			}
 
 			buttonState[ButtonName.Jump] = Input.GetButtonDown(InputName.Jump) ? true : buttonState[ButtonName.Jump];
 			buttonState[ButtonName.Attack] = Input.GetButtonDown(InputName.Attack) ? true : buttonState[ButtonName.Attack];
@@ -214,6 +236,11 @@ namespace Uxtuno
 			buttonState[ButtonName.JumpTrampled] = false;
 			buttonState[ButtonName.LockOn] = false;
 			buttonState[ButtonName.CameraToFront] = false;
+			if (lockOnChangedInputFrameCount >= 1)
+			{
+				buttonState[ButtonName.RightLockOnChanged] = false;
+				buttonState[ButtonName.LeftLockOnChanged] = false;
+			}
 		}
 
 		/// <summary>
@@ -231,10 +258,10 @@ namespace Uxtuno
 					// 同時入力判定中、または入力されていないときにfalseを返す
 					if (jumpTrampledInputCount < jumpTrampledInputSeconds)
 					{
-						
+
 						return false;
 					}
-					
+
 					return buttonState[buttonName];
 
 				case ButtonName.Barrier:
@@ -242,6 +269,8 @@ namespace Uxtuno
 				case ButtonName.LockOn:
 				case ButtonName.CameraToFront:
 				case ButtonName.JumpTrampled:
+				case ButtonName.RightLockOnChanged:
+				case ButtonName.LeftLockOnChanged:
 					return buttonState[buttonName];
 				default:
 					throw new ArgumentException("不正な引数が渡されました");

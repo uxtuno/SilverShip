@@ -206,7 +206,6 @@ namespace Uxtuno
 						lookPosition.y = hit.point.y + limitHeightDistance;
 					}
 				}
-				Debug.Log((Camera.main.aspect));
 				Vector3 halfToTarget = (lookPosition - lockOnPoint.position) * 0.5f;
 				Vector3 center = lockOnPoint.position + halfToTarget;
 				halfToTarget.y *= Camera.main.aspect;
@@ -340,6 +339,16 @@ namespace Uxtuno
 			{
 				lockOnIcon.Hide();
 			}
+
+			if(PlayerInput.GetButtonDownInFixedUpdate(ButtonName.LeftLockOnChanged))
+			{
+				Debug.Log("Left");
+			}
+
+			if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.RightLockOnChanged))
+			{
+				Debug.Log("Right");
+			}
 		}
 
 		/// <summary>
@@ -347,33 +356,9 @@ namespace Uxtuno
 		/// </summary>
 		private void ManualLockOn()
 		{
-			// ロックオンする敵
-			Transform lockOnEnemy = null;
-			// 敵のリストを取得
-			Transform[] enemies = GameObject.FindGameObjectsWithTag(TagName.Enemy)
-				.Select(obj => obj.transform)
-				.ToArray();
-			float playerAngle = cameraController.cameraTransform.eulerAngles.y;
-			float minDistance = float.PositiveInfinity;
-			foreach (Transform enemy in enemies)
-			{
-				// カメラの前方の円弧上の範囲をロックオン可能範囲とする
-				if (Utility.hitTestArcPoint(cameraController.cameraTransform.position.z, cameraController.cameraTransform.position.x, LockOnDistance, playerAngle - LockOnAngleHulfRange, playerAngle + LockOnAngleHulfRange, enemy.position.z, enemy.position.x))
-				{
-					float distance = (enemy.position - transform.position).sqrMagnitude;
-					// 最も近い対象をロックオン
-					if (distance < minDistance)
-					{
-						minDistance = distance;
-						lockOnEnemy = enemy;
-					}
-				}
-			}
-
 			// ロックオン
-			if (lockOnEnemy != null)
+			if (lockOnTarget != null)
 			{
-				lockOnTarget = lockOnEnemy.GetComponent<Actor>();
 				playerCamera.BeginLockOn(lockOnTarget.lockOnPoint);
 				lockOnState = LockOnState.Manual;
 				lockOnIcon.Set(lockOnTarget.lockOnPoint, manualLockOnIconSprite);

@@ -39,7 +39,7 @@ public class EffekseerSystem : MonoBehaviour
 	public static string resourcePath
 	{
 		get {
-			return Path.Combine(Application.streamingAssetsPath, "Effekseer");
+			return Path.Combine(Application.streamingAssetsPath, "Effekseer/EffectsData");
 		}
 	}
 

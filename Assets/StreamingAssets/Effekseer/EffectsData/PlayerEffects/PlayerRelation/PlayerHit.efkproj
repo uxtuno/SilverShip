@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<EffekseerProject>
+  <Root>
+    <Name>Root</Name>
+    <Children>
+      <Node>
+        <CommonValues>
+          <Life>
+            <Center>10</Center>
+            <Max>10</Max>
+            <Min>10</Min>
+          </Life>
+        </CommonValues>
+        <RotationValues>
+          <Type>1</Type>
+          <PVA>
+            <Rotation>
+              <Z>
+                <Max>360</Max>
+                <Min>-360</Min>
+              </Z>
+            </Rotation>
+          </PVA>
+        </RotationValues>
+        <RendererCommonValues>
+          <ColorTexture>HitLight.png</ColorTexture>
+          <AlphaBlend>2</AlphaBlend>
+          <FadeInType>1</FadeInType>
+          <FadeIn>
+            <StartSpeed>20</StartSpeed>
+          </FadeIn>
+          <FadeOutType>1</FadeOutType>
+          <FadeOut>
+            <Frame>3</Frame>
+            <EndSpeed>30</EndSpeed>
+          </FadeOut>
+        </RendererCommonValues>
+        <DrawingValues>
+          <Sprite>
+            <Billboard>3</Billboard>
+          </Sprite>
+        </DrawingValues>
+        <Name>Node</Name>
+        <Children />
+      </Node>
+    </Children>
+  </Root>
+  <ToolVersion>1.01</ToolVersion>
+  <Version>3</Version>
+  <StartFrame>0</StartFrame>
+  <EndFrame>20</EndFrame>
+  <IsLoop>True</IsLoop>
+</EffekseerProject>

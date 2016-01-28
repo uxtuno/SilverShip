@@ -233,6 +233,12 @@
             <LoopType>1</LoopType>
           </UVAnimation>
         </RendererCommonValues>
+        <SoundValues>
+          <Type>1</Type>
+          <Sound>
+            <Wave>thunder.wav</Wave>
+          </Sound>
+        </SoundValues>
         <Name>example</Name>
         <Children />
       </Node>

@@ -80,7 +80,7 @@ namespace Uxtuno
 			if (player.isGrounded &&
 				controller.xAngle > 0.0f)
 			{
-				cameraVertical = Vector3.Scale(moveVector, new Vector3(1.0f, 0.0f, 1.0f)).magnitude * verticalMoveRotationSpeed;
+				cameraVertical = Vector3.Scale(moveVector, new Vector3(1.0f, 0.0f, 1.0f)).magnitude * verticalMoveRotationSpeed * 0.25f;
 			}
 			// プレイヤーが移動した時のY軸カメラ回転量を計算
 			moveVector = controller.cameraTransform.InverseTransformDirection(moveVector);
