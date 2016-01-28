@@ -92,7 +92,7 @@ namespace Kuvo
 						break;
 
 					case ActionState.Attacking:
-						if (EnemyCreatorSingleton.instance.isCostOver)
+						if (EnemyManagerSingleton.instance.isCostOver)
 						{
 							actionTime = 0;
 							break;
@@ -175,7 +175,7 @@ namespace Kuvo
 						// 攻撃可能範囲に入っている場合変更
 						if (baseEnemy.CheckDistance(player.lockOnPoint.position, attackParameters.UsedRange(isCaptain)))
 						{
-							bool isAttackable = (EnemyCreatorSingleton.instance.maxAttackCost - EnemyCreatorSingleton.instance.currentAttackCostCount) >= attackParameters.largeCost;
+							bool isAttackable = (EnemyManagerSingleton.instance.maxAttackCost - EnemyManagerSingleton.instance.currentAttackCostCount) >= attackParameters.largeCost;
 							if (isAttackable)
 							{
 								currentState = ActionState.Attacking;
