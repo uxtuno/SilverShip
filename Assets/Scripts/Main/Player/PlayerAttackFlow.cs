@@ -8,6 +8,8 @@ namespace Uxtuno
 	/// </summary>
 	public class PlayerAttackFlow
 	{
+		public event System.Action OnActionChanged;
+
 		private class Motion
 		{
 			private readonly string name;
@@ -34,7 +36,7 @@ namespace Uxtuno
 			}
 
 			/// <summary>
-			/// コンストラクタ(こんなコメントはいらないんだよー)
+			/// コンストラクタ(こんなコメントはいらない)
 			/// </summary>
 			/// <param name="name">攻撃モーションの名前</param>
 			/// <param name="motionSeconds">攻撃モーションの時間</param>
@@ -170,18 +172,18 @@ namespace Uxtuno
 		{
 			this.animator = animator;
 			groundRootMotion = new Motion();
-			Motion attack1 = new Motion("GroundAttack1", 0.8f, 1, ButtonName.Attack, 0.3f);
-			Motion attack2 = new Motion("GroundAttack2", 0.8f, 2, ButtonName.Attack, 0.3f);
-			Motion attack3 = new Motion("GroundAttack3", 0.8f, 3, ButtonName.Attack, 0.3f);
+			Motion attack1 = new Motion("GroundAttack1", 0.6f, 1, ButtonName.Attack, 0.2f);
+			Motion attack2 = new Motion("GroundAttack2", 0.6f, 2, ButtonName.Attack, 0.2f);
+			Motion attack3 = new Motion("GroundAttack3", 0.6f, 3, ButtonName.Attack, 0.2f);
 			// コンボ攻撃を追加
 			groundRootMotion.AddNextMotion(attack1);
 			attack1.AddNextMotion(attack2);
 			attack2.AddNextMotion(attack3);
 
 			airRootMotion = new Motion();
-			attack1 = new Motion("AirAttack1", 1.3f, 1, ButtonName.Attack, 0.5f);
-			attack2 = new Motion("AirAttack2", 1.3f, 2, ButtonName.Attack, 0.5f);
-			attack3 = new Motion("AirAttack3", 1.3f, 3, ButtonName.Attack, 0.5f);
+			attack1 = new Motion("AirAttack1", 0.4f, 1, ButtonName.Attack, 0.3f);
+			attack2 = new Motion("AirAttack2", 0.4f, 2, ButtonName.Attack, 0.3f);
+			attack3 = new Motion("AirAttack3", 0.4f, 3, ButtonName.Attack, 0.3f);
 
 			// コンボ攻撃を追加
 			airRootMotion.AddNextMotion(attack1);
@@ -227,6 +229,11 @@ namespace Uxtuno
 				if (currentMotion == null)
 				{
 					ChangeMode(currentMode);
+				}
+
+				if (OnActionChanged != null)
+				{
+					OnActionChanged();
 				}
 			}
 		}

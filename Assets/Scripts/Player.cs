@@ -11,7 +11,7 @@ namespace Uxtuno
 	public class Player : Actor
 	{
 		[Tooltip("歩く速さ(単位:m/s)"), SerializeField]
-        private float maxSpeed = 5.0f; // 移動速度
+		private float maxSpeed = 5.0f; // 移動速度
 		[Tooltip("ジャンプの高さ(単位:m)"), SerializeField]
 		private float jumpHeight = 5.0f;
 		[Tooltip("ハイジャンプの高さ(単位:m)"), SerializeField]
@@ -195,7 +195,6 @@ namespace Uxtuno
 
 		void FixedUpdate()
 		{
-			Debug.Log(currentState.GetType());
 			if (lockOnState == LockOnState.Manual && lockOnTarget)
 			{
 				// 敵とプレイヤーの中心点を求め境界球とする
@@ -335,7 +334,6 @@ namespace Uxtuno
 					LockOnRelease();
 				}
 			}
-
 			// ロックオン対象から離れすぎると解除
 			if (lockOnTarget != null)
 			{
@@ -817,7 +815,7 @@ namespace Uxtuno
 						return;
 					}
 				}
-				else if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Attack))
+				else if (player.jumpVY < 0.0f && PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Attack))
 				{
 					player.Attack();
 				}
@@ -881,10 +879,9 @@ namespace Uxtuno
 					player.Gravity();
 				}
 				Vector3 moveVector = moveDirection * speed;
-				moveVector *= Time.deltaTime;
 				moveVector.y = player.jumpVY;
 
-				player.Move(moveVector);
+				player.Move(moveVector * Time.deltaTime);
 				if (moveDirection != Vector3.zero)
 				{
 					Vector3 newAngles = Vector3.zero;
@@ -1018,10 +1015,11 @@ namespace Uxtuno
 		/// </summary>
 		private class AttackState : BaseState
 		{
-			private Vector3 moveVector;
+			private static readonly float speed = 4.0f;
 			public AttackState(Player player)
 				: base(player)
 			{
+				player.attackFlow.OnActionChanged += new Action(OnActionChanged);
 			}
 
 			public override void Move()
@@ -1029,6 +1027,7 @@ namespace Uxtuno
 				player.attackFlow.Move();
 				if (!player.attackFlow.isAction())
 				{
+					player.attackFlow.OnActionChanged -= new Action(OnActionChanged);
 					if (player.isGrounded)
 					{
 						player.currentState = new NormalState(player);
@@ -1040,11 +1039,23 @@ namespace Uxtuno
 
 					return;
 				}
+				Vector3 inputVec = player.calclateMoveDirection();
+				Vector3 moveVector = Vector3.zero;
+				if (inputVec.sqrMagnitude > float.Epsilon)
+				{
+					moveVector = inputVec * speed;
+					Vector3 newAngles = Vector3.zero;
+					newAngles.y = Mathf.Atan2(moveVector.x, moveVector.z) * Mathf.Rad2Deg;
+					player.meshRoot.eulerAngles = newAngles;
+				}
 				player.FallGravity();
-				// マジックナンバーがなんぼのもんじゃーい
-				// 攻撃中の落下速度調整用数値
-				moveVector.y = player.jumpVY * Time.deltaTime;
-				player.Move(moveVector);
+				moveVector.y = player.jumpVY;
+				player.Move(moveVector * Time.deltaTime);
+			}
+
+			private void OnActionChanged()
+			{
+
 			}
 		}
 
