@@ -10,9 +10,8 @@ namespace Uxtuno
 {
 	public class Player : Actor
 	{
-		public int a;
 		[Tooltip("歩く速さ(単位:m/s)"), SerializeField]
-		private float maxSpeed = 5.0f; // 移動速度
+        private float maxSpeed = 5.0f; // 移動速度
 		[Tooltip("ジャンプの高さ(単位:m)"), SerializeField]
 		private float jumpHeight = 5.0f;
 		[Tooltip("ハイジャンプの高さ(単位:m)"), SerializeField]
@@ -196,6 +195,7 @@ namespace Uxtuno
 
 		void FixedUpdate()
 		{
+			Debug.Log(currentState.GetType());
 			if (lockOnState == LockOnState.Manual && lockOnTarget)
 			{
 				// 敵とプレイヤーの中心点を求め境界球とする
@@ -423,7 +423,7 @@ namespace Uxtuno
 						continue;
 				}
 
-				if(enemy == lockOnTarget.transform)
+				if (enemy == lockOnTarget.transform)
 					continue;
 
 				if (angle < minAngle)
@@ -881,9 +881,10 @@ namespace Uxtuno
 					player.Gravity();
 				}
 				Vector3 moveVector = moveDirection * speed;
+				moveVector *= Time.deltaTime;
 				moveVector.y = player.jumpVY;
 
-				player.Move(moveVector * Time.deltaTime);
+				player.Move(moveVector);
 				if (moveDirection != Vector3.zero)
 				{
 					Vector3 newAngles = Vector3.zero;
@@ -1042,7 +1043,7 @@ namespace Uxtuno
 				player.FallGravity();
 				// マジックナンバーがなんぼのもんじゃーい
 				// 攻撃中の落下速度調整用数値
-				moveVector.y = player.jumpVY * 0.15f * Time.deltaTime;
+				moveVector.y = player.jumpVY * Time.deltaTime;
 				player.Move(moveVector);
 			}
 		}
@@ -1103,14 +1104,13 @@ namespace Uxtuno
 			IEnumerator MoveCoroutine()
 			{
 				float count = 0.0f;
-				while(count <= damegeSeconds)
+				while (count <= damegeSeconds)
 				{
 					count += Time.deltaTime;
 					player.FallGravity();
 					Vector3 moveVector = Vector3.zero;
 					moveVector.y = player.jumpVY;
 					player.Move(moveVector * Time.deltaTime);
-					Debug.Log(player.jumpVY);
 					yield return null;
 				}
 				player.currentState = new NormalState(player);
