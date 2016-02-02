@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 //[RequireComponent(typeof(CharacterController))]
 
@@ -49,6 +50,7 @@ namespace Uxtuno
 		private int isGroundedID;
 		private int isTrampledID;
 		private int isFallID;
+		private int isDamageID;
 
 		/// <summary>
 		/// ジャンプ状態
@@ -130,6 +132,8 @@ namespace Uxtuno
 		private GameObject barrierPrefab;
 		[SerializeField, Tooltip("足のCollider")]
 		private ContainedObjects __footContained; // 足付近の壁、敵を検知
+		[SerializeField, Tooltip("武器Collider")]
+		private AttackCollider __weaponCollider;
 
 		#endregion
 
@@ -169,6 +173,7 @@ namespace Uxtuno
 			isGroundedID = Animator.StringToHash("IsGrounded");
 			isTrampledID = Animator.StringToHash("IsTrampled");
 			isFallID = Animator.StringToHash("IsFall");
+			isDamageID = Animator.StringToHash("IsDamage");
 
 			attackFlow = new PlayerAttackFlow(animator);
 
@@ -233,7 +238,7 @@ namespace Uxtuno
 			} while (currentState != oldState);
 			CommonState();
 
-			LockOn();
+			LockOnControl();
 
 			StartCoroutine(CameraControl());
 		}
@@ -291,14 +296,14 @@ namespace Uxtuno
 		/// <summary>
 		/// ロックオン関係処理
 		/// </summary>
-		private void LockOn()
+		private void LockOnControl()
 		{
 			// マニュアルロックオン
 			if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.LockOn))
 			{
 				if (lockOnState != LockOnState.Manual)
 				{
-					ManualLockOn();
+					BeginManualLockOn();
 				}
 				else
 				{
@@ -309,6 +314,10 @@ namespace Uxtuno
 			if (lockOnState != LockOnState.Manual)
 			{
 				AutoLockOn();
+			}
+			else
+			{
+				ManualLockOn();
 			}
 
 			// それぞれのロックオン状態での限界距離
@@ -339,28 +348,118 @@ namespace Uxtuno
 			{
 				lockOnIcon.Hide();
 			}
+		}
 
-			if(PlayerInput.GetButtonDownInFixedUpdate(ButtonName.LeftLockOnChanged))
+
+		private static readonly float blockLockOnReleaseSeconds = 1.5f; // ロックオンが解除されるまでの遮蔽時間
+		private float blockLockOnReleaseCount;
+		/// <summary>
+		/// マニュアルロックオン時動作
+		/// </summary>
+		private void ManualLockOn()
+		{
+			if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.LeftLockOnChanged))
 			{
-				Debug.Log("Left");
+				LockOnChange(FindNextLockOnEnemy(true));
 			}
 
 			if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.RightLockOnChanged))
 			{
-				Debug.Log("Right");
+				LockOnChange(FindNextLockOnEnemy(false));
+			}
+
+			// 間に遮るものがあればカウントを増加
+			if (CheckLockOnObstacle())
+			{
+				blockLockOnReleaseCount += Time.deltaTime;
+				if (blockLockOnReleaseCount > blockLockOnReleaseSeconds)
+				{
+					LockOnRelease();
+				}
+			}
+			else
+			{
+				blockLockOnReleaseCount = 0.0f;
 			}
 		}
 
 		/// <summary>
-		/// マニュアルロックオン
+		/// ロックオン対象との間に障害物があるか
 		/// </summary>
-		private void ManualLockOn()
+		/// <returns></returns>
+		private bool CheckLockOnObstacle()
+		{
+			// ロックオン対象からプレイヤーへレイを飛ばす
+			Vector3 origin = lockOnTarget.lockOnPoint.position;
+			Vector3 direction = lockOnPoint.position - origin;
+			return Physics.Raycast(origin, direction, direction.magnitude, LayerName.Obstacle.maskValue);
+		}
+
+		/// <summary>
+		/// 次にロックオンする敵を見つける
+		/// </summary>
+		/// <param name="isLeft">左側から探す(falseなら右から)</param>
+		private Actor FindNextLockOnEnemy(bool isLeft)
+		{
+			float minAngle = float.PositiveInfinity;
+			Transform lockOn = null;
+			foreach (Transform enemy in autoLockOnArea)
+			{
+				// プレイヤーからエネミーへのベクトル
+				var toEnemy = enemy.position - transform.position;
+				var front = cameraController.cameraTransform.forward;
+				front.y = 0.0f;
+				float cosTheta = Vector3.Dot(toEnemy, front) / (toEnemy.magnitude * front.magnitude);
+				float angle = Mathf.Acos(cosTheta) * Mathf.Rad2Deg;
+				float rotateDirection = front.x * toEnemy.z - front.z * toEnemy.x;
+				if (isLeft)
+				{
+					if (rotateDirection < 0.0f)
+						continue;
+				}
+				else
+				{
+					if (rotateDirection >= 0.0f)
+						continue;
+				}
+
+				if(enemy == lockOnTarget.transform)
+					continue;
+
+				if (angle < minAngle)
+				{
+					minAngle = angle;
+					lockOn = enemy;
+				}
+			}
+
+			return lockOn != null ? lockOn.GetComponent<Actor>() : null;
+		}
+
+		/// <summary>
+		/// マニュアルロックオン開始
+		/// </summary>
+		private void BeginManualLockOn()
 		{
 			// ロックオン
-			if (lockOnTarget != null)
+			if (lockOnTarget != null && !CheckLockOnObstacle())
 			{
+
 				playerCamera.BeginLockOn(lockOnTarget.lockOnPoint);
 				lockOnState = LockOnState.Manual;
+				lockOnIcon.Set(lockOnTarget.lockOnPoint, manualLockOnIconSprite);
+			}
+		}
+
+		/// <summary>
+		/// ロックオン対象切り替え
+		/// </summary>
+		/// <param name="newTarget">新しいロックオン対象</param>
+		private void LockOnChange(Actor newTarget)
+		{
+			if (newTarget != null)
+			{
+				lockOnTarget = newTarget;
 				lockOnIcon.Set(lockOnTarget.lockOnPoint, manualLockOnIconSprite);
 			}
 		}
@@ -593,7 +692,19 @@ namespace Uxtuno
 			LockOnRelease();
 		}
 
-		// プレーヤーの各状態をそれぞれクラスとして表す
+		public override void Damage(int attackPower, float magnification)
+		{
+			base.Damage(attackPower, magnification);
+
+			animator.SetTrigger(isDamageID);
+			currentState = new DamageState(this);
+		}
+
+		// プレーヤーの各状態をそれぞれクラスとしてあらわすStateパターンで実装
+		// todo : 状態遷移の際にインスタンスの生成を伴うので、リアルタイムな動作を要求されるゲームには向いてないと思われる
+		// 解決法として、状態クラスをSingletonとして実装し、一つのインスタンスを再利用する方法が考えられる
+		// また、Singletonとして実装するのであれば内部変数は持つべきでないかもしれない
+		// xxx : 状態遷移の実行箇所がバラバラで、可読性の面からも書き直す必要あり
 		#region - 状態クラス
 
 		/// <summary>
@@ -607,7 +718,6 @@ namespace Uxtuno
 				// 接地しているのでジャンプ状態を解除
 				player.currentJumpState = JumpState.None;
 				player.jumpVY = 0.0f;
-				player.animator.SetBool(player.isTrampledID, false);
 				player.animator.SetBool(player.isGroundedID, true);
 				player.isAirDashPossible = false;
 				player.attackFlow.ChangeMode(PlayerAttackFlow.Mode.Ground);
@@ -699,7 +809,7 @@ namespace Uxtuno
 
 				if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Jump))
 				{
-					if (player.isAirDashPossible&&
+					if (player.isAirDashPossible &&
 						airDashPossibleCount > airDashPossibleSeconds &&
 						airDashPossibleCount < airDashDisableSeconds)
 					{
@@ -969,6 +1079,41 @@ namespace Uxtuno
 				{
 					player.currentState = new AirState(player);
 				}
+			}
+		}
+
+		/// <summary>
+		/// ダメージ判定中
+		/// </summary>
+		private class DamageState : BaseState
+		{
+			private readonly float damegeSeconds;
+			public DamageState(Player player)
+				: base(player)
+			{
+				damegeSeconds = player.animator.GetCurrentAnimatorStateInfo(0).length;
+				player.StartCoroutine(MoveCoroutine());
+				player.jumpVY = 0.0f;
+			}
+
+			public override void Move()
+			{
+			}
+
+			IEnumerator MoveCoroutine()
+			{
+				float count = 0.0f;
+				while(count <= damegeSeconds)
+				{
+					count += Time.deltaTime;
+					player.FallGravity();
+					Vector3 moveVector = Vector3.zero;
+					moveVector.y = player.jumpVY;
+					player.Move(moveVector * Time.deltaTime);
+					Debug.Log(player.jumpVY);
+					yield return null;
+				}
+				player.currentState = new NormalState(player);
 			}
 		}
 
