@@ -67,11 +67,6 @@ public class TagName
 	public const string @Scaffold = "Scaffold";
 
 	/// <summary>
-	/// return "Wall"
- 	/// </summary>
-	public const string @Wall = "Wall";
-
-	/// <summary>
 	/// <para>0. "Untagged"</para>
 	/// <para>1. "Respawn"</para>
 	/// <para>2. "Finish"</para>
@@ -85,7 +80,6 @@ public class TagName
 	/// <para>10. "Fire"</para>
 	/// <para>11. "LockOnPoint"</para>
 	/// <para>12. "Scaffold"</para>
-	/// <para>13. "Wall"</para>
 	/// </summary>
-	public static readonly string[] names = new string[]{"Untagged","Respawn","Finish","EditorOnly","MainCamera","Player","GameController","Enemy","CameraController","AttackArea","Fire","LockOnPoint","Scaffold","Wall"};
+	public static readonly string[] names = new string[]{"Untagged","Respawn","Finish","EditorOnly","MainCamera","Player","GameController","Enemy","CameraController","AttackArea","Fire","LockOnPoint","Scaffold"};
 }

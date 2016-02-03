@@ -7,6 +7,7 @@ namespace Kuvo
 	/// <summary>
 	/// 敵の共通動作を規定した抽象クラス
 	/// </summary>
+	[RequireComponent(typeof(BaseEnemyAI))]
 	abstract public class BaseEnemy : Actor
 	{
 		/// <summary>
@@ -14,7 +15,10 @@ namespace Kuvo
 		/// </summary>
 		public enum EnemyState
 		{
+			//None,
 			Idle,
+			Bone,
+			Search,
 			Move,
 			GoBack,
 			SAttack,
@@ -35,29 +39,28 @@ namespace Kuvo
 		protected float CostKeepSecond = 2;
 		private CameraController cameraController;
 
-		private Animator _animator;   // animatorプロパティの実体
+		private Animation _animation;   // animationプロパティの実体
 
 		/// <summary>
-		/// 自身のAnimatorを取得する(キャッシュあり)
+		/// 自身のAnimationを取得する
 		/// </summary>
-		protected new Animator animator
+		protected new Animation animation
 		{
 			get
 			{
-				if (!_animator)
+				if (!_animation)
 				{
-					_animator = GetComponentInChildren<Animator>();
-					//_animator = GetComponent<Animator>();
+					_animation = GetComponent<Animation>();
 				}
 
-				return _animator;
+				return _animation;
 			}
 		}
 
 		private BaseEnemyAI _baseEnemyAI;   // baseEnemyAIプロパティの実体
 
 		/// <summary>
-		/// 自身のBaseEnemyAIを取得する(キャッシュあり)
+		/// 自身のBaseEnemyAIを取得する
 		/// </summary>
 		protected BaseEnemyAI baseEnemyAI
 		{
@@ -75,7 +78,7 @@ namespace Kuvo
 		private Player _player;     // playerプロパティの実体
 
 		/// <summary>
-		/// プレイヤーの参照を取得する(キャッシュあり)
+		/// プレイヤーの参照を取得する
 		/// </summary>
 		protected Player player
 		{
@@ -93,7 +96,7 @@ namespace Kuvo
 		private GameObject _shortRangeAttackAreaObject;   // shortRangeAttackAreaObjectプロパティの実体
 
 		/// <summary>
-		/// 攻撃判定用のゲームオブジェクトを取得する(キャッシュあり)
+		/// 攻撃判定用のゲームオブジェクトを取得する
 		/// </summary>
 		protected GameObject shortRangeAttackAreaObject
 		{
@@ -167,21 +170,16 @@ namespace Kuvo
 
 		protected virtual void Awake()
 		{
-			currentState = EnemyState.Idle;
+			currentState = EnemyState.Bone;
 			haveGround = false;
 			isAttack = false;
 		}
 
 		protected virtual void Start()
 		{
-			if (!baseEnemyAI)
+			if (currentState != EnemyState.Bone)
 			{
-				Debug.LogError("BaseEnemyAIが存在しません");
-			}
-
-			if (currentState != EnemyState.Idle)
-			{
-				currentState = EnemyState.Idle;
+				currentState = EnemyState.Bone;
 			}
 
 			cameraController = GameObject.FindGameObjectWithTag(TagName.CameraController).GetComponent<CameraController>();
@@ -189,6 +187,11 @@ namespace Kuvo
 
 		protected virtual void Update()
 		{
+			if (currentState == EnemyState.Bone)
+			{
+				currentState = EnemyState.Idle;
+			}
+
 			// カメラとの距離に応じて描画状態を切り替える
 			Vector3 cameraToVector = cameraController.cameraTransform.position - transform.position;
 			if (cameraToVector.magnitude < sight)
@@ -221,35 +224,17 @@ namespace Kuvo
 		{
 			base.Damage(attackPower, magnification);
 
-			// 体力が0を下回っているかを確認
-			if (hp <= 0 && currentState != EnemyState.Death)
+			if (hp <= 0 && currentState != EnemyState.Death && !isAttack)
 			{
-				if (isAttack)
-				{
-					// 使用しているコストを解放
-					if (baseEnemyAI.isCaptain)
-					{
-						EnemyManagerSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.lAttackCost, 0);
-					}
-					else
-					{
-						EnemyManagerSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.sAttackCost, 0);
-					}
-					isAttack = false;
-				}
-
 				currentState = EnemyState.Death;
-
-				// 自身のAIを停止する(コルーチン含む)
-				if (baseEnemyAI.enabled)
+				BaseEnemyAI aI = GetComponent<BaseEnemyAI>();
+				if (aI)
 				{
-					baseEnemyAI.StopAllCoroutines();
-					baseEnemyAI.enabled = false;
+					aI.StopAllCoroutines();
+					aI.enabled = false;
 				}
-
-				// 実行中のすべてのコルーチンを停止
 				StopAllCoroutines();
-				OnDie();
+				StartCoroutine(OnDie(2));
 				return;
 			}
 
@@ -308,19 +293,21 @@ namespace Kuvo
 		}
 
 		/// <summary>
-		/// 死亡する
-		/// 
-		/// オーバーライドする場合の処理実行順
-		///	{ 
-		///		// 処理
-		///		base.OnDie();
-		///	}
+		/// 指定秒をかけて死亡する
 		/// </summary>
 		/// <param name="second"> インスタンスが消滅するまでの時間</param>
 		/// <returns></returns>
-		protected virtual void OnDie()
+		protected virtual IEnumerator OnDie(float second)
 		{
-			EnemyManagerSingleton.instance.enemies.Remove(this);
+			float time = 0.0f;
+			while (time < second)
+			{
+				time += Time.deltaTime;
+
+				yield return new WaitForEndOfFrame();
+			}
+			Debug.Log("死んだー", gameObject);
+			Destroy(gameObject);
 		}
 
 		/// <summary>
@@ -342,20 +329,5 @@ namespace Kuvo
 		/// 遠距離攻撃
 		/// </summary>
 		abstract public IEnumerator LongRangeAttack();
-
-		/// <summary>
-		/// エネミーが破棄されるとき、アニメーションビヘイビアから呼ばれる
-		/// 
-		/// オーバーライドする場合の処理実行順
-		///	{ 
-		///		// 処理
-		///		base.DestroyEnemy();
-		///	}
-		/// </summary>
-		/// <param name="waitSeconds"></param>
-		public virtual void DestroyEnemy(float waitSeconds)
-		{
-			Destroy(gameObject, waitSeconds);
-		}
 	}
 }

@@ -2,9 +2,9 @@ public class SceneName
 {
 
 	/// <summary>
-	/// return "main"
+	/// return "title"
  	/// </summary>
-	public const string @main = "main";
+	public const string @title = "title";
 
 	/// <summary>
 	/// return "questSelection"
@@ -12,14 +12,14 @@ public class SceneName
 	public const string @questSelection = "questSelection";
 
 	/// <summary>
-	/// return "title"
+	/// return "main"
  	/// </summary>
-	public const string @title = "title";
+	public const string @main = "main";
 
 	/// <summary>
-	/// <para>0. "main"</para>
+	/// <para>0. "title"</para>
 	/// <para>1. "questSelection"</para>
-	/// <para>2. "title"</para>
+	/// <para>2. "main"</para>
 	/// </summary>
-	public static readonly string[] names = new string[]{"main","questSelection","title"};
+	public static readonly string[] names = new string[]{"title","questSelection","main"};
 }

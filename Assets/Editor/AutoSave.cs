@@ -47,6 +47,7 @@ public class AutoSave
 
 				if (IsSaveSceneTimer && IsAutoSave && !EditorApplication.isPlaying)
 				{
+					Debug.Log(13);
 					if (IsSavePrefab)
 						EditorApplication.SaveAssets();
 					if (IsSaveScene)

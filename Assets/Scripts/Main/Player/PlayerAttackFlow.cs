@@ -8,8 +8,6 @@ namespace Uxtuno
 	/// </summary>
 	public class PlayerAttackFlow
 	{
-		public event System.Action OnActionChanged;
-
 		private class Motion
 		{
 			private readonly string name;
@@ -21,7 +19,7 @@ namespace Uxtuno
 			/// </summary>
 			public float motionSeconds { get { return _motionSeconds; } }
 
-			private readonly ButtonName nextButtonName;
+			private readonly string nextInputName;
 			private readonly float inputReceptionSeconds;
 			private readonly int motionID;
 			//private Motion currenMotion;
@@ -36,20 +34,20 @@ namespace Uxtuno
 			}
 
 			/// <summary>
-			/// コンストラクタ(こんなコメントはいらない)
+			/// コンストラクタ(こんなコメントはいらないんだよー)
 			/// </summary>
 			/// <param name="name">攻撃モーションの名前</param>
 			/// <param name="motionSeconds">攻撃モーションの時間</param>
 			/// <param name="motionID">攻撃モーションのID</param>
-			/// <param name="nextButtonName">攻撃モーションを出すための入力ボタン</param>
+			/// <param name="nextInputName">攻撃モーションを出すための入力ボタン</param>
 			/// <param name="inputReceptionSeconds">入力受付時間</param>
-			public Motion(string name, float motionSeconds = 0.0f, int motionID = 0, ButtonName nextButtonName = ButtonName.None, float inputReceptionSeconds = 0.0f)
+			public Motion(string name, float motionSeconds = 0.0f, int motionID = 0, string nextInputName = "", float inputReceptionSeconds = 0.0f)
 			{
 				//currenMotion = this;
 				this.name = name;
 				_motionSeconds = motionSeconds;
 				this.motionID = motionID;
-				this.nextButtonName = nextButtonName;
+				this.nextInputName = nextInputName;
 				this.inputReceptionSeconds = inputReceptionSeconds;
 			}
 
@@ -71,7 +69,7 @@ namespace Uxtuno
 			{
 				foreach (Motion motion in nextMotions)
 				{
-					if (PlayerInput.GetButtonDownInFixedUpdate(motion.nextButtonName) &&
+					if (Input.GetButtonDown(motion.nextInputName) &&
 						motionCount >= motionSeconds - inputReceptionSeconds) // 入力受付時間内なら
 					{
 						changeMotion = motion;
@@ -172,18 +170,18 @@ namespace Uxtuno
 		{
 			this.animator = animator;
 			groundRootMotion = new Motion();
-			Motion attack1 = new Motion("GroundAttack1", 0.6f, 1, ButtonName.Attack, 0.2f);
-			Motion attack2 = new Motion("GroundAttack2", 0.6f, 2, ButtonName.Attack, 0.2f);
-			Motion attack3 = new Motion("GroundAttack3", 0.6f, 3, ButtonName.Attack, 0.2f);
+			Motion attack1 = new Motion("GroundAttack1", 1.3f, 1, InputName.Attack, 0.5f);
+			Motion attack2 = new Motion("GroundAttack2", 1.3f, 2, InputName.Attack, 0.5f);
+			Motion attack3 = new Motion("GroundAttack3", 1.3f, 3, InputName.Attack, 0.5f);
 			// コンボ攻撃を追加
 			groundRootMotion.AddNextMotion(attack1);
 			attack1.AddNextMotion(attack2);
 			attack2.AddNextMotion(attack3);
 
 			airRootMotion = new Motion();
-			attack1 = new Motion("AirAttack1", 0.4f, 1, ButtonName.Attack, 0.3f);
-			attack2 = new Motion("AirAttack2", 0.4f, 2, ButtonName.Attack, 0.3f);
-			attack3 = new Motion("AirAttack3", 0.4f, 3, ButtonName.Attack, 0.3f);
+			attack1 = new Motion("AirAttack1", 1.3f, 1, InputName.Attack, 0.5f);
+			attack2 = new Motion("AirAttack2", 1.3f, 2, InputName.Attack, 0.5f);
+			attack3 = new Motion("AirAttack3", 1.3f, 3, InputName.Attack, 0.5f);
 
 			// コンボ攻撃を追加
 			airRootMotion.AddNextMotion(attack1);
@@ -229,11 +227,6 @@ namespace Uxtuno
 				if (currentMotion == null)
 				{
 					ChangeMode(currentMode);
-				}
-
-				if (OnActionChanged != null)
-				{
-					OnActionChanged();
 				}
 			}
 		}

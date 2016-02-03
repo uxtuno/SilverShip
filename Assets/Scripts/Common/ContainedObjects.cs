@@ -6,7 +6,7 @@ using System.Linq;
 [RequireComponent(typeof(Collider))]
 public class ContainedObjects : MonoBehaviour, IEnumerable<Transform>
 {
-	private ICollection<Transform> objects = new LinkedList<Transform>();
+	private IList<Transform> objects = new List<Transform>();
 	[Tooltip("対応するタグ"), SerializeField]
 	private string[] tagNames = new string[0];
 
@@ -49,9 +49,7 @@ public class ContainedObjects : MonoBehaviour, IEnumerable<Transform>
 
 	public IEnumerator<Transform> GetEnumerator()
 	{
-		// null を削除
-		IEnumerator<Transform> enumerator = objects.Where((obj) => obj != null).GetEnumerator();
-		return enumerator;
+		return ((IEnumerable<Transform>)objects).GetEnumerator();
 	}
 
 	IEnumerator IEnumerable.GetEnumerator()
@@ -63,7 +61,7 @@ public class ContainedObjects : MonoBehaviour, IEnumerable<Transform>
 	/// 内包オブジェクトを返す
 	/// </summary>
 	/// <returns></returns>
-	public ICollection<Transform> GetContainedObjects()
+	public IList<Transform> GetContainedObjects()
 	{
 		return objects;
 	}

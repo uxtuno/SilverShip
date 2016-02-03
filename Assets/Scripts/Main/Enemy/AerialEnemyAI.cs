@@ -7,17 +7,6 @@ namespace Kuvo
 	/// </summary>
 	public class AerialEnemyAI : BaseEnemyAI
 	{
-		// TODO: 偶発的な移動に関する処理だが、優先度が低いのでやる気になったらやる
-		//
-		//  private enum LookingWaitState
-		//  {
-		//  	Start,
-		//  	FixedTimeElapsed,
-		//  	End,
-		//  }
-
-		//  private LookingWaitState lookingWaitState = LookingWaitState.End;
-
 		protected override void Start()
 		{
 			base.Start();
@@ -66,6 +55,7 @@ namespace Kuvo
 				switch (currentState)
 				{
 					case ActionState.Waiting:
+
 						if (baseEnemy.currentState != BaseEnemy.EnemyState.Idle)
 						{
 							baseEnemy.currentState = BaseEnemy.EnemyState.Idle;
@@ -92,7 +82,7 @@ namespace Kuvo
 						break;
 
 					case ActionState.Attacking:
-						if (EnemyManagerSingleton.instance.isCostOver)
+						if (EnemyCreatorSingleton.instance.isCostOver)
 						{
 							actionTime = 0;
 							break;
@@ -148,24 +138,12 @@ namespace Kuvo
 				switch (currentState)
 				{
 					case ActionState.Waiting:
-						// TODO: 偶発的な移動に関する処理だが、優先度が低いのでやる気になったらやる
-						//
-						//  if (lookingWaitState == LookingWaitState.Start)
-						//  {
-						//  	lookingWaitState = LookingWaitState.FixedTimeElapsed;
-						//  	break;
-						//  }
-						//  else if (lookingWaitState == LookingWaitState.FixedTimeElapsed)
-						//  {
-						//  	lookingWaitState = LookingWaitState.End;
-						//  }
-
 						// 攻撃可能範囲に入っている場合攻撃
 						if (baseEnemy.CheckDistance(player.lockOnPoint.position, attackParameters.UsedRange(isCaptain)))
 						{
 							currentState = ActionState.Attacking;
 						}
-						else if (!baseEnemy.CheckDistance(player.lockOnPoint.position, attackParameters.lAttackRange))
+						else
 						{
 							currentState = ActionState.Moving;
 						}
@@ -175,7 +153,7 @@ namespace Kuvo
 						// 攻撃可能範囲に入っている場合変更
 						if (baseEnemy.CheckDistance(player.lockOnPoint.position, attackParameters.UsedRange(isCaptain)))
 						{
-							bool isAttackable = (EnemyManagerSingleton.instance.maxAttackCost - EnemyManagerSingleton.instance.currentAttackCostCount) >= attackParameters.largeCost;
+							bool isAttackable = (EnemyCreatorSingleton.instance.maxAttackCost - EnemyCreatorSingleton.instance.currentAttackCostCount) >= attackParameters.largeCost;
 							if (isAttackable)
 							{
 								currentState = ActionState.Attacking;
@@ -185,35 +163,22 @@ namespace Kuvo
 
 					case ActionState.Attacking:
 						// 攻撃可能範囲に入っている場合待機
-						if (!baseEnemy.CheckDistance(player.lockOnPoint.position, attackParameters.lAttackRange))
+						if (baseEnemy.CheckDistance(player.lockOnPoint.position, attackParameters.UsedRange(isCaptain)))
 						{
-							currentState = ActionState.Moving;
+							currentState = ActionState.Waiting;
 						}
 						else
 						{
-							currentState = ActionState.Waiting;
-
-							// TODO: 偶発的な移動に関する処理だが、優先度が低いのでやる気になったらやる
-							//
-							//  actionTime = 5f;
-							//	lookingWaitState = LookingWaitState.Start;
+							currentState = ActionState.Moving;
 						}
 						break;
 				}
 			}
-			else		// プレイヤー未発見時
+			else
 			{
-				// TODO: 偶発的な移動に関する処理だが、優先度が低いのでやる気になったらやる
-				//
-				//  if (lookingWaitState != LookingWaitState.End)
-				//  {
-				//  	lookingWaitState = LookingWaitState.End;
-				//  }
-
 				switch (currentState)
 				{
 					case ActionState.Waiting:
-
 						baseEnemy.transform.eulerAngles += new Vector3(0, Random.Range(0f, 359f), 0);
 						currentState = ActionState.Moving;
 						break;
