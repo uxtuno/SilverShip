@@ -53,11 +53,11 @@ public class GameManager : MyMonoBehaviour
 		}
 
 		// プレイヤーの入力情報を更新
-		PlayerInput.instance.Update(Time.deltaTime);
+		PlayerInput.Update(Time.deltaTime);
 	}
 
 	void FixedUpdate()
 	{
-		StartCoroutine(PlayerInput.instance.LateFixedUpdate());
+		StartCoroutine(PlayerInput.LateFixedUpdate());
 	}
 }

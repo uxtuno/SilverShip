@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Kuvo
@@ -8,6 +9,18 @@ namespace Kuvo
 	/// </summary>
 	public class CannibalLantern : BaseEnemy
 	{
+
+		private struct AnimatorID
+		{
+			public static readonly int isPlayerLocate = Animator.StringToHash("isPlayerLocate");
+			public static readonly int moveInTrigger = Animator.StringToHash("moveInTrigger");
+			public static readonly int moveOutTrigger = Animator.StringToHash("moveOutTrigger");
+			public static readonly int damageTrigger = Animator.StringToHash("damageTrigger");
+			public static readonly int sAttackTrigger = Animator.StringToHash("sAttackTrigger");
+			public static readonly int lAttackTrigger = Animator.StringToHash("lAttackTrigger");
+			public static readonly int dieTrigger = Animator.StringToHash("dieTrigger");
+		}
+
 		[Tooltip("弾のプレハブ"), SerializeField]
 		private GameObject bulletPrafab = null;
 		private GameObject bulletCollecter = null;
@@ -20,7 +33,6 @@ namespace Kuvo
 
 		protected override void Awake()
 		{
-			hp = 30;
 			attack = 1;
 			defence = 2;
 			sight = 1.5f;
@@ -46,48 +58,7 @@ namespace Kuvo
 				Damage(int.MaxValue, Mathf.Infinity);
 			}
 
-			if (currentState != oldState)
-			{
-				switch (currentState)
-				{
-					case EnemyState.Idle:
-						break;
-
-					case EnemyState.Move:
-						break;
-
-					case EnemyState.GoBack:
-						break;
-
-					case EnemyState.Bone:
-						break;
-
-					case EnemyState.Search:
-						break;
-
-					case EnemyState.SAttack:
-						if (!isAttack && !EnemyCreatorSingleton.instance.isCostOver)
-						{
-							StartCoroutine(ShortRangeAttack());
-						}
-						break;
-
-					case EnemyState.LAttack:
-						if (!isAttack && !EnemyCreatorSingleton.instance.isCostOver)
-						{
-							StartCoroutine(LongRangeAttack());
-						}
-						break;
-
-					case EnemyState.Stagger:
-						break;
-
-					case EnemyState.Death:
-						break;
-				}
-
-				oldState = currentState;
-			}
+			UpdateState();
 		}
 
 		private void FixedUpdate()
@@ -104,15 +75,90 @@ namespace Kuvo
 				}
 				else
 				{
-					rigidbody.velocity = transform.forward * speed;
+					if (transform.position.y < 5f)
+					{
+						rigidbody.velocity = (transform.forward + Vector3.up / 2) * speed;
+					}
+					else
+					{
+						rigidbody.velocity = transform.forward * speed;
+					}
 				}
 			}
-			else if(currentState != EnemyState.GoBack)
+			else if (currentState == EnemyState.Idle)
+			{
+				if (transform.position.y > 1)
+				{
+					rigidbody.velocity = Vector3.down;
+				}
+				else
+				{
+					if (rigidbody.velocity != Vector3.zero)
+					{
+						rigidbody.velocity = Vector3.zero;
+					}
+				}
+			}
+			else if (currentState != EnemyState.GoBack)
 			{
 				if (rigidbody.velocity != Vector3.zero)
 				{
 					rigidbody.velocity = Vector3.zero;
 				}
+			}
+		}
+
+		/// <summary>
+		/// currentStateに応じたUpdate処理
+		/// アニメーション遷移等に使用
+		/// </summary>
+		private void UpdateState()
+		{
+			if (currentState != oldState)
+			{
+				switch (currentState)
+				{
+					case EnemyState.Idle:
+						animator.SetBool(AnimatorID.isPlayerLocate, isPlayerLocate);
+						break;
+
+					case EnemyState.Move:
+							animator.SetTrigger(AnimatorID.moveInTrigger);
+						break;
+
+					case EnemyState.GoBack:
+						break;
+
+					case EnemyState.SAttack:
+						if (!isAttack && !EnemyManagerSingleton.instance.isCostOver)
+						{
+							animator.SetTrigger(AnimatorID.sAttackTrigger);
+							StartCoroutine(ShortRangeAttack());
+						}
+						break;
+
+					case EnemyState.LAttack:
+						if (!isAttack && !EnemyManagerSingleton.instance.isCostOver)
+						{
+							animator.SetTrigger(AnimatorID.lAttackTrigger);
+							StartCoroutine(LongRangeAttack());
+						}
+						break;
+
+					case EnemyState.Stagger:
+						animator.SetTrigger(AnimatorID.damageTrigger);
+						break;
+
+					case EnemyState.Death:
+						break;
+				}
+
+				if (currentState != EnemyState.Move && oldState == EnemyState.Move)
+				{
+					animator.SetTrigger(AnimatorID.moveOutTrigger);
+				}
+
+				oldState = currentState;
 			}
 		}
 
@@ -123,7 +169,7 @@ namespace Kuvo
 		{
 			EnemyState oldState = currentState;
 			currentState = EnemyState.Stagger;
-			print("ぐはっ！");
+			Debug.Log("ぐはっ！");
 
 			yield return new WaitForSeconds(1);
 
@@ -145,7 +191,7 @@ namespace Kuvo
 		public override IEnumerator ShortRangeAttack()
 		{
 			isAttack = true;
-			EnemyCreatorSingleton.instance.StartCostAddForSeconds(baseEnemyAI.attackParameters.sAttackCost, 0);
+			EnemyManagerSingleton.instance.StartCostAddForSeconds(baseEnemyAI.attackParameters.sAttackCost, 0);
 			currentState = EnemyState.Move;
 			Vector3 startPosition = transform.position;
 
@@ -181,7 +227,7 @@ namespace Kuvo
 			yield return new WaitForSeconds(1.0f);
 
 			shortRangeAttackAreaObject.SetActive(false);
-			EnemyCreatorSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.sAttackCost, CostKeepSecond);
+			EnemyManagerSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.sAttackCost, CostKeepSecond);
 			StartCoroutine(MovingPosition(startPosition, baseEnemyAI.attackParameters.sAttackPreOperatSecond));
 		}
 
@@ -191,7 +237,7 @@ namespace Kuvo
 		public override IEnumerator LongRangeAttack()
 		{
 			isAttack = true;
-			EnemyCreatorSingleton.instance.StartCostAddForSeconds(baseEnemyAI.attackParameters.lAttackCost, 0);
+			EnemyManagerSingleton.instance.StartCostAddForSeconds(baseEnemyAI.attackParameters.lAttackCost, 0);
 
 			// ここに予備動作
 			yield return new WaitForSeconds(baseEnemyAI.attackParameters.lAttackPreOperatSecond);
@@ -215,7 +261,7 @@ namespace Kuvo
 				bullet.transform.SetParent(bulletCollecter.transform);
 			}
 
-			EnemyCreatorSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.lAttackCost, CostKeepSecond);
+			EnemyManagerSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.lAttackCost, CostKeepSecond);
 			isAttack = false;
 		}
 
@@ -226,35 +272,45 @@ namespace Kuvo
 		/// <param name="second"> 移動する時間(秒)</param>
 		private IEnumerator MovingPosition(Vector3 targetPosition, float second)
 		{
-			if(currentState != EnemyState.GoBack)
+			const float min = 0.125f;
+
+			if (!CheckDistance(targetPosition, min))
 			{
-				currentState = EnemyState.GoBack;
-			}
-
-			for (float elapsedTime = 0; second > elapsedTime; elapsedTime += Time.deltaTime)
-			{
-				//print("ξ" + (targetPosition - lockOnPoint.position).normalized * speed);
-				Vector3 lookPosition = targetPosition;
-				lookPosition.y = transform.position.y;
-
-				transform.LookAt(lookPosition);
-				rigidbody.velocity = (targetPosition - lockOnPoint.position).normalized * speed;
-
-				if(CheckDistance(targetPosition, 0.125f))
+				if (currentState != EnemyState.GoBack)
 				{
-					break;
+					currentState = EnemyState.GoBack;
 				}
 
-				yield return new WaitForFixedUpdate();
-			}
+				for (float elapsedTime = 0; second > elapsedTime; elapsedTime += Time.deltaTime)
+				{
+					Vector3 lookPosition = targetPosition;
+					lookPosition.y = transform.position.y;
 
-			rigidbody.velocity = Vector3.zero;
-			currentState = EnemyState.Idle;
+					transform.LookAt(lookPosition);
+					rigidbody.velocity = (targetPosition - lockOnPoint.position).normalized * speed;
+
+					if (CheckDistance(targetPosition, min))
+					{
+						break;
+					}
+
+					yield return new WaitForFixedUpdate();
+				}
+
+				rigidbody.velocity = Vector3.zero;
+				currentState = EnemyState.Idle;
+			}
 
 			if (isAttack)
 			{
 				isAttack = false;
 			}
+		}
+
+		protected override void OnDie()
+		{
+			animator.SetTrigger(AnimatorID.dieTrigger);
+			base.OnDie();
 		}
 	}
 }

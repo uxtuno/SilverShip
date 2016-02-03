@@ -216,7 +216,7 @@ namespace Kuvo
 			startTime = Time.time;
 		}
 
-		protected virtual void Update()
+		protected virtual void FixedUpdate()
 		{
 			// 一定時間待機する
 			if (Time.time - startTime < wait)
@@ -281,7 +281,7 @@ namespace Kuvo
 			if (!captain && members.Count <= 0)
 			{
 				// 上司をキャッシュ
-				BaseEnemyAI captainAI = EnemyCreatorSingleton.instance.captainAI;
+				BaseEnemyAI captainAI = EnemyManagerSingleton.instance.captainAI;
 
 				// 上司が存在しなければ
 				if (!captainAI)
