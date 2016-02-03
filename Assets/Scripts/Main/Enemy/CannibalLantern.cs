@@ -123,7 +123,10 @@ namespace Kuvo
 						break;
 
 					case EnemyState.Move:
+						if (!isAttack)
+						{
 							animator.SetTrigger(AnimatorID.moveInTrigger);
+						}
 						break;
 
 					case EnemyState.GoBack:

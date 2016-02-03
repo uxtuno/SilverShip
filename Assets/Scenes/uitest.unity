@@ -212,62 +212,6 @@ MonoBehaviour:
   usePlayerHp: 0
   nameDisplayObjct: {fileID: 1010177079}
   levelDisplayObjct: {fileID: 0}
---- !u!1 &47284860
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 112374, guid: f31da0a02feb5e04cbe534016c6bbd5e, type: 2}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 4
-  m_Component:
-  - 4: {fileID: 47284861}
-  - 135: {fileID: 47284863}
-  - 114: {fileID: 47284862}
-  m_Layer: 0
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &47284861
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 421478, guid: f31da0a02feb5e04cbe534016c6bbd5e, type: 2}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 47284860}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: .5, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 938389932}
-  m_RootOrder: 3
---- !u!114 &47284862
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 11439618, guid: f31da0a02feb5e04cbe534016c6bbd5e,
-    type: 2}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 47284860}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 13e20d82e1a632646b4a59708b5f19dc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tagNames:
-  - Enemy
---- !u!135 &47284863
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 13595478, guid: f31da0a02feb5e04cbe534016c6bbd5e,
-    type: 2}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 47284860}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &65080265
 GameObject:
   m_ObjectHideFlags: 0
@@ -593,6 +537,7 @@ MonoBehaviour:
   viewAngle: 90
   viewRange: 10
   muzzle: {fileID: 0}
+  score: 0
 --- !u!136 &496855377
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1064,6 +1009,7 @@ MonoBehaviour:
   viewAngle: 90
   viewRange: 10
   muzzle: {fileID: 0}
+  score: 0
 --- !u!136 &891939301
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1128,7 +1074,6 @@ Transform:
   - {fileID: 1550510397}
   - {fileID: 76596105}
   - {fileID: 1583676859}
-  - {fileID: 47284861}
   - {fileID: 1370264554}
   m_Father: {fileID: 0}
   m_RootOrder: 18
@@ -1170,6 +1115,7 @@ MonoBehaviour:
   viewAngle: 90
   viewRange: 5
   muzzle: {fileID: 1583676859}
+  score: 0
   bulletPrafab: {fileID: 172264, guid: 50cc16a0b3bb7084ea8e729b5a113b35, type: 2}
 --- !u!136 &938389935
 CapsuleCollider:
@@ -2216,6 +2162,7 @@ MonoBehaviour:
   viewAngle: 90
   viewRange: 10
   muzzle: {fileID: 0}
+  score: 0
 --- !u!136 &1736570345
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -2458,6 +2405,7 @@ MonoBehaviour:
   viewAngle: 90
   viewRange: 10
   muzzle: {fileID: 0}
+  score: 0
 --- !u!1 &1897807464
 GameObject:
   m_ObjectHideFlags: 0
