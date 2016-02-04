@@ -33,21 +33,22 @@ namespace Kuvo
 		protected Transform muzzle = null;
 		[Tooltip("攻撃コストを保持する時間")]
 		protected float CostKeepSecond = 2;
+		[Tooltip("スコア"), SerializeField]
+		protected int score = 0;
 		private CameraController cameraController;
 
 		private Animator _animator;   // animatorプロパティの実体
 
 		/// <summary>
-		/// 自身のAnimatorを取得する(キャッシュあり)
+		/// 自身の子のAnimatorを取得する(キャッシュあり)
 		/// </summary>
-		protected new Animator animator
+		protected Animator animator
 		{
 			get
 			{
 				if (!_animator)
 				{
 					_animator = GetComponentInChildren<Animator>();
-					//_animator = GetComponent<Animator>();
 				}
 
 				return _animator;
@@ -316,10 +317,10 @@ namespace Kuvo
 		///		base.OnDie();
 		///	}
 		/// </summary>
-		/// <param name="second"> インスタンスが消滅するまでの時間</param>
-		/// <returns></returns>
 		protected virtual void OnDie()
 		{
+			// スコアを加算
+			GameManager.instance.score += score;
 			EnemyManagerSingleton.instance.enemies.Remove(this);
 		}
 

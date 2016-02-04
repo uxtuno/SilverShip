@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Uxtuno;
+using Kuvo;
 
 /// <summary>
 /// ゲーム進行に必要な情報を保持し、制御する
@@ -38,6 +39,8 @@ public class GameManager : MyMonoBehaviour
 			return _player;
 		}
 	}
+	
+	public int score { get; set; }
 
 	//private static readonly string followIconCanvas = "FollowIconCanvas";
 	void Start()
