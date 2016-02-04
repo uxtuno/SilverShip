@@ -1371,11 +1371,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waves:
+  - createEnemyInformations: []
   - createEnemyInformations:
-    - enemyPrefabs:
-      - {fileID: 105192, guid: 268bec692f654d64fae7f640f70db719, type: 2}
-      createNumber: 50
-      createArea: {fileID: 2115308589}
+    - enemyPrefabs: []
+      createNumber: 0
+      createArea: {fileID: 0}
 --- !u!4 &1290838127
 Transform:
   m_ObjectHideFlags: 0

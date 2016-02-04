@@ -36,7 +36,7 @@ namespace Kuvo
 				{
 					if (!(_instance = FindObjectOfType<EnemyManagerSingleton>()))
 					{
-						Debug.LogError("EnemyCreatorSingletonが存在しませんでした\n規定値としてnullを使用します。");
+						UnityEngine.Debug.LogError("EnemyManagerSingletonが存在しませんでした\n規定値としてnullを使用します。");
 					}
 				}
 
@@ -134,12 +134,21 @@ namespace Kuvo
 			// 複数生成の禁止
 			if (this != instance)
 			{
-				Destroy(gameObject);
+				UnityEngine.Debug.LogWarning("EnemyManagerSingletonが複数存在しました\n一方を削除します。");
+				Destroy(this);
+				return;
 			}
 		}
 
 		private void Start()
 		{
+			if(waves.Count <= 0)
+			{
+				UnityEngine.Debug.LogWarning("Waveが存在しません");
+				Destroy(this);
+				return;
+            }
+			
 			// エネミーをまとめるGameObjectを探し、無ければ生成
 			if (!enemyFolder)
 			{
@@ -163,7 +172,6 @@ namespace Kuvo
 		{
 			if(enemies.Count <= 0)
 			{
-				//TODO:ここで次のWaveを呼ぶ
 				StartWave();
 			}
 		}
@@ -177,11 +185,27 @@ namespace Kuvo
 		/// <param name="createNumber"> 生成数</param>
 		private void Create(List<GameObject> enemyPrefabs, BoxCollider createArea, int createNumber)
 		{
+			if(enemyPrefabs.Count <= 0)
+			{
+				UnityEngine.Debug.LogError("enemyPrefabsが正しく設定されていません。");
+				return;
+			}
+
+			if(!createArea)
+			{
+				UnityEngine.Debug.LogError("createAreaが正しく設定されていません。");
+				return;
+			}
+			else if(!createArea.isTrigger)
+			{
+				UnityEngine.Debug.LogWarning("createAreaのisTriggerがfalseになっています!");
+			}
+
 			foreach(GameObject enemyPrefab in enemyPrefabs)
 			{
 				if(!enemyPrefab)
 				{
-					Debug.LogError("enemyPrefabsが正しく設定されていません。");
+					UnityEngine.Debug.LogError("enemyPrefabがnullです。");
 					return;
 				}
 			}
@@ -226,14 +250,14 @@ namespace Kuvo
 				currentWaveIndex = 0;
 			}
 
+			if(waves[currentWaveIndex].createEnemyInformations.Count <= 0)
+			{
+				UnityEngine.Debug.LogError("createEnemyInformationsが正しく設定されていません。");
+				return;
+			}
+
 			foreach (CreateEnemyInformation createEnemyInformation in waves[currentWaveIndex].createEnemyInformations)
 			{
-				if (!createEnemyInformation.createArea)
-				{
-					Debug.LogError("createAreaの値が正しく設定されていません。");
-					return;
-				}
-
 				// コードの可読性のために値を変数に格納
 				List<GameObject> enemyPrefabs = createEnemyInformation.enemyPrefabs;
 				BoxCollider createArea = createEnemyInformation.createArea;
