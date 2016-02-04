@@ -65,7 +65,7 @@ namespace Kuvo
 
 		[Tooltip("WAVE"), SerializeField]
 		private List<Wave> waves = new List<Wave>();
-		private int currentWaveIndex = -1;
+		private int currentWaveIndex = -1;			// Waveの選択と同時に加算するため、-1で初期化
 		private GameObject enemyFolder = null;      // エネミーを格納する入れ物
 
 		/// <summary>
@@ -158,6 +158,7 @@ namespace Kuvo
 				}
 			}
 
+			// Waveの選択と同時に加算するため、-1で初期化
 			if(currentWaveIndex != -1)
 			{
 				currentWaveIndex = -1;
@@ -216,15 +217,19 @@ namespace Kuvo
 			float createY = createArea.size.y * createArea.transform.lossyScale.y;
 			float createZ = createArea.size.z * createArea.transform.lossyScale.z;
 
+			// 範囲内のランダムな位置に生成
 			for (int i = 0; i < createNumber; i++)
 			{
 				Quaternion rotation = new Quaternion();
+
+				// ランダムな位置・角度を計算
 				rotation.eulerAngles = new Vector3(0, Random.Range(0, 359));
 				float randamX = Random.Range(-(createX / 2), createX / 2);
 				float randamY = Random.Range(-(createY / 2), createY / 2);
 				float randamZ = Random.Range(-(createZ / 2), createZ / 2);
 				Vector3 position = centerPosition + new Vector3(randamX, randamY, randamZ);
 
+				// 登録されているエネミーをランダムに選択
 				int selectIndex = Random.Range(0, enemyPrefabs.Count);
 
 				GameObject enemy = Instantiate(enemyPrefabs[selectIndex], position, rotation) as GameObject;
