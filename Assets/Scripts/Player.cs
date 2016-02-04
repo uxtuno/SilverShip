@@ -275,11 +275,6 @@ namespace Uxtuno
 
 		IEnumerator CameraControl()
 		{
-			if (lockOnState == LockOnState.Manual)
-			{
-				playerCamera.LockOnCamera();
-			}
-
 			yield return new WaitForFixedUpdate();
 
 			if (lockOnState != LockOnState.Manual)

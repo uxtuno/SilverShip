@@ -88,7 +88,7 @@ namespace Uxtuno
 		}
 
 		private static bool jumpTrampled; // 踏みつけジャンプ入力
-		private static readonly float jumpTrampledInputSeconds = 0.15f; //　同時押し判定用 猶予時間
+		private static readonly float jumpTrampledInputSeconds = 0.2f; //　同時押し判定用 猶予時間
 		private static int jumpTrampledInputFrame; //　同時押し継続フレーム数
 		private static float jumpTrampledInputCount; //　同時押し判定用 猶予カウンタ
 		private static JumpTrampledInput jumpTrampledInput = JumpTrampledInput.None;
@@ -172,16 +172,6 @@ namespace Uxtuno
 				jumpTrampledInput |= JumpTrampledInput.Attack;
 			}
 
-			if (jumpTrampledInput == JumpTrampledInput.None)
-			{
-				jumpTrampledInputCount = 0.0f;
-			}
-			else
-			{
-				// 何らかのボタンが押されていたので同時押し判定用のカウンタを増加させる
-				jumpTrampledInputCount += elapsedTime;
-			}
-
 			// 時間内に同時押しが成立
 			if (jumpTrampledInput == JumpTrampledInput.All &&
 				jumpTrampledInputCount < jumpTrampledInputSeconds)
@@ -192,6 +182,16 @@ namespace Uxtuno
 			else
 			{
 				jumpTrampledInputFrame = 0;
+			}
+
+			if (jumpTrampledInput == JumpTrampledInput.None)
+			{
+				jumpTrampledInputCount = 0.0f;
+			}
+			else
+			{
+				// 何らかのボタンが押されていたので同時押し判定用のカウンタを増加させる
+				jumpTrampledInputCount += elapsedTime;
 			}
 
 			// 同時押しの瞬間にtrue
