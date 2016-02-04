@@ -51,18 +51,24 @@ namespace Kuvo
 			[Tooltip("生成するエネミーのプレハブ")]
 			public List<GameObject> enemyPrefabs = new List<GameObject>();
 			[Tooltip("生成数")]
-			public int createNumber = 50; // 生成数
-
+			public int createNumber = 50;
 			[Tooltip("生成地点の中心")]
 			public Transform transformPosition = null;
 			[Tooltip("生成範囲")]
 			public float range = 10.0f;
-
 		}
 
-		[Tooltip("エネミーの生成情報"), SerializeField]
-		private List<CreateEnemyInformation> createEnemyInformations = new List<CreateEnemyInformation>();
-		private GameObject enemyFolder = null;		// エネミーを格納する入れ物
+		[System.Serializable]
+		private class Wave
+		{
+			[Tooltip("エネミーの生成情報")]
+			public List<CreateEnemyInformation> createEnemyInformations = new List<CreateEnemyInformation>();
+		}
+
+		[Tooltip("WAVE"), SerializeField]
+		private List<Wave> waves = new List<Wave>();
+		private int currentWaveIndex = -1;
+		private GameObject enemyFolder = null;      // エネミーを格納する入れ物
 
 		/// <summary>
 		/// 現在使用している攻撃コストを格納する
@@ -145,17 +151,22 @@ namespace Kuvo
 				}
 			}
 
+			if(currentWaveIndex != -1)
+			{
+				currentWaveIndex = -1;
+			}
+
 			enemies = new List<BaseEnemy>();
 
-			foreach (CreateEnemyInformation createEnemyInformation in createEnemyInformations)
-			{
-				// コードの可読性のために値を変数に格納
-				List<GameObject> enemyPrefabs = createEnemyInformation.enemyPrefabs;
-				Vector3 centerPosition = createEnemyInformation.transformPosition.position;
-				float range = createEnemyInformation.range;
-				int createNumber = createEnemyInformation.createNumber;
+			StartWave();
+		}
 
-				Create(enemyPrefabs, centerPosition, range, createNumber);
+		public void FixedUpdate()
+		{
+			if(enemies.Count <= 0)
+			{
+				//TODO:ここで次のWaveを呼ぶ
+				StartWave();
 			}
 		}
 
@@ -168,6 +179,15 @@ namespace Kuvo
 		/// <param name="createNumber"> 生成数</param>
 		private void Create(List<GameObject> enemyPrefabs, Vector3 centerPosition, float range, int createNumber)
 		{
+			foreach(GameObject enemyPrefab in enemyPrefabs)
+			{
+				if(!enemyPrefab)
+				{
+					Debug.LogError("enemyPrefabsが正しく設定されていません。");
+					return;
+				}
+			}
+
 			for (int i = 0; i < createNumber; i++)
 			{
 				Quaternion rotation = new Quaternion();
@@ -191,6 +211,34 @@ namespace Kuvo
 			}
 		}
 
+		/// <summary>
+		/// 次のWaveを開始する
+		/// </summary>
+		private void StartWave()
+		{
+			// 最後の要素まで到達した場合最初の要素へループ
+			if(++currentWaveIndex >= waves.Count)
+			{
+				currentWaveIndex = 0;
+			}
+
+			foreach (CreateEnemyInformation createEnemyInformation in waves[currentWaveIndex].createEnemyInformations)
+			{
+				if (!createEnemyInformation.transformPosition)
+				{
+					Debug.LogError("transformPositionの値が正しく設定されていません。");
+					return;
+				}
+
+				// コードの可読性のために値を変数に格納
+				List<GameObject> enemyPrefabs = createEnemyInformation.enemyPrefabs;
+				Vector3 centerPosition = createEnemyInformation.transformPosition.position;
+				float range = createEnemyInformation.range;
+				int createNumber = createEnemyInformation.createNumber;
+
+				Create(enemyPrefabs, centerPosition, range, createNumber);
+			}
+		}
 		/// <summary>
 		/// 指定秒後に指定数のコストを加算する
 		/// (※負の値を入れることで減算も可能)
