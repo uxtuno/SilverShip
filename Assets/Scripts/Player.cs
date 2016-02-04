@@ -229,8 +229,15 @@ namespace Uxtuno
 
 			// プレイヤーが移動する前の「カメラ→プレイヤー」ベクトルを保持
 			BaseState oldState;
+			int a = 0;
 			do
 			{
+				++a;
+				if(a > 10)
+				{
+					Debug.Log("無限ループ");
+				}
+
 				oldState = currentState;
 				// 現在の状態の動作を実行
 				currentState.Move();
@@ -693,7 +700,7 @@ namespace Uxtuno
 		public override void Damage(int attackPower, float magnification)
 		{
 			base.Damage(attackPower, magnification);
-
+			Debug.Log("ぐふっ");
 			animator.SetTrigger(isDamageID);
 			currentState = new DamageState(this);
 		}

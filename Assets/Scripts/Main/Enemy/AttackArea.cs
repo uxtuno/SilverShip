@@ -13,7 +13,10 @@ namespace Kuvo
 			{
 				return;
 			}
-			GameManager.instance.player.Damage((int)power, (float)magnification);
+			if (other.tag == TagName.Player)
+			{
+				GameManager.instance.player.Damage((int)power, (float)magnification);
+			}
 		}
 
 		public void Set(int power, float magnification)
