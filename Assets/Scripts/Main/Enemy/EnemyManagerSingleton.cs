@@ -52,10 +52,8 @@ namespace Kuvo
 			public List<GameObject> enemyPrefabs = new List<GameObject>();
 			[Tooltip("生成数")]
 			public int createNumber = 50;
-			[Tooltip("生成地点の中心")]
-			public Transform transformPosition = null;
-			[Tooltip("生成範囲")]
-			public float range = 10.0f;
+			[Tooltip("生成地点と範囲")]
+			public BoxCollider createArea = null;
 		}
 
 		[System.Serializable]
@@ -177,7 +175,7 @@ namespace Kuvo
 		/// <param name="centerPosition"> 生成範囲の中心</param>
 		/// <param name="range"> 範囲</param>
 		/// <param name="createNumber"> 生成数</param>
-		private void Create(List<GameObject> enemyPrefabs, Vector3 centerPosition, float range, int createNumber)
+		private void Create(List<GameObject> enemyPrefabs, BoxCollider createArea, int createNumber)
 		{
 			foreach(GameObject enemyPrefab in enemyPrefabs)
 			{
@@ -188,13 +186,19 @@ namespace Kuvo
 				}
 			}
 
+			// transformの位置,大きさも反映
+			Vector3 centerPosition = createArea.center + createArea.transform.position;
+			float createX = createArea.size.x * createArea.transform.lossyScale.x;
+			float createY = createArea.size.y * createArea.transform.lossyScale.y;
+			float createZ = createArea.size.z * createArea.transform.lossyScale.z;
+
 			for (int i = 0; i < createNumber; i++)
 			{
 				Quaternion rotation = new Quaternion();
 				rotation.eulerAngles = new Vector3(0, Random.Range(0, 359));
-				float randamX = Random.Range(-(range / 2), range / 2);
-				float randamY = Random.Range(-(range / 2), range / 2);
-				float randamZ = Random.Range(-(range / 2), range / 2);
+				float randamX = Random.Range(-(createX / 2), createX / 2);
+				float randamY = Random.Range(-(createY / 2), createY / 2);
+				float randamZ = Random.Range(-(createZ / 2), createZ / 2);
 				Vector3 position = centerPosition + new Vector3(randamX, randamY, randamZ);
 
 				int selectIndex = Random.Range(0, enemyPrefabs.Count);
@@ -224,19 +228,18 @@ namespace Kuvo
 
 			foreach (CreateEnemyInformation createEnemyInformation in waves[currentWaveIndex].createEnemyInformations)
 			{
-				if (!createEnemyInformation.transformPosition)
+				if (!createEnemyInformation.createArea)
 				{
-					Debug.LogError("transformPositionの値が正しく設定されていません。");
+					Debug.LogError("createAreaの値が正しく設定されていません。");
 					return;
 				}
 
 				// コードの可読性のために値を変数に格納
 				List<GameObject> enemyPrefabs = createEnemyInformation.enemyPrefabs;
-				Vector3 centerPosition = createEnemyInformation.transformPosition.position;
-				float range = createEnemyInformation.range;
+				BoxCollider createArea = createEnemyInformation.createArea;
 				int createNumber = createEnemyInformation.createNumber;
 
-				Create(enemyPrefabs, centerPosition, range, createNumber);
+				Create(enemyPrefabs, createArea, createNumber);
 			}
 		}
 		/// <summary>

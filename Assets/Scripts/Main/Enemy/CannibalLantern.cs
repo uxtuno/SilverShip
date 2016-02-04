@@ -227,10 +227,13 @@ namespace Kuvo
 
 			shortRangeAttackAreaObject.SetActive(true);
 
-			yield return new WaitForSeconds(1.0f);
+			yield return new WaitForSeconds(0.2f);
 
 			shortRangeAttackAreaObject.SetActive(false);
 			EnemyManagerSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.sAttackCost, CostKeepSecond);
+
+			yield return new WaitForSeconds(0.8f);
+
 			StartCoroutine(MovingPosition(startPosition, baseEnemyAI.attackParameters.sAttackPreOperatSecond));
 		}
 
