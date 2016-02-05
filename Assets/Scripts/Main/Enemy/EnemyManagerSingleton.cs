@@ -36,7 +36,7 @@ namespace Kuvo
 				{
 					if (!(_instance = FindObjectOfType<EnemyManagerSingleton>()))
 					{
-						Debug.LogError("EnemyCreatorSingletonが存在しませんでした\n規定値としてnullを使用します。");
+						UnityEngine.Debug.LogError("EnemyManagerSingletonが存在しませんでした\n規定値としてnullを使用します。");
 					}
 				}
 
@@ -51,18 +51,22 @@ namespace Kuvo
 			[Tooltip("生成するエネミーのプレハブ")]
 			public List<GameObject> enemyPrefabs = new List<GameObject>();
 			[Tooltip("生成数")]
-			public int createNumber = 50; // 生成数
-
-			[Tooltip("生成地点の中心")]
-			public Transform transformPosition = null;
-			[Tooltip("生成範囲")]
-			public float range = 10.0f;
-
+			public int createNumber = 50;
+			[Tooltip("生成地点と範囲")]
+			public BoxCollider createArea = null;
 		}
 
-		[Tooltip("エネミーの生成情報"), SerializeField]
-		private List<CreateEnemyInformation> createEnemyInformations = new List<CreateEnemyInformation>();
-		private GameObject enemyFolder = null;		// エネミーを格納する入れ物
+		[System.Serializable]
+		private class Wave
+		{
+			[Tooltip("エネミーの生成情報")]
+			public List<CreateEnemyInformation> createEnemyInformations = new List<CreateEnemyInformation>();
+		}
+
+		[Tooltip("WAVE"), SerializeField]
+		private List<Wave> waves = new List<Wave>();
+		private int currentWaveIndex = -1;			// Waveの選択と同時に加算するため、-1で初期化
+		private GameObject enemyFolder = null;      // エネミーを格納する入れ物
 
 		/// <summary>
 		/// 現在使用している攻撃コストを格納する
@@ -130,12 +134,21 @@ namespace Kuvo
 			// 複数生成の禁止
 			if (this != instance)
 			{
-				Destroy(gameObject);
+				UnityEngine.Debug.LogWarning("EnemyManagerSingletonが複数存在しました\n一方を削除します。");
+				Destroy(this);
+				return;
 			}
 		}
 
 		private void Start()
 		{
+			if(waves.Count <= 0)
+			{
+				UnityEngine.Debug.LogWarning("Waveが存在しません");
+				Destroy(this);
+				return;
+            }
+			
 			// エネミーをまとめるGameObjectを探し、無ければ生成
 			if (!enemyFolder)
 			{
@@ -145,17 +158,22 @@ namespace Kuvo
 				}
 			}
 
+			// Waveの選択と同時に加算するため、-1で初期化
+			if(currentWaveIndex != -1)
+			{
+				currentWaveIndex = -1;
+			}
+
 			enemies = new List<BaseEnemy>();
 
-			foreach (CreateEnemyInformation createEnemyInformation in createEnemyInformations)
-			{
-				// コードの可読性のために値を変数に格納
-				List<GameObject> enemyPrefabs = createEnemyInformation.enemyPrefabs;
-				Vector3 centerPosition = createEnemyInformation.transformPosition.position;
-				float range = createEnemyInformation.range;
-				int createNumber = createEnemyInformation.createNumber;
+			StartWave();
+		}
 
-				Create(enemyPrefabs, centerPosition, range, createNumber);
+		public void FixedUpdate()
+		{
+			if(enemies.Count <= 0)
+			{
+				StartWave();
 			}
 		}
 
@@ -166,17 +184,52 @@ namespace Kuvo
 		/// <param name="centerPosition"> 生成範囲の中心</param>
 		/// <param name="range"> 範囲</param>
 		/// <param name="createNumber"> 生成数</param>
-		private void Create(List<GameObject> enemyPrefabs, Vector3 centerPosition, float range, int createNumber)
+		private void Create(List<GameObject> enemyPrefabs, BoxCollider createArea, int createNumber)
 		{
+			if(enemyPrefabs.Count <= 0)
+			{
+				UnityEngine.Debug.LogError("enemyPrefabsが正しく設定されていません。");
+				return;
+			}
+
+			if(!createArea)
+			{
+				UnityEngine.Debug.LogError("createAreaが正しく設定されていません。");
+				return;
+			}
+			else if(!createArea.isTrigger)
+			{
+				UnityEngine.Debug.LogWarning("createAreaのisTriggerがfalseになっています!");
+			}
+
+			foreach(GameObject enemyPrefab in enemyPrefabs)
+			{
+				if(!enemyPrefab)
+				{
+					UnityEngine.Debug.LogError("enemyPrefabがnullです。");
+					return;
+				}
+			}
+
+			// transformの位置,大きさも反映
+			Vector3 centerPosition = createArea.center + createArea.transform.position;
+			float createX = createArea.size.x * createArea.transform.lossyScale.x;
+			float createY = createArea.size.y * createArea.transform.lossyScale.y;
+			float createZ = createArea.size.z * createArea.transform.lossyScale.z;
+
+			// 範囲内のランダムな位置に生成
 			for (int i = 0; i < createNumber; i++)
 			{
 				Quaternion rotation = new Quaternion();
+
+				// ランダムな位置・角度を計算
 				rotation.eulerAngles = new Vector3(0, Random.Range(0, 359));
-				float randamX = Random.Range(-(range / 2), range / 2);
-				float randamY = Random.Range(-(range / 2), range / 2);
-				float randamZ = Random.Range(-(range / 2), range / 2);
+				float randamX = Random.Range(-(createX / 2), createX / 2);
+				float randamY = Random.Range(-(createY / 2), createY / 2);
+				float randamZ = Random.Range(-(createZ / 2), createZ / 2);
 				Vector3 position = centerPosition + new Vector3(randamX, randamY, randamZ);
 
+				// 登録されているエネミーをランダムに選択
 				int selectIndex = Random.Range(0, enemyPrefabs.Count);
 
 				GameObject enemy = Instantiate(enemyPrefabs[selectIndex], position, rotation) as GameObject;
@@ -191,6 +244,33 @@ namespace Kuvo
 			}
 		}
 
+		/// <summary>
+		/// 次のWaveを開始する
+		/// </summary>
+		private void StartWave()
+		{
+			// 最後の要素まで到達した場合最初の要素へループ
+			if(++currentWaveIndex >= waves.Count)
+			{
+				currentWaveIndex = 0;
+			}
+
+			if(waves[currentWaveIndex].createEnemyInformations.Count <= 0)
+			{
+				UnityEngine.Debug.LogError("createEnemyInformationsが正しく設定されていません。");
+				return;
+			}
+
+			foreach (CreateEnemyInformation createEnemyInformation in waves[currentWaveIndex].createEnemyInformations)
+			{
+				// コードの可読性のために値を変数に格納
+				List<GameObject> enemyPrefabs = createEnemyInformation.enemyPrefabs;
+				BoxCollider createArea = createEnemyInformation.createArea;
+				int createNumber = createEnemyInformation.createNumber;
+
+				Create(enemyPrefabs, createArea, createNumber);
+			}
+		}
 		/// <summary>
 		/// 指定秒後に指定数のコストを加算する
 		/// (※負の値を入れることで減算も可能)
