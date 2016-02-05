@@ -233,10 +233,7 @@ namespace Uxtuno
 			do
 			{
 				++a;
-				if(a > 10)
-				{
-					Debug.Log("無限ループ");
-				}
+				UnityEngine.Debug.Assert(a > 10);
 
 				oldState = currentState;
 				// 現在の状態の動作を実行
