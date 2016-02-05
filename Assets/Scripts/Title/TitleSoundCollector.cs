@@ -18,7 +18,7 @@ namespace Kuvo
 		protected override void Awake()
 		{
 			sounds.Add(SoundName.NONE, null);
-			sounds.Add(SoundName.BGM, Resources.Load<AudioClip>("Sounds/Yoimatsurinokaze"));
+			sounds.Add(SoundName.BGM, Resources.Load<AudioClip>("Sounds/BackGroundMusic/Yoimatsurinokaze"));
 		}
 	}
 }

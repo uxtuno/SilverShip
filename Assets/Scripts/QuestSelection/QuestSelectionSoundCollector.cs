@@ -21,10 +21,10 @@ namespace Kuvo
 		protected override void Awake()
 		{
 			sounds.Add(SoundName.NONE, null);
-			sounds.Add(SoundName.BGM, Resources.Load<AudioClip>("Sounds/Bureikou") as AudioClip);
-			sounds.Add(SoundName.CursorSelect, Resources.Load<AudioClip>("Sounds/Cursor") as AudioClip);
-			sounds.Add(SoundName.Submit, Resources.Load<AudioClip>("Sounds/Submit") as AudioClip);
-			sounds.Add(SoundName.Cancel, Resources.Load<AudioClip>("Sounds/Cancel") as AudioClip);
+			sounds.Add(SoundName.BGM, Resources.Load<AudioClip>("Sounds/BackGroundMusic/Bureikou") as AudioClip);
+			sounds.Add(SoundName.CursorSelect, Resources.Load<AudioClip>("Sounds/SoundEffects/Cursor") as AudioClip);
+			sounds.Add(SoundName.Submit, Resources.Load<AudioClip>("Sounds/SoundEffects/Submit") as AudioClip);
+			sounds.Add(SoundName.Cancel, Resources.Load<AudioClip>("Sounds/SoundEffects/Cancel") as AudioClip);
 		}
 	}
 }
