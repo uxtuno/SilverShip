@@ -77,7 +77,7 @@ namespace Uxtuno
 			}
 
 			// 地面に着いている状態のみ前方を向く処理
-			if (player.isGrounded &&
+			if ((player.isGrounded || player.currentState.GetType() == typeof(Player.AirDashState)) &&
 				controller.xAngle > 0.0f)
 			{
 				cameraVertical = Vector3.Scale(moveVector, new Vector3(1.0f, 0.0f, 1.0f)).magnitude * verticalMoveRotationSpeed * 0.25f;

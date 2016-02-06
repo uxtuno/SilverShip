@@ -23,9 +23,9 @@ namespace Uxtuno
 			canvas = this.GetSafeComponent<Canvas>();
 		}
 
-		void Update()
+		void FixedUpdate()
 		{
-			timeLeft.text = string.Format("{0:000}", (int)GameManager.instance.timeLeft);
+			timeLeft.text = string.Format("{0:000.00}", (GameManager.instance.timeLeft));
 			score.text = string.Format("{0:0,000,000}", GameManager.instance.score);
         }
 	}

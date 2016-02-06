@@ -11,15 +11,16 @@ namespace Kuvo
 		[SerializeField]
 		private Text timeField = null;          // 時間の表示枠
 		private IEnumerator showResult = null;  // ShowResult()のコルーチン
-		private int h, m, s = 0;                // 時,分,秒
-		private int clearSeconds = 120;         // クリアタイム(秒)
+		private float h, m, s = 0;                // 時,分,秒
+		private float clearSeconds = 120;         // クリアタイム(秒)
 
 		void Start()
 		{
 			nextButton.SetActive(false);
 
 			// クリアタイムを時,分,秒に換算
-			s = clearSeconds % 60;
+			clearSeconds = GameManager.instance.timeLeft;
+			s = clearSeconds % 60.0f;
 			clearSeconds -= s;
 			clearSeconds /= 60;
 			m = clearSeconds % 60;
@@ -68,9 +69,11 @@ namespace Kuvo
 				yield return new WaitForSeconds(waitTime);
 			}
 
-			if (timeField.text != h.ToString() + ":" + m.ToString().PadLeft(2, '0') + ":" + s.ToString().PadLeft(2, '0'))
+			if (timeField.text != string.Format("{0:0,000,000}", GameManager.instance.score))
 			{
-				timeField.text = h.ToString() + ":" + m.ToString().PadLeft(2, '0') + ":" + s.ToString().PadLeft(2, '0');
+				//timeField.text = h.ToString() + ":" + m.ToString().PadLeft(2, '0') + ":" + s.ToString().PadLeft(2, '0');
+				//timeField.text = string.Format("{0:00}:{1:00}:{2:00}", h, m, s);
+				timeField.text = string.Format("{0:0,000,000}", GameManager.instance.score);
 
 				yield return new WaitForSeconds(waitTime);
 			}

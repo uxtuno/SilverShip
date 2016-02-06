@@ -66,7 +66,7 @@ namespace Uxtuno
 		private float highJumpPower; // ハイジャンプの初速
 		private float jumpVY = 0.0f; // ジャンプ中のY軸方向の移動量
 
-		private abstract class BaseState
+		public abstract class BaseState
 		{
 			protected Player player;
 			public BaseState(Player player)
@@ -80,7 +80,10 @@ namespace Uxtuno
 			public abstract void Move();
 		}
 
-		private BaseState currentState; // 現在の状態
+		/// <summary>
+		/// 現在のState
+		/// </summary>
+		public BaseState currentState { get; private set; }
 
 		#region - フィールド
 		private Actor _lockOnTarget; // ロックオン対象エネミー
@@ -227,18 +230,10 @@ namespace Uxtuno
 			}
 			checkGrounded();
 
-			// プレイヤーが移動する前の「カメラ→プレイヤー」ベクトルを保持
-			BaseState oldState;
-			int a = 0;
-			do
-			{
-				++a;
-				UnityEngine.Debug.Assert(a > 10);
+			UnityEngine.Debug.Assert(currentState != null);
 
-				oldState = currentState;
-				// 現在の状態の動作を実行
-				currentState.Move();
-			} while (currentState != oldState);
+			// 現在の状態の動作を実行
+			currentState.Move();
 			CommonState();
 
 			LockOnControl();
@@ -707,7 +702,7 @@ namespace Uxtuno
 		/// <summary>
 		/// 通常時(地上)
 		/// </summary>
-		private class NormalState : BaseState
+		public class NormalState : BaseState
 		{
 			public NormalState(Player player)
 				: base(player)
@@ -776,7 +771,7 @@ namespace Uxtuno
 		/// <summary>
 		/// 空中
 		/// </summary>
-		private class AirState : BaseState
+		public class AirState : BaseState
 		{
 			private static readonly float trampledJumpInputSeconds = 0.1f; // 踏みつけジャンプ入力同時押し猶予時間
 			private float trampledJumpInputCount; // 踏みつけジャンプ入力受付カウンタ
@@ -893,7 +888,7 @@ namespace Uxtuno
 		/// <summary>
 		/// 空中ダッシュ
 		/// </summary>
-		private class AirDashState : BaseState
+		public class AirDashState : BaseState
 		{
 			private static readonly float initialVelocity = 22.0f; // 初速
 			private static readonly float fallStartSpeed = 18.0f; // 落下開始速度
@@ -946,7 +941,7 @@ namespace Uxtuno
 		/// <summary>
 		/// 踏み込み状態
 		/// </summary>
-		private class DepressionState : BaseState
+		public class DepressionState : BaseState
 		{
 			private float transitionCount; // 次の状態へ遷移するまでの時間をカウント
 			private static readonly float transitionSeconds = 0.3f; // 次の状態へ遷移するまでの時間
@@ -969,7 +964,7 @@ namespace Uxtuno
 		/// <summary>
 		/// 対象へダッシュ(ロックオン対象)
 		/// </summary>
-		private class DashToTargetState : BaseState
+		public class DashToTargetState : BaseState
 		{
 			private static readonly float contactDistance = 0.2f; // 対象に接触したとみなす距離
 			private static readonly float speed = 20.0f; // 対象へ向かうスピード
@@ -1012,7 +1007,7 @@ namespace Uxtuno
 		/// <summary>
 		/// 攻撃状態
 		/// </summary>
-		private class AttackState : BaseState
+		public class AttackState : BaseState
 		{
 			private static readonly float speed = 4.0f;
 			public AttackState(Player player)
@@ -1061,7 +1056,7 @@ namespace Uxtuno
 		/// <summary>
 		/// 壁キック
 		/// </summary>
-		private class WallKick : BaseState
+		public class WallKick : BaseState
 		{
 			// 初速
 			private static readonly float primarySpeed = 12.0f;
@@ -1096,7 +1091,7 @@ namespace Uxtuno
 		/// <summary>
 		/// ダメージ判定中
 		/// </summary>
-		private class DamageState : BaseState
+		public class DamageState : BaseState
 		{
 			private readonly float damegeSeconds;
 			public DamageState(Player player)

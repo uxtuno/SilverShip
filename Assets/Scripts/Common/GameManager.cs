@@ -47,6 +47,9 @@ public class GameManager : MyMonoBehaviour
 	private static readonly float timeLimitSeconds = 300.0f; // 制限時間
 	public float _timeLeft = timeLimitSeconds;
 	public float timeLeft { get { return _timeLeft; } private set { _timeLeft = value; } }
+	public float elapsedTimeSconds {
+		get { return timeLimitSeconds - timeLeft; }
+	}
 
 	/// <summary>
 	/// シーン切り替え時に呼ばれる
@@ -54,8 +57,15 @@ public class GameManager : MyMonoBehaviour
 	/// <param name="level"></param>
 	public void OnLevelWasLoaded(int level)
 	{
-		// 制限時間で残り時間を初期化
-		timeLeft = timeLimitSeconds;
+		if(Application.loadedLevelName == SceneName.main)
+		{
+			// 制限時間で残り時間を初期化
+			timeLeft = timeLimitSeconds;
+		}
+		else
+		{
+			enabled = false;
+		}
 	}
 
 	//private static readonly string followIconCanvas = "FollowIconCanvas";
@@ -75,6 +85,23 @@ public class GameManager : MyMonoBehaviour
 		PlayerInput.Update(Time.deltaTime);
 
 		timeLeft -= Time.deltaTime;
+		if(timeLeft < 0.0f)
+		{
+			timeLeft = 0.0f;
+		}
+	}
+
+	void LateUpdate()
+	{
+		if (timeLeft <= 0.0f)
+		{
+			SceneChangerSingleton.instance.FadeChange(SceneName.result);
+		}
+
+		if(player.hp <= 0)
+		{
+			SceneChangerSingleton.instance.FadeChange(SceneName.result);
+		}
 	}
 
 	void FixedUpdate()

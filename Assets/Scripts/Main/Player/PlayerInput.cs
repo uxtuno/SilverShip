@@ -139,8 +139,8 @@ namespace Uxtuno
 
 			if (Input.GetAxis(InputName.RightStickHorizontal) < -lockOnChangeThreshold)
 			{
-				if (!buttonState[ButtonName.LeftLockOnChanged]
-					&& lockOnChangedInputFrameCount == 0)
+				if (!buttonState[ButtonName.LeftLockOnChanged] &&
+					lockOnChangedInputFrameCount == 0)
 				{
 					buttonState[ButtonName.LeftLockOnChanged] = true;
 				}
@@ -148,8 +148,8 @@ namespace Uxtuno
 			}
 			else if (Input.GetAxis(InputName.RightStickHorizontal) > lockOnChangeThreshold)
 			{
-				if (!buttonState[ButtonName.RightLockOnChanged]
-					&& lockOnChangedInputFrameCount == 0)
+				if (!buttonState[ButtonName.RightLockOnChanged] &&
+					lockOnChangedInputFrameCount == 0)
 				{
 					buttonState[ButtonName.RightLockOnChanged] = true;
 				}
@@ -171,10 +171,10 @@ namespace Uxtuno
 			{
 				jumpTrampledInput |= JumpTrampledInput.Attack;
 			}
-
+			Debug.Log(jumpTrampledInput);
 			// 時間内に同時押しが成立
 			if (jumpTrampledInput == JumpTrampledInput.All &&
-				jumpTrampledInputCount < jumpTrampledInputSeconds)
+				jumpTrampledInputCount <= jumpTrampledInputSeconds)
 			{
 				// 同時押し判定が複数回発生しないように入力フレームをカウント
 				++jumpTrampledInputFrame;
@@ -184,14 +184,14 @@ namespace Uxtuno
 				jumpTrampledInputFrame = 0;
 			}
 
-			if (jumpTrampledInput == JumpTrampledInput.None)
-			{
-				jumpTrampledInputCount = 0.0f;
-			}
-			else
+			if (jumpTrampledInput != JumpTrampledInput.None)
 			{
 				// 何らかのボタンが押されていたので同時押し判定用のカウンタを増加させる
 				jumpTrampledInputCount += elapsedTime;
+			}
+			else
+			{
+				jumpTrampledInputCount = 0.0f;
 			}
 
 			// 同時押しの瞬間にtrue
@@ -199,9 +199,6 @@ namespace Uxtuno
 			{
 				jumpTrampled = true;
 				buttonState[ButtonName.JumpTrampled] = true;
-				// 同時押しが成立した瞬間それぞれのボタン入力は無効
-				buttonState[ButtonName.Attack] = false;
-				buttonState[ButtonName.Jump] = false;
 			}
 			else
 			{
@@ -219,13 +216,13 @@ namespace Uxtuno
 		{
 			yield return new WaitForFixedUpdate();
 			// 同時押し判定後のタイミングでリセット
-			if (jumpTrampledInputCount >= jumpTrampledInputSeconds ||
-				buttonState[ButtonName.JumpTrampled])
+			if (jumpTrampledInputCount >= jumpTrampledInputSeconds)
 			{
 				buttonState[ButtonName.Attack] = false;
 				buttonState[ButtonName.Jump] = false;
 				jumpTrampledInputCount = 0.0f;
 				jumpTrampledInput = JumpTrampledInput.None;
+				buttonState[ButtonName.JumpTrampled] = false;
 			}
 
 			// Attackと Jumpについては同時押しに使用するためfalseに戻すタイミングを遅延させる
@@ -233,7 +230,6 @@ namespace Uxtuno
 			buttonState[ButtonName.Barrier] = false;
 			buttonState[ButtonName.ItemGet] = false;
 			//buttonState[ButtonName.Jump] = false;
-			buttonState[ButtonName.JumpTrampled] = false;
 			buttonState[ButtonName.LockOn] = false;
 			buttonState[ButtonName.CameraToFront] = false;
 			if (lockOnChangedInputFrameCount >= 1)
@@ -255,26 +251,33 @@ namespace Uxtuno
 			{
 				case ButtonName.Attack:
 				case ButtonName.Jump:
-					// 同時入力判定中、または入力されていないときにfalseを返す
-					if (jumpTrampledInputCount < jumpTrampledInputSeconds)
+					// 同時入力判定中、または同時押し確定時
+					if (jumpTrampledInputCount < jumpTrampledInputSeconds ||
+						buttonState[ButtonName.JumpTrampled])
 					{
-
 						return false;
 					}
+					break;
 
-					return buttonState[buttonName];
+				case ButtonName.JumpTrampled:
+					// 同時入力判定中、または同時押し確定時
+					if (jumpTrampledInputCount < jumpTrampledInputSeconds)
+					{
+						return false;
+					}
+					break;
 
 				case ButtonName.Barrier:
 				case ButtonName.ItemGet:
 				case ButtonName.LockOn:
 				case ButtonName.CameraToFront:
-				case ButtonName.JumpTrampled:
 				case ButtonName.RightLockOnChanged:
 				case ButtonName.LeftLockOnChanged:
-					return buttonState[buttonName];
+					break;
 				default:
 					throw new ArgumentException("不正な引数が渡されました");
 			}
+			return buttonState[buttonName];
 		}
 
 		/// <summary>
@@ -288,16 +291,18 @@ namespace Uxtuno
 			switch (buttonName)
 			{
 				case ButtonName.Attack:
-					// 同時入力判定中、または入力されていないときにfalseを返す
-					if (jumpTrampledInputCount < jumpTrampledInputSeconds)
+					// 同時入力判定中、または同時押し確定時
+					if (jumpTrampledInputCount < jumpTrampledInputSeconds ||
+						jumpTrampled)
 					{
 						return false;
 					}
 					return Input.GetButtonDown(InputName.Attack);
 
 				case ButtonName.Jump:
-					// 同時入力判定中、または入力されていないときにfalseを返す
-					if (jumpTrampledInputCount < jumpTrampledInputSeconds)
+					// 同時入力判定中、または同時押し確定時
+					if (jumpTrampledInputCount < jumpTrampledInputSeconds ||
+						jumpTrampled)
 					{
 						return false;
 					}
