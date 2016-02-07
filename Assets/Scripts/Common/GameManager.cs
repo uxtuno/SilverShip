@@ -42,6 +42,9 @@ public class GameManager : MyMonoBehaviour
 		}
 	}
 
+	private GameData data = new GameData();
+	public GameData GetGameData() { return data; }
+
 	public int score { get; set; }
 
 	private static readonly float timeLimitSeconds = 300.0f; // 制限時間
@@ -50,6 +53,7 @@ public class GameManager : MyMonoBehaviour
 	public float elapsedTimeSconds {
 		get { return timeLimitSeconds - timeLeft; }
 	}
+	private bool isTransition; // シーン遷移
 
 	/// <summary>
 	/// シーン切り替え時に呼ばれる
@@ -57,15 +61,11 @@ public class GameManager : MyMonoBehaviour
 	/// <param name="level"></param>
 	public void OnLevelWasLoaded(int level)
 	{
-		if(Application.loadedLevelName == SceneName.main)
-		{
-			// 制限時間で残り時間を初期化
-			timeLeft = timeLimitSeconds;
-		}
-		else
-		{
-			enabled = false;
-		}
+		isTransition = false;
+		// 制限時間で残り時間を初期化
+		timeLeft = timeLimitSeconds;
+		score = 0;
+		timeLeft = 0.0f;
 	}
 
 	//private static readonly string followIconCanvas = "FollowIconCanvas";
@@ -76,6 +76,11 @@ public class GameManager : MyMonoBehaviour
 
 	void Update()
 	{
+		if(Application.loadedLevelName != SceneName.main)
+		{
+			return;
+		}
+
 		if (Input.GetKeyDown(KeyCode.T))
 		{
 			Application.CaptureScreenshot("ScreenShot.png");
@@ -93,14 +98,19 @@ public class GameManager : MyMonoBehaviour
 
 	void LateUpdate()
 	{
+		if (Application.loadedLevelName != SceneName.main)
+		{
+			return;
+		}
+
 		if (timeLeft <= 0.0f)
 		{
-			SceneChangerSingleton.instance.FadeChange(SceneName.result);
+			ChangeResultScene();
 		}
 
 		if(player.hp <= 0)
 		{
-			SceneChangerSingleton.instance.FadeChange(SceneName.result);
+			ChangeResultScene();
 		}
 	}
 
@@ -108,4 +118,25 @@ public class GameManager : MyMonoBehaviour
 	{
 		StartCoroutine(PlayerInput.LateFixedUpdate());
 	}
+
+	private void ChangeResultScene()
+	{
+		if (isTransition)
+			return;
+		isTransition = true;
+		data.clearHP = (int)player.hp;
+		data.score = score;
+		data.timeLeft = timeLeft;
+		SceneChangerSingleton.instance.FadeChange(SceneName.result);
+	}
+}
+
+/// <summary>
+/// シーン間の受け渡しが必要なデータ
+/// </summary>
+public class GameData
+{
+	public int score { get; set; }
+	public float timeLeft { get; set; }
+	public int clearHP { get; set; }
 }
