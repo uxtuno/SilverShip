@@ -128,6 +128,7 @@ public class GameManager : MyMonoBehaviour
 		data.score = score;
 		data.timeLeft = timeLeft;
 		SceneChangerSingleton.instance.FadeChange(SceneName.result);
+
 	}
 }
 

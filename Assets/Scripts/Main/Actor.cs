@@ -38,6 +38,10 @@ public abstract class Actor : MyMonoBehaviour
 		protected set
 		{
 			_hp = value;
+			if(hp < 0)
+			{
+				hp = 0;
+			}
 		}
 	}
 

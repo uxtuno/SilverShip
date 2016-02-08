@@ -78,9 +78,9 @@ namespace Kuvo
 			evaluationSymbol.SetActive(false);
 
 			data = GameManager.instance.GetGameData();
-			data.score = 60000;
-			data.timeLeft = 300;
-			data.clearHP = 200;
+			//data.score = 60000;
+			//data.timeLeft = 300;
+			//data.clearHP = 200;
 
 			scoreItem = new ResultItem(score, scoreValue, data.score, scoreFormat, scoreMagnification);
 			timeLeftItem = new ResultItem(timeLeft, timeLeftValue, (int)data.timeLeft, timeFormat, timeLeftMagnification);

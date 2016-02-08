@@ -1082,14 +1082,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91ae1b1cacae2c348bd68b912bee05aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _actorName: "\u63D0\u706F\u4E59"
+  _actorName: "\u63D0\u706F \u4E59"
   _maxHp: 10
   speed: 5
   viewAngle: 120
   viewRange: 10
   muzzle: {fileID: 424770}
   score: 500
-  bulletPrafab: {fileID: 172264, guid: 50cc16a0b3bb7084ea8e729b5a113b35, type: 2}
+  bulletPrafab: {fileID: 172264, guid: 7fcedaa194f451649a919162447a7fa9, type: 2}
 --- !u!114 &11468838
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1140,7 +1140,15 @@ Prefab:
   serializedVersion: 2
   m_Modification:
     m_TransformParent: {fileID: 0}
-    m_Modifications: []
+    m_Modifications:
+    - target: {fileID: 0}
+      propertyPath: _actorName
+      value: "\u63D0\u706F \u4E59"
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: bulletPrafab
+      value: 
+      objectReference: {fileID: 172264, guid: 7fcedaa194f451649a919162447a7fa9, type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 105192}

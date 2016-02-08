@@ -130,7 +130,7 @@ namespace Uxtuno
 		private PlayerAttackFlow attackFlow;
 		private GameObject powerPointPrefab; // 結界ポイントエフェクト
 		private PowerPointCreator powerPointCreator; // 結界の点を生成するためのクラス
-		private static readonly int barrierPointNumber = 3; // 結界を発生させる事ができる点の数
+		private static readonly int barrierPointNumber = 5; // 結界を発生させる事ができる点の数
 		private GameObject barrierPrefab;
 		[SerializeField, Tooltip("足のCollider")]
 		private ContainedObjects __footContained; // 足付近の壁、敵を検知
@@ -341,7 +341,6 @@ namespace Uxtuno
 				lockOnIcon.Hide();
 			}
 		}
-
 
 		private static readonly float blockLockOnReleaseSeconds = 1.5f; // ロックオンが解除されるまでの遮蔽時間
 		private float blockLockOnReleaseCount;
@@ -687,7 +686,6 @@ namespace Uxtuno
 		public override void Damage(int attackPower, float magnification)
 		{
 			base.Damage(attackPower, magnification);
-			Debug.Log("ぐふっ");
 			animator.SetTrigger(isDamageID);
 			currentState = new DamageState(this);
 		}
@@ -993,12 +991,16 @@ namespace Uxtuno
 						// 踏みつけジャンプさせる
 						if (enemy.tag == TagName.Enemy || player.lockOnTarget != null)
 						{
-							player.JumpTrampled();
-							return;
+							// 倍率は適当な数値(マジックナンバー)
+							enemy.GetComponent<Actor>().Damage(player.attack, 1.0f);
 						}
 					}
-					// それ以外なら落下
-					player.currentState = new AirState(player);
+
+					if(player.lockOnTarget != null)
+					{
+						player.JumpTrampled();
+						return;
+					}
 					return;
 				}
 			}
