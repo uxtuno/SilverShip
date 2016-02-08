@@ -46,8 +46,8 @@ namespace Kuvo
 		private GameData data;
 
 		private static readonly string valueString = "Value"; // 名前で子を探すための定数
-		private static readonly float waitSeconds = 1.0f; // 項目表示後の待機時間
-		private static readonly float showCompleteSeconds = 1.0f; // 項目の表示完了までにかかる時間
+		private static readonly float waitSeconds = 0.8f; // 項目表示後の待機時間
+		private static readonly float showCompleteSeconds = 0.5f; // 項目の表示完了までにかかる時間
 
 		private enum Evaluation
 		{
@@ -78,6 +78,9 @@ namespace Kuvo
 			evaluationSymbol.SetActive(false);
 
 			data = GameManager.instance.GetGameData();
+			data.score = 60000;
+			data.timeLeft = 300;
+			data.clearHP = 200;
 
 			scoreItem = new ResultItem(score, scoreValue, data.score, scoreFormat, scoreMagnification);
 			timeLeftItem = new ResultItem(timeLeft, timeLeftValue, (int)data.timeLeft, timeFormat, timeLeftMagnification);
@@ -136,7 +139,7 @@ namespace Kuvo
 
 		private IEnumerator ShowEvaluation()
 		{
-			float scale = 0.7f;
+			float scale = 0.3f;
 			float scalingSpeed = 4.0f;
 			while (scale < 1.0f)
 			{
