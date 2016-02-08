@@ -20,6 +20,7 @@ namespace Kuvo
 			EnemySAttack,       // 近距離攻撃
 			EnemyLAttack,       // 遠距離攻撃
 			EnemyDamage,        // ダメージ
+			EnemyDie,			// 死亡
 		}
 
 		protected override void Awake()
@@ -29,7 +30,8 @@ namespace Kuvo
 			sounds.Add(SoundName.SeaWave, Resources.Load<AudioClip>("Sounds/BackGroundMusic/SeaWaveBGM") as AudioClip);
 			sounds.Add(SoundName.EnemySAttack, Resources.Load<AudioClip>("Sounds/SoundEffects/EnemyVoice") as AudioClip);
 			sounds.Add(SoundName.EnemyLAttack, Resources.Load<AudioClip>("Sounds/SoundEffects/EnemyVoice") as AudioClip);
-			sounds.Add(SoundName.EnemyDamage, Resources.Load<AudioClip>("Sounds/SoundEffects/EnemyDeathSE") as AudioClip);
+			sounds.Add(SoundName.EnemyDamage, Resources.Load<AudioClip>("Sounds/SoundEffects/PlayerAttackHitSE") as AudioClip);
+			sounds.Add(SoundName.EnemyDie, Resources.Load<AudioClip>("Sounds/SoundEffects/EnemyDeathSE") as AudioClip);
 		}
 	}
 }

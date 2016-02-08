@@ -149,6 +149,7 @@ namespace Kuvo
 						break;
 
 					case EnemyState.Stagger:
+						SoundPlayerSingleton.instance.PlaySE(gameObject, soundCollector[MainSoundCollector.SoundName.EnemyDamage]);
 						animator.SetTrigger(AnimatorID.damageTrigger);
 						break;
 
@@ -317,7 +318,7 @@ namespace Kuvo
 
 		protected override void OnDie()
 		{
-			SoundPlayerSingleton.instance.PlaySE(gameObject, soundCollector[MainSoundCollector.SoundName.EnemyDamage]);
+			SoundPlayerSingleton.instance.PlaySE(gameObject, soundCollector[MainSoundCollector.SoundName.EnemyDie]);
 			animator.SetTrigger(AnimatorID.dieTrigger);
 			base.OnDie();
 		}
