@@ -37,6 +37,13 @@ namespace Kuvo
 		protected int score = 0;
 		private CameraController cameraController;
 
+		protected MainSoundCollector soundCollector {
+			get
+			{
+				return this.GetSafeComponent<MainSoundCollector>();
+			}
+		}
+
 		private Animator _animator;   // animatorプロパティの実体
 
 		/// <summary>

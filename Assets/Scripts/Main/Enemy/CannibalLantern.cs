@@ -149,6 +149,7 @@ namespace Kuvo
 						break;
 
 					case EnemyState.Stagger:
+						SoundPlayerSingleton.instance.PlaySE(gameObject, soundCollector[MainSoundCollector.SoundName.EnemyDamage]);
 						animator.SetTrigger(AnimatorID.damageTrigger);
 						break;
 
@@ -194,6 +195,8 @@ namespace Kuvo
 		public override IEnumerator ShortRangeAttack()
 		{
 			isAttack = true;
+			SoundPlayerSingleton.instance.PlaySE(gameObject, soundCollector[MainSoundCollector.SoundName.EnemySAttack]);
+			
 			EnemyManagerSingleton.instance.StartCostAddForSeconds(baseEnemyAI.attackParameters.sAttackCost, 0);
 			currentState = EnemyState.Move;
 			Vector3 startPosition = transform.position;
@@ -315,6 +318,7 @@ namespace Kuvo
 
 		protected override void OnDie()
 		{
+			SoundPlayerSingleton.instance.PlaySE(gameObject, soundCollector[MainSoundCollector.SoundName.EnemyDie]);
 			animator.SetTrigger(AnimatorID.dieTrigger);
 			base.OnDie();
 		}
