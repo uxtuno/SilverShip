@@ -38,12 +38,16 @@ public abstract class Actor : MyMonoBehaviour
 		protected set
 		{
 			_hp = value;
+			if(hp < 0)
+			{
+				hp = 0;
+			}
 		}
 	}
 
 	public virtual float level { get; protected set; }
-	protected virtual int attack { get; set; }
-	protected virtual int defence { get; set; }
+	public virtual int attack { get; protected set; }
+	public virtual int defence { get; protected set; }
 
 	private Transform _lockOnPoint;
 

@@ -4,18 +4,14 @@ namespace Kuvo
 {
 	public class AttackArea : MonoBehaviour
 	{
-		public int? power { get; set; }
-		public float? magnification { get; set; }
+		private int power = 1;
+		private float magnification = 1.0f;
 
 		public void OnTriggerEnter(Collider other)
 		{
-			if (power == null || magnification == null)
-			{
-				return;
-			}
 			if (other.tag == TagName.Player)
 			{
-				GameManager.instance.player.Damage((int)power, (float)magnification);
+				GameManager.instance.player.Damage(power, magnification);
 			}
 		}
 

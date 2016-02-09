@@ -22,6 +22,7 @@ namespace Kuvo
 
 		private IEnumerator Start()
 		{
+			DontDestroyOnLoad(SoundPlayerSingleton.instance);
 			if (!flashingGameObject)
 			{
 				Debug.LogError("点滅させるGameObjectがnullです");

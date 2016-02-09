@@ -53,7 +53,7 @@ namespace Uxtuno
 			{
 				if (other.tag == tag)
 				{
-					other.GetComponent<Actor>().Damage(/*Owner.attack =*/ 10, magnification);
+					other.GetComponent<Actor>().Damage(owner.attack, magnification);
 				}
 			}
 		}

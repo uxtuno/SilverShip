@@ -123,7 +123,6 @@ GameObject:
   - 4: {fileID: 472278}
   - 33: {fileID: 3309778}
   - 135: {fileID: 13568992}
-  - 23: {fileID: 2342860}
   m_Layer: 2
   m_Name: ShortRangeAttackTrigger
   m_TagString: AttackArea
@@ -742,8 +741,8 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 129762}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: .469999999, z: .125}
-  m_LocalScale: {x: .625, y: .625, z: .625}
+  m_LocalPosition: {x: 0, y: .469999999, z: .200000003}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 496422}
   m_RootOrder: 1
@@ -874,7 +873,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 105192}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 2.01999998}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 494708}
@@ -946,30 +945,6 @@ MeshRenderer:
   m_ReceiveShadows: 1
   m_Materials:
   - {fileID: 2100000, guid: ec62369c1db46a946bd8c98716e8c22d, type: 2}
-  m_SubsetIndices: 
-  m_StaticBatchRoot: {fileID: 0}
-  m_UseLightProbes: 1
-  m_ReflectionProbeUsage: 1
-  m_ProbeAnchor: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_PreserveUVs: 1
-  m_ImportantGI: 0
-  m_AutoUVMaxDistance: .5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingOrder: 0
---- !u!23 &2342860
-MeshRenderer:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 129762}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 1
@@ -1082,14 +1057,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91ae1b1cacae2c348bd68b912bee05aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _actorName: "\u63D0\u706F\u4E59"
-  _maxHp: 10
+  _actorName: "\u63D0\u706F \u4E59"
+  _maxHp: 20
+  _attack: 20
   speed: 5
   viewAngle: 120
   viewRange: 10
   muzzle: {fileID: 424770}
   score: 500
-  bulletPrafab: {fileID: 172264, guid: 50cc16a0b3bb7084ea8e729b5a113b35, type: 2}
+  bulletPrafab: {fileID: 172264, guid: 7fcedaa194f451649a919162447a7fa9, type: 2}
 --- !u!114 &11468838
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1140,7 +1116,27 @@ Prefab:
   serializedVersion: 2
   m_Modification:
     m_TransformParent: {fileID: 0}
-    m_Modifications: []
+    m_Modifications:
+    - target: {fileID: 0}
+      propertyPath: _actorName
+      value: "\u63D0\u706F \u4E59"
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: bulletPrafab
+      value: 
+      objectReference: {fileID: 172264, guid: 7fcedaa194f451649a919162447a7fa9, type: 2}
+    - target: {fileID: 0}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: _maxHp
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: _attack
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 105192}

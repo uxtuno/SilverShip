@@ -1,0 +1,153 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &126042
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 420462}
+  - 114: {fileID: 11450900}
+  m_Layer: 0
+  m_Name: EnemyManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &420462
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 126042}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+--- !u!114 &11450900
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 126042}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 866732dc7e8abd04abc32d1c4ee7b021, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  waves:
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 5
+      createArea: {fileID: 6513796, guid: f8b8591a58f0fa54c8f295e7415afe74, type: 2}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 5
+      createArea: {fileID: 6513796, guid: f8b8591a58f0fa54c8f295e7415afe74, type: 2}
+    - enemyPrefabs:
+      - {fileID: 105192, guid: 268bec692f654d64fae7f640f70db719, type: 2}
+      createNumber: 3
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 10
+      createArea: {fileID: 6513796, guid: f8b8591a58f0fa54c8f295e7415afe74, type: 2}
+    - enemyPrefabs:
+      - {fileID: 119744, guid: b6524760173ed5f4eaf5d440e895eda5, type: 2}
+      createNumber: 1
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 13
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 7
+      createArea: {fileID: 0}
+    - enemyPrefabs:
+      - {fileID: 105192, guid: 268bec692f654d64fae7f640f70db719, type: 2}
+      createNumber: 5
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 5
+      createArea: {fileID: 0}
+    - enemyPrefabs:
+      - {fileID: 119744, guid: b6524760173ed5f4eaf5d440e895eda5, type: 2}
+      createNumber: 2
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 5
+      createArea: {fileID: 0}
+    - enemyPrefabs:
+      - {fileID: 105192, guid: 268bec692f654d64fae7f640f70db719, type: 2}
+      createNumber: 5
+      createArea: {fileID: 0}
+    - enemyPrefabs:
+      - {fileID: 119744, guid: b6524760173ed5f4eaf5d440e895eda5, type: 2}
+      createNumber: 1
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 119744, guid: b6524760173ed5f4eaf5d440e895eda5, type: 2}
+      createNumber: 2
+      createArea: {fileID: 0}
+    - enemyPrefabs:
+      - {fileID: 119744, guid: b6524760173ed5f4eaf5d440e895eda5, type: 2}
+      createNumber: 3
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 105192, guid: 268bec692f654d64fae7f640f70db719, type: 2}
+      createNumber: 10
+      createArea: {fileID: 0}
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 5
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 105192, guid: 268bec692f654d64fae7f640f70db719, type: 2}
+      createNumber: 10
+      createArea: {fileID: 0}
+    - enemyPrefabs:
+      - {fileID: 105192, guid: 268bec692f654d64fae7f640f70db719, type: 2}
+      createNumber: 5
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 20
+      createArea: {fileID: 0}
+    - enemyPrefabs:
+      - {fileID: 119744, guid: b6524760173ed5f4eaf5d440e895eda5, type: 2}
+      createNumber: 5
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 30
+      createArea: {fileID: 0}
+--- !u!1001 &100100000
+Prefab:
+  m_ObjectHideFlags: 1
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications: []
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 0}
+  m_RootGameObject: {fileID: 126042}
+  m_IsPrefabParent: 1

@@ -24,13 +24,13 @@ namespace Uxtuno
 		private ContainedObjects autoLockOnArea;
 		[SerializeField]
 		private int _attack = 5;
-		protected override int attack
+		public override int attack
 		{
 			get
 			{
 				return _attack;
 			}
-			set
+			protected set
 			{
 				_attack = value;
 			}
@@ -66,7 +66,7 @@ namespace Uxtuno
 		private float highJumpPower; // ハイジャンプの初速
 		private float jumpVY = 0.0f; // ジャンプ中のY軸方向の移動量
 
-		private abstract class BaseState
+		public abstract class BaseState
 		{
 			protected Player player;
 			public BaseState(Player player)
@@ -80,7 +80,10 @@ namespace Uxtuno
 			public abstract void Move();
 		}
 
-		private BaseState currentState; // 現在の状態
+		/// <summary>
+		/// 現在のState
+		/// </summary>
+		public BaseState currentState { get; private set; }
 
 		#region - フィールド
 		private Actor _lockOnTarget; // ロックオン対象エネミー
@@ -127,12 +130,12 @@ namespace Uxtuno
 		private PlayerAttackFlow attackFlow;
 		private GameObject powerPointPrefab; // 結界ポイントエフェクト
 		private PowerPointCreator powerPointCreator; // 結界の点を生成するためのクラス
-		private static readonly int barrierPointNumber = 3; // 結界を発生させる事ができる点の数
+		private static readonly int barrierPointNumber = 5; // 結界を発生させる事ができる点の数
 		private GameObject barrierPrefab;
 		[SerializeField, Tooltip("足のCollider")]
-		private ContainedObjects __footContained; // 足付近の壁、敵を検知
+		private ContainedObjects _footContained; // 足付近の壁、敵を検知
 		[SerializeField, Tooltip("武器Collider")]
-		private AttackCollider __weaponCollider;
+		private AttackCollider _weaponCollider;
 
 		#endregion
 
@@ -227,21 +230,10 @@ namespace Uxtuno
 			}
 			checkGrounded();
 
-			// プレイヤーが移動する前の「カメラ→プレイヤー」ベクトルを保持
-			BaseState oldState;
-			int a = 0;
-			do
-			{
-				++a;
-				if(a > 10)
-				{
-					Debug.Log("無限ループ");
-				}
+			UnityEngine.Debug.Assert(currentState != null);
 
-				oldState = currentState;
-				// 現在の状態の動作を実行
-				currentState.Move();
-			} while (currentState != oldState);
+			// 現在の状態の動作を実行
+			currentState.Move();
 			CommonState();
 
 			LockOnControl();
@@ -275,11 +267,6 @@ namespace Uxtuno
 
 		IEnumerator CameraControl()
 		{
-			if (lockOnState == LockOnState.Manual)
-			{
-				playerCamera.LockOnCamera();
-			}
-
 			yield return new WaitForFixedUpdate();
 
 			if (lockOnState != LockOnState.Manual)
@@ -354,7 +341,6 @@ namespace Uxtuno
 				lockOnIcon.Hide();
 			}
 		}
-
 
 		private static readonly float blockLockOnReleaseSeconds = 1.5f; // ロックオンが解除されるまでの遮蔽時間
 		private float blockLockOnReleaseCount;
@@ -633,7 +619,7 @@ namespace Uxtuno
 		/// <summary>
 		/// 攻撃判定を発生
 		/// </summary>
-		private void Attack()
+		private IEnumerator Attack()
 		{
 			// 空中攻撃
 			attackFlow.Move();
@@ -642,11 +628,15 @@ namespace Uxtuno
 				currentState = new AttackState(this);
 			}
 
-			foreach (Transform enemy in autoLockOnArea)
-			{
-				// todo : 技倍率は仮
-				enemy.GetComponent<Actor>().Damage(attack, 1.0f);
-			}
+			//foreach (Transform enemy in autoLockOnArea)
+			//{
+			//	// todo : 技倍率は仮
+			//	enemy.GetComponent<Actor>().Damage(attack, 1.0f);
+			//}
+
+			_weaponCollider.BeginCollision();
+			yield return new WaitForSeconds(1);
+			_weaponCollider.EndCollision();
 		}
 
 		/// <summary>
@@ -700,7 +690,6 @@ namespace Uxtuno
 		public override void Damage(int attackPower, float magnification)
 		{
 			base.Damage(attackPower, magnification);
-			Debug.Log("ぐふっ");
 			animator.SetTrigger(isDamageID);
 			currentState = new DamageState(this);
 		}
@@ -715,7 +704,7 @@ namespace Uxtuno
 		/// <summary>
 		/// 通常時(地上)
 		/// </summary>
-		private class NormalState : BaseState
+		public class NormalState : BaseState
 		{
 			public NormalState(Player player)
 				: base(player)
@@ -750,7 +739,7 @@ namespace Uxtuno
 				}
 				else if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Attack))
 				{
-					player.Attack();
+					player.StartCoroutine(player.Attack());
 				}
 
 				// ハイジャンプ入力
@@ -784,7 +773,7 @@ namespace Uxtuno
 		/// <summary>
 		/// 空中
 		/// </summary>
-		private class AirState : BaseState
+		public class AirState : BaseState
 		{
 			private static readonly float trampledJumpInputSeconds = 0.1f; // 踏みつけジャンプ入力同時押し猶予時間
 			private float trampledJumpInputCount; // 踏みつけジャンプ入力受付カウンタ
@@ -824,7 +813,7 @@ namespace Uxtuno
 				}
 				else if (player.jumpVY < 0.0f && PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Attack))
 				{
-					player.Attack();
+					player.StartCoroutine(player.Attack());
 				}
 
 				// 踏みつけジャンプ入力成功
@@ -901,7 +890,7 @@ namespace Uxtuno
 		/// <summary>
 		/// 空中ダッシュ
 		/// </summary>
-		private class AirDashState : BaseState
+		public class AirDashState : BaseState
 		{
 			private static readonly float initialVelocity = 22.0f; // 初速
 			private static readonly float fallStartSpeed = 18.0f; // 落下開始速度
@@ -954,7 +943,7 @@ namespace Uxtuno
 		/// <summary>
 		/// 踏み込み状態
 		/// </summary>
-		private class DepressionState : BaseState
+		public class DepressionState : BaseState
 		{
 			private float transitionCount; // 次の状態へ遷移するまでの時間をカウント
 			private static readonly float transitionSeconds = 0.3f; // 次の状態へ遷移するまでの時間
@@ -977,7 +966,7 @@ namespace Uxtuno
 		/// <summary>
 		/// 対象へダッシュ(ロックオン対象)
 		/// </summary>
-		private class DashToTargetState : BaseState
+		public class DashToTargetState : BaseState
 		{
 			private static readonly float contactDistance = 0.2f; // 対象に接触したとみなす距離
 			private static readonly float speed = 20.0f; // 対象へ向かうスピード
@@ -1001,17 +990,21 @@ namespace Uxtuno
 				if ((target - player.transform.position).magnitude < contactDistance ||
 					(player.transform.position - oldPosition).magnitude < moveVector.magnitude * 0.9f)
 				{
-					foreach (var enemy in player.__footContained)
+					foreach (var enemy in player._footContained)
 					{
 						// 踏みつけジャンプさせる
 						if (enemy.tag == TagName.Enemy || player.lockOnTarget != null)
 						{
-							player.JumpTrampled();
-							return;
+							// 倍率は適当な数値(マジックナンバー)
+							enemy.GetComponent<Actor>().Damage(player.attack, 1.0f);
 						}
 					}
-					// それ以外なら落下
-					player.currentState = new AirState(player);
+
+					if(player.lockOnTarget != null)
+					{
+						player.JumpTrampled();
+						return;
+					}
 					return;
 				}
 			}
@@ -1020,7 +1013,7 @@ namespace Uxtuno
 		/// <summary>
 		/// 攻撃状態
 		/// </summary>
-		private class AttackState : BaseState
+		public class AttackState : BaseState
 		{
 			private static readonly float speed = 4.0f;
 			public AttackState(Player player)
@@ -1069,7 +1062,7 @@ namespace Uxtuno
 		/// <summary>
 		/// 壁キック
 		/// </summary>
-		private class WallKick : BaseState
+		public class WallKick : BaseState
 		{
 			// 初速
 			private static readonly float primarySpeed = 12.0f;
@@ -1104,7 +1097,7 @@ namespace Uxtuno
 		/// <summary>
 		/// ダメージ判定中
 		/// </summary>
-		private class DamageState : BaseState
+		public class DamageState : BaseState
 		{
 			private readonly float damegeSeconds;
 			public DamageState(Player player)
