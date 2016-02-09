@@ -3,10 +3,16 @@
 [Tt]emp/
 [Oo]bj/
 [Tt]est/
+Sounds/
+SilverShip/
 
+ProjectSettings/
+*.exe
 *.csproj
 *.unityproj
 *.sln
 *.suo
 *.user
 *.userprefs
+TagManager.asset
+InputManager.asset

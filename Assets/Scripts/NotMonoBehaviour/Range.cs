@@ -5,14 +5,13 @@
 /// 最大値と最小値の指定が出来る
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public class Range<T> where T : new()
+public class Range<T> where T : struct, IComparable
 {
 	public readonly T min;
 	public readonly T max;
 	public Range()
+		: this(new T(), new T())
 	{
-		min = new T();
-		max = new T();
 	}
 	/// <param name="max">最大値</param>
 	/// <param name="min">最小値</param>
@@ -23,14 +22,28 @@ public class Range<T> where T : new()
 	}
 	/// <param name="max">最大値</param>
 	public Range(T max)
+		: this(new T(), max)
 	{
-		this.min = new T();
-		this.max = max;
 	}
 
-	public float GetSize()
+	public T GetSize()
 	{
-		float size = (float)(Convert.ToDouble(min) + Convert.ToDouble(max));
-		return size;
+		object size = Convert.ToDouble(max) - Convert.ToDouble(min);
+		return (T)size;
 	}
+
+	/// <summary>
+	/// 範囲内に含まれているか
+	/// </summary>
+	/// <param name="pos"></param>
+	/// <returns></returns>
+	public bool IsInRange(T pos)
+	{
+		if (pos.CompareTo(min) < 0)
+			return false;
+		else if (pos.CompareTo(max) > 0)
+			return false;
+
+		return true;
+    }
 }
