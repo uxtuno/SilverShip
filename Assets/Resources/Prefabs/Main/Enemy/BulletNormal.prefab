@@ -149,6 +149,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0ef23b1992bbdb479a762ace692173c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  power: 10
+  magnification: 1
 --- !u!114 &11445394
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1288,6 +1290,10 @@ Prefab:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 9e1074f6ea296934fafb482d13f71f88, type: 2}
+    - target: {fileID: 0}
+      propertyPath: power
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 142162}

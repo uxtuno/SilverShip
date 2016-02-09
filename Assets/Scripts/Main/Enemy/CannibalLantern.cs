@@ -33,7 +33,6 @@ namespace Kuvo
 
 		protected override void Awake()
 		{
-			attack = 1;
 			defence = 2;
 			sight = 1.5f;
 		}
@@ -41,8 +40,7 @@ namespace Kuvo
 		protected override void Start()
 		{
 			base.Start();
-
-			shortRangeAttackAreaObject.GetComponent<AttackArea>().Set(attack, 1.0f);
+			
 			if (!(bulletCollecter = GameObject.Find("BulletCollecter")))
 			{
 				bulletCollecter = new GameObject("BulletCollecter");
@@ -149,6 +147,19 @@ namespace Kuvo
 						break;
 
 					case EnemyState.Stagger:
+						if (isAttack)
+						{
+							// 使用しているコストを解放
+							if (baseEnemyAI.isCaptain)
+							{
+								EnemyManagerSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.lAttackCost, 0);
+							}
+							else
+							{
+								EnemyManagerSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.sAttackCost, 0);
+							}
+							isAttack = false;
+						}
 						SoundPlayerSingleton.instance.PlaySE(gameObject, soundCollector[MainSoundCollector.SoundName.EnemyDamage]);
 						animator.SetTrigger(AnimatorID.damageTrigger);
 						break;
@@ -175,7 +186,7 @@ namespace Kuvo
 			currentState = EnemyState.Stagger;
 			Debug.Log("ぐはっ！");
 
-			yield return new WaitForSeconds(1);
+			yield return new WaitForSeconds(3);
 
 			currentState = oldState;
 		}
@@ -207,6 +218,12 @@ namespace Kuvo
 			playerPosition.y = transform.position.y;
 			while (true)
 			{
+				if(!isAttack)
+				{
+					EnemyManagerSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.sAttackCost, 0);
+					yield break;
+				}
+
 				if (CheckDistance(playerPosition, 1f))
 				{
 					if (currentState != EnemyState.Idle)
@@ -234,6 +251,11 @@ namespace Kuvo
 
 			shortRangeAttackAreaObject.SetActive(false);
 			EnemyManagerSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.sAttackCost, CostKeepSecond);
+			if (!isAttack)
+			{
+				EnemyManagerSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.sAttackCost, 0);
+				yield break;
+			}
 
 			yield return new WaitForSeconds(0.8f);
 
@@ -250,6 +272,11 @@ namespace Kuvo
 
 			// ここに予備動作
 			yield return new WaitForSeconds(baseEnemyAI.attackParameters.lAttackPreOperatSecond);
+			if (!isAttack)
+			{
+				EnemyManagerSingleton.instance.StartCostAddForSeconds(-baseEnemyAI.attackParameters.lAttackCost, 0);
+				yield break;
+			}
 
 			// 弾の発射位置・角度を登録
 			Transform t = (muzzle != null) ? muzzle : transform;

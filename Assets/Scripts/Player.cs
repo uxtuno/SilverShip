@@ -24,13 +24,13 @@ namespace Uxtuno
 		private ContainedObjects autoLockOnArea;
 		[SerializeField]
 		private int _attack = 5;
-		protected override int attack
+		public override int attack
 		{
 			get
 			{
 				return _attack;
 			}
-			set
+			protected set
 			{
 				_attack = value;
 			}
@@ -133,9 +133,9 @@ namespace Uxtuno
 		private static readonly int barrierPointNumber = 5; // 結界を発生させる事ができる点の数
 		private GameObject barrierPrefab;
 		[SerializeField, Tooltip("足のCollider")]
-		private ContainedObjects __footContained; // 足付近の壁、敵を検知
+		private ContainedObjects _footContained; // 足付近の壁、敵を検知
 		[SerializeField, Tooltip("武器Collider")]
-		private AttackCollider __weaponCollider;
+		private AttackCollider _weaponCollider;
 
 		#endregion
 
@@ -619,7 +619,7 @@ namespace Uxtuno
 		/// <summary>
 		/// 攻撃判定を発生
 		/// </summary>
-		private void Attack()
+		private IEnumerator Attack()
 		{
 			// 空中攻撃
 			attackFlow.Move();
@@ -628,11 +628,15 @@ namespace Uxtuno
 				currentState = new AttackState(this);
 			}
 
-			foreach (Transform enemy in autoLockOnArea)
-			{
-				// todo : 技倍率は仮
-				enemy.GetComponent<Actor>().Damage(attack, 1.0f);
-			}
+			//foreach (Transform enemy in autoLockOnArea)
+			//{
+			//	// todo : 技倍率は仮
+			//	enemy.GetComponent<Actor>().Damage(attack, 1.0f);
+			//}
+
+			_weaponCollider.BeginCollision();
+			yield return new WaitForSeconds(1);
+			_weaponCollider.EndCollision();
 		}
 
 		/// <summary>
@@ -735,7 +739,7 @@ namespace Uxtuno
 				}
 				else if (PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Attack))
 				{
-					player.Attack();
+					player.StartCoroutine(player.Attack());
 				}
 
 				// ハイジャンプ入力
@@ -809,7 +813,7 @@ namespace Uxtuno
 				}
 				else if (player.jumpVY < 0.0f && PlayerInput.GetButtonDownInFixedUpdate(ButtonName.Attack))
 				{
-					player.Attack();
+					player.StartCoroutine(player.Attack());
 				}
 
 				// 踏みつけジャンプ入力成功
@@ -986,7 +990,7 @@ namespace Uxtuno
 				if ((target - player.transform.position).magnitude < contactDistance ||
 					(player.transform.position - oldPosition).magnitude < moveVector.magnitude * 0.9f)
 				{
-					foreach (var enemy in player.__footContained)
+					foreach (var enemy in player._footContained)
 					{
 						// 踏みつけジャンプさせる
 						if (enemy.tag == TagName.Enemy || player.lockOnTarget != null)
