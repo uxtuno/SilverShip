@@ -15,8 +15,8 @@ namespace Kuvo
 		[Serializable]
 		private struct TargetAndMessage
 		{
-			public Text target { get; set; }
-			public string message { get; set; }
+			public Text target;
+			public string message;
 		}
 
 		[SerializeField]

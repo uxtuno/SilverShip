@@ -12,7 +12,7 @@ namespace Kuvo
 		{
 			if(seaObject)
 			{
-				if(SoundPlayerSingleton.instance.PlaySE(seaObject, soundCollector[MainSoundCollector.SoundName.SeaWave], true))
+				if (!SoundPlayerSingleton.instance.PlaySE(seaObject, soundCollector[MainSoundCollector.SoundName.SeaWave], true, SoundPlayerSingleton.FadeMode.NONE, 0, 0.2f)) 
 				{
 					Debug.LogError("SeaWaveBGMの再生に失敗しました");
 				}

@@ -23,6 +23,8 @@ namespace Kuvo
 			Death,
 		}
 
+		[Tooltip("攻撃力"), SerializeField]
+		protected int _attack = 1;
 		[Tooltip("移動速度"), SerializeField]
 		protected float speed = 1;
 		[Tooltip("視野角"), SerializeField]
@@ -36,6 +38,19 @@ namespace Kuvo
 		[Tooltip("スコア"), SerializeField]
 		protected int score = 0;
 		private CameraController cameraController;
+
+		public override int attack
+		{
+			get
+			{
+				return _attack;
+			}
+
+			protected set
+			{
+				_attack = value;
+			}
+		}
 
 		protected MainSoundCollector soundCollector {
 			get
@@ -117,7 +132,7 @@ namespace Kuvo
 						}
 					}
 
-					_shortRangeAttackAreaObject.GetSafeComponent<AttackArea>();
+					_shortRangeAttackAreaObject.GetSafeComponent<AttackArea>().Set(attack,1.0f);
 
 					if (!_shortRangeAttackAreaObject)
 					{

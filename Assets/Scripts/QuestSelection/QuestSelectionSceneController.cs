@@ -17,11 +17,6 @@ namespace Kuvo
 			oldSelectedGameObject = EventSystem.current.currentSelectedGameObject;
 			soundCollector = gameObject.AddComponent<QuestSelectionSoundCollector>();
 			isFirstSelected = true;
-
-			if (!SoundPlayerSingleton.instance.PlayBGM(soundCollector[QuestSelectionSoundCollector.SoundName.BGM], true, SoundPlayerSingleton.FadeMode.FadeIn))
-			{
-				Debug.LogError("BGMの再生に失敗しました");
-			}
 		}
 
 		void Update()

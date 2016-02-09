@@ -160,6 +160,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0ef23b1992bbdb479a762ace692173c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  power: 5
+  magnification: 1
 --- !u!114 &11444454
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1282,6 +1284,10 @@ Prefab:
     m_Modifications:
     - target: {fileID: 0}
       propertyPath: speed
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: power
       value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []

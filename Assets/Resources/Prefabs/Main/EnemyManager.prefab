@@ -39,7 +39,107 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 866732dc7e8abd04abc32d1c4ee7b021, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  waves: []
+  waves:
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 5
+      createArea: {fileID: 6513796, guid: f8b8591a58f0fa54c8f295e7415afe74, type: 2}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 5
+      createArea: {fileID: 6513796, guid: f8b8591a58f0fa54c8f295e7415afe74, type: 2}
+    - enemyPrefabs:
+      - {fileID: 105192, guid: 268bec692f654d64fae7f640f70db719, type: 2}
+      createNumber: 3
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 10
+      createArea: {fileID: 6513796, guid: f8b8591a58f0fa54c8f295e7415afe74, type: 2}
+    - enemyPrefabs:
+      - {fileID: 119744, guid: b6524760173ed5f4eaf5d440e895eda5, type: 2}
+      createNumber: 1
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 13
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 7
+      createArea: {fileID: 0}
+    - enemyPrefabs:
+      - {fileID: 105192, guid: 268bec692f654d64fae7f640f70db719, type: 2}
+      createNumber: 5
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 5
+      createArea: {fileID: 0}
+    - enemyPrefabs:
+      - {fileID: 119744, guid: b6524760173ed5f4eaf5d440e895eda5, type: 2}
+      createNumber: 2
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 5
+      createArea: {fileID: 0}
+    - enemyPrefabs:
+      - {fileID: 105192, guid: 268bec692f654d64fae7f640f70db719, type: 2}
+      createNumber: 5
+      createArea: {fileID: 0}
+    - enemyPrefabs:
+      - {fileID: 119744, guid: b6524760173ed5f4eaf5d440e895eda5, type: 2}
+      createNumber: 1
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 119744, guid: b6524760173ed5f4eaf5d440e895eda5, type: 2}
+      createNumber: 2
+      createArea: {fileID: 0}
+    - enemyPrefabs:
+      - {fileID: 119744, guid: b6524760173ed5f4eaf5d440e895eda5, type: 2}
+      createNumber: 3
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 105192, guid: 268bec692f654d64fae7f640f70db719, type: 2}
+      createNumber: 10
+      createArea: {fileID: 0}
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 5
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 105192, guid: 268bec692f654d64fae7f640f70db719, type: 2}
+      createNumber: 10
+      createArea: {fileID: 0}
+    - enemyPrefabs:
+      - {fileID: 105192, guid: 268bec692f654d64fae7f640f70db719, type: 2}
+      createNumber: 5
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 20
+      createArea: {fileID: 0}
+    - enemyPrefabs:
+      - {fileID: 119744, guid: b6524760173ed5f4eaf5d440e895eda5, type: 2}
+      createNumber: 5
+      createArea: {fileID: 0}
+  - createEnemyInformations:
+    - enemyPrefabs:
+      - {fileID: 187116, guid: d2ab9859778fbae418b849c61ab51583, type: 2}
+      createNumber: 30
+      createArea: {fileID: 0}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
